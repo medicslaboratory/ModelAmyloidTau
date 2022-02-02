@@ -3,6 +3,7 @@
 
 # This file contains the equations of the model
 # It generates a class for the parameters of the model.
+# Recall : 1 cm^3 = 1 mL (for water)
 
 import math
 
@@ -13,227 +14,269 @@ class Parameters():
     """
 
     def __init__(self):
-        # Reference density of neuron (neurons/cm^3)
-        self.N_0 = 7e7  # 7 * 10 ** (7)
+        self.N_0 = 0.14
+        """Reference density of neuron (g/cm^3) (= g/mL) [Value from Hao]"""
+        # Seyed avait : 7 * 10 ** (7) neurons/cm^3, mais unitées pas valides
 
-        # Half-life of Amyloid Beta42 inside the neurons (day)
-        self.ABihalf = 9.4
+        # TODO: Grande différence avec Hao : self.d_ABi = 9.51
+        # self.d_ABi = (math.log(2)) / (self.ABihalf / 24) = 1.76
+        # self.ABihalf = 9.4 : Half-life of Amyloid Beta42 inside the neurons (hour) (semble ok)
+        self.d_ABi = (math.log(2)) / (9.4 / 24)
+        """Degradation rate of Amyloid Beta42 inside (/day)"""
 
-        # Degradation rate of Amyloid Beta42 inside (day^-1)
-        # self.d_ABi = 9.51  # [Hao]
-        self.d_ABi = (math.log(2)) / (self.ABihalf / 24)  # = 1.76
+        # TODO: Fait pas de sens...
+        #   Seyed: self.lambda_ABi = self.d_ABi * 1.0e-6  # self.ABi = 10**(-6)
+        #   Je prends plutôt la valeur de Hao en attendant (9.51e-6).
+        self.lambda_ABi = 9.51e-6
+        """Creation rate of Amyloid Beta42 inside (g/mL/day)"""
 
-        # Creation rate of Amyloid Beta42 inside (g/ml/day) #TODO Fait pas de sens...
-        # self.lambda_ABi = self.d_ABi * 1.0e-6  # self.ABi = 10**(-6)
-        self.lambda_ABi = 9.51e-6  # [Hao]
-
-        # Degradation rate of Amyloid Beta42 monomer outside (day^-1)
         self.d_ABmo = self.d_ABi
+        """Degradation rate of Amyloid Beta42 monomer outside (/day)"""
 
-        # Creation rate of  Amyloid Beta42 monomer outside (g/ml/day) #TODO Fait pas de sens...
-        # Selon thèse : = self.d_ABmo * ABmo = self.d_ABmo * 1.5 * ABi = self.d_ABmo * 1.5 * 10**(-6)
+        # TODO Fait pas de sens...
+        #  Selon thèse : = self.d_ABmo * ABmo = self.d_ABmo * 1.5 * ABi = self.d_ABmo * 1.5 * 10**(-6)
+        #                           = 9.51e-6 * 1.5 * 10e-6 = 1.4265e-11
         self.lambda_ABmo = self.d_ABmo * 1.5e-6  # self.ABmo = 1.5 * 10**(-6)
+        """Creation rate of  Amyloid Beta42 monomer outside (g/mL/day)"""
 
-        # Reference density of astrocytes (astrocytes/cm^3)
-        self.A_0 = 7e7  # 7 * 10 ** 7
+        self.A_0 = 0.14
+        """Reference density of astrocytes (g/cm^3) (= g/mL) [Value from Hao]"""
+        # Seyed avait : 7 * 10 ** (7) astrocytes/cm^3, mais unitées pas valides
 
-        # Creation rate of Amyloid Beta42 plaque outside by astrocytes
-        # = (1 / 10) * self.lambda_NABpo
-        # self.lambda_NABpo : the production rate of Amyloid Beta42 plaque outside by neuron (g/ml/day)
-        self.lambda_AABpo = (1 / 10) * 8e-11  # (1 / 10) * 8 * 10 ** (-11)
+        self.lambda_AABpo = (1 / 10) * 8e-10
+        """Creation rate of Amyloid Beta42 plaque outside by astrocytes (g/mL/day)"""
+        # TODO : Seyed (méthode de Hao): = (1 / 10) * self.lambda_NABpo = (1 / 10) * 8 * 10 ** (-11) = 8e-12
+        #   self.lambda_NABpo : Production rate of Amyloid Beta42 plaque outside by neuron (g/mL/day) [Hao: lambda_N = 8e-9]
+        #   Hao: 8e-10 g/mL/day (lambda_A)
+        #   8e-12 => LSODA_2 vs 8e-10 => LSODA_3 : bonne différence! En attendant: entre-deux : 8e-11 (LSODA_4)
 
-        # Creation rate of Amyloid Beta42 plaque outside by Amyloid Beta oligomers outside (g/ml/day)
         self.lambda_ABooABpo = 25.09
+        """Creation rate of Amyloid Beta42 plaque outside by Amyloid Beta oligomers outside (/day)"""
+        # TODO: Pas clair d'où vient la valeur...
+        #   Devrait être en /day (j'ai fait la modif g/ml/day -> /day)
+        #   Testé avec 9e-7 (_5) et change pas grand chose (LSODA_4 vs _5)
 
-        # Put a value for AP and delta_AP #TODO
-        # AP stands for 1 if one has the APOE4 gene and 0 otherwise
+        # TODO : Sayed put a value for AP and delta_AP
         self.AP = 1
-        # This constant quantifies the impact of the APOE4 gene.
+        """AP equals to 1 if one has the APOE4 gene and 0 otherwise"""
+
         self.delta_AP = 0.25
+        """This constant quantifies the impact of the APOE4 gene."""
 
-        # Degradation rate of Amyloid Beta42 plaque outside by M_2^hat (/day)
-        self.d_M2hatABpo = 4e-7  # 4 * 10 ** (-7)
-
-        # Degradation rate of Amyloid Beta42 plaque outside by microglias (M) (/day)
-        self.d_MABpo = (1 / 5) * self.d_M2hatABpo
-
-        # Relative clearance power of amyloid-beta by M_2 compared to M_1
         self.theta = 0.9
+        """Relative clearance power of amyloid-beta by M_2 compared to M_1 [Value from Hao]"""
 
-        # Concentration of Amyloid Beta42 plaque outside at which the process rate is half maximal (g/ml)
-        # #TODO revoir...
-        # self.K_ABpo = 10**(3) * self.ABo = 10**(3) * 7*10**(-6) = 7 * 10**(-3)
-        self.K_ABpo = 7e-3  # 7 * 10 ** (-3)
+        self.d_M2hatABpo = self.theta * 1.0e-2
+        """Degradation rate of Amyloid Beta42 plaque outside by M_2^hat (/day)"""
+        # TODO: Revoir
+        #   Seyed : 4e-7
+        #   Hao : estime 10^-2, mais lui a plutôt le terme : d_M2hatABpo * (M_1^hat + theta * M_2^hat)
+        #   Prenons: theta * valeur de Hao = 0.9 * 10^-2 (= 9e-3)
 
-        # Creation rate of GSK3 by Amyloid Beta42 inside neurons (/day)
+        self.d_MABpo = (1 / 5) * (self.d_M2hatABpo / self.theta)
+        """Degradation rate of Amyloid Beta42 plaque outside by microglias (M) (/day) [Computation from Hao : 
+        (1 / 5) * self.d_M2hatABpo ; ajout de "/ self.theta" pour compenser pour la modification de self.d_M2hatABpo]"""
+
+        self.K_ABpo = 7e-3
+        """Concentration of Amyloid Beta42 plaque outside at which the process rate is half maximal (Michaelis-Menten 
+        constant) (g/mL) \n 
+        [Value of Hao] : self.K_ABpo = 10**(3) * self.ABo = 10**(3) * 7*10**(-6) = 7 * 10**(-3) """
+
+        self.d_ABoo = (1 / 10) * self.d_ABmo  # = 0.1 * 1.76
+        """Degradation rate of Amyloid Beta42 oligomer outside (/day) [Computation method of Hao]"""
+
+        self.lambda_ABmoABoo = 5
+        """Creation rate of Amyloid Beta42 oligomer outside by Amyloid Beta42 monomer outside (/day)"""
+        # TODO: Pas trop sure du pourquoi du calcul de Seyed. : = 5 * (1 / 25) * self.d_ABoo
+        #  Hao : The ratio of soluble AO to total AB_out is approximately 1/25 => lambda_{A_O} = 1/25 * d_{A_O}
+        #  Ce calcul d'applique pas ici.
+        #  Devrait être selon le nbr de mono pour 1 oligo en moyenne. Posons 5 pour le moment.
+
         self.lambda_ABiG = 0.25
+        """Creation rate of GSK-3 by Amyloid Beta42 inside neurons (/day)"""
+        # TODO : Revoir valeur.
 
-        # Degradation rate of GSK3 (/day)
-        # self.d_G = (math.log(2)) / (self.GSK3half / 24)
-        # self.GSK3half : The half-life of GSK3 = 41 +/- 4 h
-        self.d_G = (math.log(2)) / (41 / 24)
+        self.d_G = 0.408
+        """Degradation rate of GSK-3 (/day)"""
+        # Seyed : self.d_G = (math.log(2)) / (self.GSK3half / 24) où self.GSK3half : The half-life of GSK3 = (41 ± 4)h
+        # De la même source que Seyed : (0.017 ± 0.02)/h = (0.408 ± 0.48)/day  # TODO: Valeur chez souris; pour humain?
 
-        # Creation rate of tau in health (g/ml/day)
-        self.lambda_tau = 26.3e-12  # 26.3 * 10 ** (-12)
+        self.lambda_tau = 2.63e-11  # 26.3 * 10 ** (-12)
+        """Creation rate of tau in health (g/ml/day)"""
+        # Hao : 8.1 × 10^−11 g/ml/day
 
-        # Degradation rate of tau proteins (/day)
-        # self.d_tau = (math.log(2)) / self.Tauhalf
-        # self.Tauhalf : The half-life of tau proteins in humain = 23 days
-        self.d_tau = (math.log(2)) / 23
+        self.d_tau = (math.log(2)) / 23  # = 0.03014...
+        """Degradation rate of tau proteins (/day) \n 
+            self.d_tau = (math.log(2)) / self.Tauhalf \n 
+            self.Tauhalf : The half-life of tau proteins in humain = 23 days"""
+        # Hao : 0.277/day (half-live = 60h)
 
-        # Creation rate of tau by GSK3 (/day) # TODO: Ceci est une valeur posée par Seyed
+        # TODO: Ceci est une valeur posée par Seyed
         self.lambda_Gtau = 0.25
+        """Creation rate of tau by GSK3 (/day)"""
 
-        # Degradation rate of intracellular NFT (/day)
-        self.d_Fi = 1.0e-2 * self.d_tau  # 10 ** (-2) * self.d_tau
+        self.d_Fi = 1.0e-2 * self.d_tau
+        """Degradation rate of intracellular NFT (/day) [Computation method of Hao]"""
 
-        # Degradation rate of extracellular NFT (/day)
-        self.d_Fo = 1.0e-1 * self.d_tau  # 10 ** (-1) * self.d_tau
+        self.d_Fo = 1.0e-1 * self.d_tau
+        """Degradation rate of extracellular NFT (/day) [Computation method of Hao]"""
 
-        # Production rate of NFT by tau (/day)
-        # 60% of the hyperphosphorylated tau become NFT
         self.lambda_tauFi = 0.6 * self.d_Fo
+        """Production rate of NFT by tau (/day) [Computation method of Hao]"""
+        # 60% of the hyperphosphorylated tau become NFT
 
-        # Degradation rate of neurons by F_i (/day)
-        # self.d_FiN = ((4 + 4 * self.gamma) / (3 + 2 * self.gamma)) * self.d_N
+        self.d_FiN = ((4 + 4 * 1) / (3 + 2 * 1)) * (math.log(2) / 3650)
+        """Degradation rate of neurons by F_i (/day)"""
+        # self.d_FiN = ((4 + 4 * self.gamma) / (3 + 2 * self.gamma)) * self.d_N  = 3.038e-4  [Hao: 3.4e-4]
         # self.gamma : I_10 inhibition ratio = 1 (Hao)
         # self.d_N : the death rate of neuron (/day) = ln2/10ans = ln2/3650
-        #                           correction (2 années bissextiles): ln2/3648
         # TODO: Revoir d_N (Seyed semble pas sur)
-        self.d_FiN = ((4 + 4 * 1) / (3 + 2 * 1)) * (math.log(2) / 3648)
 
-        # Half-saturation of intracellular NFTs (g/ml)
+        self.K_Fi = 0.7 * 490e-12  # 0.7 * 490 * 10 ** (-12)
+        """Half-saturation of intracellular NFTs (g/mL)"""
         # These: Assuming that in AD, 70% of hyperphosphorylated tau proteins (whose concentration in disease is
         # 490 pg/ml) are in NFT form.
-        # self.K_Fi = 0.7 * self.htau
+        # self.K_Fi = 0.7 * self.htau = 0.7 * 490 * 10 ** (-12) = 3.43e-10   [Hao : 3.36e-10]
         # self.htau : concentration of hyperphosphorylated tau in disease (g/ml) = 490 * 10**(-12)
-        self.K_Fi = 0.7 * 490e-12  # 0.7 * 490 * 10 ** (-12)
 
-        # Degradation rate of neurons by T_alpha (TNF-alpha) (/day)
         self.d_TaN = (1 / 2) * self.d_FiN
+        """Degradation rate of neurons by T_alpha (TNF-alpha) (/day) [Computation method of Hao]"""
 
-        # Half-saturation of T_alpha (TNF-alpha) (g/ml)
-        self.K_Ta = 2.5e-5  # 2.5 * 10 ** (-5)
+        self.K_Ta = 4e-5
+        """Half-saturation of T_alpha (TNF-alpha) (g/mL)"""
+        # TODO: Seyed a mis 2.5e-5 et dit que velaur de Hao16, mais est plutôt de 4e-5 g/mL ?
 
-        # half-saturation of IL-10 (g/ml)
         self.K_I10 = 2.5e-6  # 2.5 * 10 ** (-6)
+        """Half-saturation of IL-10 (g/mL) [Value of Hao]"""
 
-        # ?? (g/astrocyte) #TODO ??
-        self.W_A = 1.0e-12  # 10 ** (-12)
+        # self.W_A = 1  # 10 ** (-12)
+        # """?? (g/astrocyte)"""  #TODO ?? Retiré de l'eq des astrocytes.
 
-        # Creation rate of astrocytes by Amyloid Beta42 plaque outside (/day)
-        # Hao16 lambda_AA_beta^o
         self.lambda_ABpoA = 1.793
+        """Creation rate of astrocytes by Amyloid Beta42 plaque outside (/day) [Value from Hao lambda_{A A_beta^o}]"""
 
-        # Production/activation rate of astrocytes by TNF-alpha (/day)
-        # Hao16 lambda_AT_alpha
         self.lambda_TaA = 1.54
+        """Production/activation rate of astrocytes by TNF-alpha (/day) [Value from Hao lambda_{A T_alpha}]"""
 
-        # Death rate of astrocytes (/day)
-        # self.d_A = (math.log(2) / self.Astrocyteshalf) * (1 / 10)  #TODO: Pk *0.1 ?
-        # self.Astrocyteshalf : Half-life of astrocytes (day) = 600 #TODO: Valeur sort d'où?
-        self.d_A = (math.log(2) / 600) * (1 / 10)
+        self.d_A = (math.log(2) / 600)
+        """Death rate of astrocytes (/day)"""
+        # self.d_A = (math.log(2) / self.Astrocyteshalf) * (1 / 10)  # TODO: Pk *0.1 ? Retiré pour l'instant.
+        # self.Astrocyteshalf : Half-life of astrocytes (day) = 600  [Valeur de Hao]
+        # Hao : 1.2e-3 /day
 
-        # Degradation rate of Amyloid Beta42 oligomer outside (/day)
-        self.d_ABoo = (1 / 10) * self.d_ABmo
+        self.lambda_FoM = 2e-2
+        """Creation rate of microglias by F_o (NFT) (/day) [Value from Hao (lambda_{MF})]"""
 
-        # Creation rate of Amyloid Beta42 oligomer outside by Amyloid Beta42 monomer outside (/day)
-        self.lambda_ABmoABoo = 5 * (1 / 25) * self.d_ABoo
+        # TODO: Revoir. Thèse: Valeur prise pour être < K_Fi = 3.36e-10 (car Hao "more NFT reside within neurons than
+        #  outside of them"). Hao : K_{F_o} = 2.58e-11
+        self.K_Fo = 1.0e-11
+        """Average of extracellular NFTs (g/mL)"""
 
-        # Creation rate of microglias by F_o (NFT) (/day)
-        self.lambda_FoM = 2e-2  # 2 * 10 ** (-2)
+        # TODO: Revoir. He puts : (0.015 * 0.047 - 2e-2 * 1.0e-11) / 1.0e-6 = 705 ; pk? Non...
+        #  La valeur de Hao (qui était pour ABO...) = 2.3e-3 /day
+        self.lambda_ABpoM = 705
+        """Creation rate of microglias by Amyloid Beta42 plaque outside (/day)"""
 
-        # Average of extracellular NFTs (g/ml)
-        # #TODO: Valeur prise pour être < K_Fi = 3.36e-10 (car more NFT reside within neurons than outside of them)
-        self.K_Fo = 1.0e-11  # 10 ** (-11)
-
-        # Creation rate of microglias by Amyloid Beta42 plaque outside (g/ml/day)
-        # TODO: Revoir. He puts : (0.015 * 0.047 - 2 * 10 ** (-2) * 10 ** (-11)) / 10 ** (-6) ; pk?
-        self.lambda_ABpoM = (0.015 * 0.047 - 2e-2 * 1.0e-11) / 1.0e-6
-
-        # Degradation rate of microglias (/day) [Here he takes it equal to the death rate of macrophage]
         self.d_M = 0.015
+        """Degradation rate of microglias (/day) [Here he takes it equal to the death rate of M_1 and M_2 from Hao]"""
 
-        # Creation rate of M_1 by microglias (/day)
-        self.lambda_MM1 = 9.3e-3  # 9.3 * 10 ** (-3)
+        self.lambda_MM1 = 9.3e-3
+        """Creation rate of M_1 by microglias (/day)"""
+        # TODO: Pas certaine de la provenance de cette valeur (voir thèse...)
 
-        # Death rate of M_1 (proinflammatory microglia) (/day)
-        self.d_M1 = 0.015
+        # self.d_M1 = 0.015
+        # """Death rate of M_1 (proinflammatory microglia) (/day)"""
 
-        # Proinflammatory / anti-inflammatory microglia ratio (M_1/M_2 ratio)
         self.beta = 10
+        """Proinflammatory / anti-inflammatory microglia ratio (M_1/M_2 ratio) [Value from Hao]"""
 
-        # Production rate of M_2 by TGF-beta (/day)
-        # [The rate by which TGF-beta affects the change of phenotype from M1 to M2]
-        self.lambda_TBM2 = 6e-3  # 6 * 10 ** (-3)
+        self.lambda_TBM2 = 6e-3
+        """Production rate of M_2 by TGF-beta (/day) [Value from Hao lambda_{M_1 T_beta}]\n
+            [The rate (maximal) by which TGF-beta affects the change of phenotype from M1 to M2]"""
 
-        # Death rate of M_2 (anti-inflammatory microglia) (/day)
-        self.d_M2 = 0.015
+        self.K_TB = 2.5e-7
+        """Half-saturation of TGF-beta (g/mL) [Value from Hao K_{T_beta}]\n
+            [Concentration of TGF-beta for which the convertion of M1 to M2 is half maximal]"""
 
-        # Half-saturation of MCP-1 (g/ml) [We consider the value for MCP-1 saturation for influx of macrophages as K_P]
-        self.K_P = 5e-9  # 5 * 10 ** (-9)
+        # self.d_M2 = 0.015
+        # """Death rate of M_2 (anti-inflammatory microglia) (/day)"""
 
-        # Concentration of M_1^hat at equilibrium (g/ml)
-        self.M1hateq = 8.64e-7  # 8.64 * 10 ** (-7)
+        self.K_P = 5e-9
+        """Half-saturation of MCP-1 (g/mL) \n
+            [Thèse : "We consider the value for MCP-1 saturation for influx of macrophages as K_P";
+            Value in Hao: K_P = 6e-9]"""
 
-        # Death rate of M_1^hat macrophages (/day) [Hao]
+        self.M1hateq = 5e-2  #8.64e-7
+        """Concentration of M_1^hat at equilibrium (g/mL)"""
+        # TODO: On devrait ici avoir la concentration de Proinflammatory macrophage dans le sang.
+        #  J'ai pris la valeur de M_0 de Hao (concentration de monocyte dans le sang) et ajusté la M1hat initial pour
+        #  qu'elle soit pas trop loin de cette valeur.
+
         self.d_M1hat = 0.015
+        """Death rate of M_1^hat macrophages (/day) [Value from Hao]"""
 
-        # Production rate of M_1^hat by MCP-1 (/day)
-        # self.lambda_PM1hat = (self.M1hat * self.d_M1hat) / self.K_P
-        # self.M1hat : M_1hat (g/ml) = 0.04  #TODO: pk?
-        # self.K_P : Half-saturation of MCP-1 (g/ml) = 5*10**(-9)  #TODO: pk? (Hao: 6e-9)
-        self.lambda_PM1hat = (0.04 * self.d_M1hat) / 5e-9
+        # self.lambda_PM1hat = (0.04 * self.d_M1hat) / 5e-9
+        # """Production rate of M_1^hat by MCP-1 (/day)"""
+        # # self.lambda_PM1hat = (self.M1hat * self.d_M1hat) / self.K_P
+        # # self.M1hat : M_1hat (g/ml) = 0.04  #TODO: pk?
+        # # self.K_P : Half-saturation of MCP-1 (g/ml) = 5*10**(-9)  #TODO: pk? (Hao: 6e-9)
 
-        # Death rate of M_2^hat macrophages (/day) [Hao]
         self.d_M2hat = 0.015
+        """Death rate of M_2^hat macrophages (/day) [Value from Hao]"""
 
-        # Degradation rate of TGF-beta (/day) [Hao]
         self.d_TB = 3.33e2  # 3.33 * 10 ** (2)
+        """Degradation rate of TGF-beta (/day) """
 
-        # Production rate of T_beta (/day)
-        # self.lambda_TB = self.d_TB * self.K_TB
-        # self.K_TB : half-saturation of TGF-beta (T_beta) = 2.5*10**(-7) [Hao]
         self.lambda_TB = self.d_TB * 2.5e-7
+        """Production rate of T_beta (/day) \n
+            self.lambda_TB = self.d_TB * self.K_TB \n
+            self.K_TB : half-saturation of TGF-beta (T_beta) = 2.5*10**(-7) [Hao]"""
+        # TODO: Calcul fait pas de sens et unitées seraient g/mL/day.
 
-        # Production rate of T_beta by M_1 (/day)
-        self.lambda_M1TB = 1.5e-2  # 1.5*10**(-2)
+        self.lambda_M1TB = 1.5e-2
+        """Production rate of TGF-beta by M_1 (/day) [Value from Hao (lambda_{T_{beta} M})]"""
 
-        # Production rate of TGF-beta by M_1^hat (/day)
-        self.lambda_M1hatTB = 1.5e-2   # 1.5*10**(-2)
+        self.lambda_M1hatTB = 1.5e-2
+        """Production rate of TGF-beta by M_1^hat (/day) [Value from Hao (lambda_{T_{beta} M^{hat}})]"""
 
-        # Production rate of IL-10 by M_2 (/day) #TODO Vérif.. These: (1.2 ± 0.16) × 10^−12 g/ml/day
-        self.lambda_M2I10 = 6.67e-3  # 6.67*10**(-3)
+        # TODO Vérif.. Thèse: (1.2 ± 0.16) × 10^−12 g/mL/day ??
+        self.lambda_M2I10 = 6.67e-3
+        """Production rate of IL-10 by M_2 (/day) [Value from Hao (lambda_{I_{10} M_2})]"""
 
-        # Degradation rate of IL-10 (/day)
+        # self.K_M2 = 0.017
+        # """Half-saturation of M2 (g/ml) [Value from Hao]"""
+
         self.d_I10 = 8.32
+        """Degradation rate of IL-10 (/day)"""
+        # TODO: Hao donne 16.64 /day
 
-        # Production rate of TNF-alpha by M_1^hat (/day) #TODO Vérif.. These: (3.09 ± 1.8) × 10^−12 g/ml/day
-        self.lambda_M1hatTa = 1.07e-1  # 1.07*10**(-1)
+        # TODO Vérif.. These: (3.09 ± 1.8) × 10^−12 g/ml/day. Unités??
+        #   Seyed prend : 1.07e-1 /day
+        #   Hao : lambda_{T_{alpha} M_1} = 3e-2 /day
+        self.lambda_M1hatTa = 3e-2
+        """Production rate of TNF-alpha by M_1^hat (/day)"""
 
-        # Production rate of TNF-alpha by M_1 (/day) #TODO Vérif. selon précédente (g/ml/day)
+        # self.K_M1 = 0.03
+        # """Half-saturation of M1 (g/ml) [Value from Hao]"""
+
         self.lambda_M1Ta = self.lambda_M1hatTa
+        """Production rate of TNF-alpha by M_1 (/day)"""
+        # Hao : lambda_{T_{alpha} M_1^hat} = 3e-2 /day (ie même val que lambda_M1hatTa)
 
-        # Degradation rate of TNF-alpha (/day) [Hao]
+        # self.K_M1hat = 0.04
+        # """Half-saturation of M_1^hat (g/ml) [Value from Hao]"""
+
         self.d_Ta = 55.45
+        """Degradation rate of TNF-alpha (/day) [Value from Hao]"""
 
-        # Half-saturation of M1 (g/ml) [Hao]
-        self.K_M1 = 0.03
-
-        # Half-saturation of M2 (g/ml) [Hao]
-        self.K_M2 = 0.017
-
-        # Half-saturation of M_1^hat (g/ml) [Hao]
-        self.K_M1hat = 0.04
-
-        # Degradation rate of  MCP-1 (/day) [Hao]
         self.d_P = 1.73
+        """Degradation rate of  MCP-1 (/day) [Value from Hao]"""
 
-        # Creation rate of MCP-1 by astrocytes (/day)
+        self.lambda_AP = 6.6e-8
+        """Creation rate of MCP-1 by astrocytes (/day)"""
         # Code : self.lambda_AP = (self.K_P*self.d_P)/self.A_0
         # Problème : thèse :
         #       lambda_AP = (d_P * P) / A_0
-        #                 = (1.73/day * 3e-10g/ml) / 0.14g/cm^3 = NOPE
-        # #TODO: Revoir.  En attendant prenons la valeur de Hao
-        self.lambda_AP = 6.6e-8
+        #                 = (1.73/day * 3e-10g/ml) / 0.14g/cm^3 = 3e-9 /day
+        # TODO: Revoir. En attendant je prends la valeur de Hao
 
