@@ -83,7 +83,7 @@ def ODEsystem(t, y):
     dydt[9] = p.lambda_ABpoA * y[2] + p.lambda_TaA * y[17] - p.d_A * y[9]
 
     # Microglia (M)
-    # TODO: J'ai retiré le terme de conversion de M1 -> M2 car ne change pas le total ici (- p.lambda_MM1 * y[10])
+    # TODO: J'ai retiré le terme de conversion de M1 -> M2, car ne change pas le total ici théoriquement (- p.lambda_MM1 * y[10])
     #  Dans Hao, ajout en fonction de ABO et non AB_out (ici plaque). Peut-être changer y[2] -> y[3].
     #  J'ai multiplié le premier et 2e terme par [M] (et ajusté les unités de p.lambda_ABpoM en conséquence)
     dydt[10] = (p.lambda_FoM * (y[7] / (y[7] + p.K_Fo)) + p.lambda_ABpoM * (y[2] / (y[2] + p.K_ABpo))) * y[10] \
@@ -92,12 +92,16 @@ def ODEsystem(t, y):
     # Proinflammatory microglia (M_1)
     # TODO: Revoir modif. Retiré "- p.d_M1 * y[11]", car déjà pris en compte dans l'eq pour M
     #  Ajout terme conversion M1 -> M2
-    dydt[11] = y[10] * (p.beta / (p.beta + 1)) * p.lambda_MM1 - p.lambda_TBM2 * (y[15] / (y[15] + p.K_TB)) * y[11]
+    #  Modif "+ y[10] * (p.beta / (p.beta + 1)) * p.lambda_MM1" par "+ dydt[10] * (p.beta / (p.beta + 1))" probleme
+    #  potentiel si Neurons (donc F_o, donc M) diminu trop rapidement (changement fait à partir de fig _17)
+    dydt[11] = dydt[10] * (p.beta / (p.beta + 1)) - p.lambda_TBM2 * (y[15] / (y[15] + p.K_TB)) * y[11]
 
     # Anti-inflammatory microglia (M_2)
     # TODO: Revoir modif. Retiré "- p.d_M2 * y[12]", car déjà pris en compte dans l'eq pour M
     #  Modif terme "+ p.lambda_TBM2 * y[15]" -> celui de Hao (fait + de sens)
-    dydt[12] = y[10] * (1 / (p.beta + 1)) * p.lambda_MM1 + p.lambda_TBM2 * (y[15] / (y[15] + p.K_TB)) * y[11]
+    #  Modif "+ y[10] * (1 / (p.beta + 1)) * p.lambda_MM1" par "+ dydt[10] * (1 / (p.beta + 1))" probleme potentiel si
+    #  Neurons (donc F_o, donc M) diminu trop rapidement (changement fait à partir de fig _17)
+    dydt[12] = dydt[10] * (1 / (p.beta + 1)) + p.lambda_TBM2 * (y[15] / (y[15] + p.K_TB)) * y[11]
 
     # Avec modif faites sur eqns ci-avant, rendue à graph ...ModifEqns_8
 
@@ -113,9 +117,8 @@ def ODEsystem(t, y):
     dydt[14] = p.lambda_TB * y[15] - p.d_M2hat * y[14]
 
     # TGF-Beta = Transforming growth factor beta (T_beta)
-    # TODO: - Pourquoi M_1 et M_1^hat? Dans Hao, il est produit par M_2 et M_2^hat, et les constantes sont les mêmes.
-    #           dydt[15] = p.lambda_M1TB * y[12] + p.lambda_M1hatTB * y[14] - p.d_TB * y[15] (graph ..._10)
-    #       - Dans modèle, il y a une flèche de M_2 à TGF-beta et pas de terme en conséquence ici.
+    # TODO: Pourquoi M_1 et M_1^hat? Dans Hao, il est produit par M_2 et M_2^hat, et les constantes sont les mêmes.
+    #         dydt[15] = p.lambda_M1TB * y[12] + p.lambda_M1hatTB * y[14] - p.d_TB * y[15] (graph ..._10)
     dydt[15] = p.lambda_M1TB * y[11] + p.lambda_M1hatTB * y[13] - p.d_TB * y[15]
 
     # IL-10 = Interleukin 10 (I_10)

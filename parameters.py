@@ -49,6 +49,8 @@ class Parameters():
         #   self.lambda_NABpo : Production rate of Amyloid Beta42 plaque outside by neuron (g/mL/day) [Hao: lambda_N = 8e-9]
         #   Hao: 8e-10 g/mL/day (lambda_A)
         #   8e-12 => LSODA_2 vs 8e-10 => LSODA_3 : bonne différence! En attendant: entre-deux : 8e-11 (LSODA_4)
+        #   Grande variation plus vraie avec modif finale du modèle (si prend autre valeur, fait faire des variations
+        #   bizarres à la fin de Ab^i et GSK3).
 
         self.lambda_ABooABpo = 25.09
         """Creation rate of Amyloid Beta42 plaque outside by Amyloid Beta oligomers outside (/day)"""
@@ -118,21 +120,23 @@ class Parameters():
         self.d_Fi = 1.0e-2 * self.d_tau
         """Degradation rate of intracellular NFT (/day) [Computation method of Hao]"""
 
-        self.d_Fo = 1.0e-1 * self.d_tau
+        self.d_Fo = 1.0e-3 * self.d_tau  # 1.0e-1 * self.d_tau
         """Degradation rate of extracellular NFT (/day) [Computation method of Hao]"""
+        # TODO: Revoir. J'ai modifié "1.0e-1" pour "1.0e-3". Ralentis la décroissance de F_o, donc de M. (fig _17)
 
         self.lambda_tauFi = 0.6 * self.d_Fo
         """Production rate of NFT by tau (/day) [Computation method of Hao]"""
         # 60% of the hyperphosphorylated tau become NFT
 
-        self.d_FiN = ((4 + 4 * 1) / (3 + 2 * 1)) * (math.log(2) / 3650)
+        self.d_FiN = 3e-5  # ((4 + 4 * 1) / (3 + 2 * 1)) * (math.log(2) / 3650)
         """Degradation rate of neurons by F_i (/day)"""
         # self.d_FiN = ((4 + 4 * self.gamma) / (3 + 2 * self.gamma)) * self.d_N  = 3.038e-4  [Hao: 3.4e-4]
         # self.gamma : I_10 inhibition ratio = 1 (Hao)
         # self.d_N : the death rate of neuron (/day) = ln2/10ans = ln2/3650
         # TODO: Revoir d_N (Seyed semble pas sur)
+        #  J'ai modifié pour 3e-5, fait bien ralentir décroissance de neurones et fait plus de sens. (fig _17)
 
-        self.K_Fi = 0.7 * 490e-12  # 0.7 * 490 * 10 ** (-12)
+        self.K_Fi = 0.7 * 490e-12  # 0.7 * 490 * 10 ** (-12) = 3.42999e-10
         """Half-saturation of intracellular NFTs (g/mL)"""
         # These: Assuming that in AD, 70% of hyperphosphorylated tau proteins (whose concentration in disease is
         # 490 pg/ml) are in NFT form.
@@ -180,9 +184,9 @@ class Parameters():
         self.d_M = 0.015
         """Degradation rate of microglias (/day) [Here he takes it equal to the death rate of M_1 and M_2 from Hao]"""
 
-        self.lambda_MM1 = 9.3e-3
-        """Creation rate of M_1 by microglias (/day)"""
-        # TODO: Pas certaine de la provenance de cette valeur (voir thèse...)
+        # self.lambda_MM1 = 9.3e-3
+        # """Creation rate of M_1 by microglias (/day)"""
+        # # TODO: Pas certaine de la provenance de cette valeur (voir thèse...)
 
         # self.d_M1 = 0.015
         # """Death rate of M_1 (proinflammatory microglia) (/day)"""
