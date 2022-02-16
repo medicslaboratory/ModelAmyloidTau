@@ -18,9 +18,9 @@ import equations as eqns
 y0 = np.zeros(19)
 # The initial conditions in g/mL
 y0[0] = 1e-6  # AB^i (Amyloid-beta monomer inside the neurons) # 1e-6 change pour éviter saut départ...
-y0[1] = 1.0e-8  # AB_m^o (Amyloid-beta monomer outside the neurons) # Todo ou  ??
-y0[2] = 0  # AB_p^o (Amyloid-beta plaque outside the neurons)
-y0[3] = 0  # AB_o^o (Amyloid-beta oligomers outside)
+y0[1] = 1e-8  # AB_m^o (Amyloid-beta monomer outside the neurons) # Todo ou  ??
+y0[2] = 0  # AB_o^o (Amyloid-beta oligomers outside)
+y0[3] = 0  # AB_p^o (Amyloid-beta plaque outside the neurons)
 y0[4] = 2.5e-7  # G (GSK3)
 # Seyed : 0, mais fait choc à cause du terme "p.lambda_ABiG * y[0]" où p.lambda_ABiG = 0.25
 y0[5] = 1.37e-10  # tau (tau proteins)  # Hao: Concentration of tau proteins is, in health, 137 pg/ml and, in AD, 490 pg/ml
@@ -56,7 +56,7 @@ fig = plt.figure()
 fig.set_size_inches(35 / 2.54, 20 / 2.54, forward=True)
 
 # Making a list for Label names in the plot
-labelname = [r'$A \beta^{i}$', r'$A \beta_{m}^{o}$', r'$A \beta_{p}^{o}$', r'$A \beta_{o}^{o}$', '$GSK 3$', r'$\tau$',
+labelname = [r'$A \beta^{i}$', r'$A \beta_{m}^{o}$', r'$A \beta_{o}^{o}$', r'$A \beta_{p}^{o}$', '$GSK 3$', r'$\tau$',
              '$F_i$', '$F_o$', '$Neurons$', 'A', '$M$', '$M_1$', '$M_2$', r'$\hat{M}_1$', r'$\hat{M}_2$',
              r'$T_{\beta}$', '$I_{10}$', r'$T_{\alpha}$', '$P$']
 
@@ -71,6 +71,8 @@ for i in range(0, 19):
     ax.plot(sol.t / 365, sol.y[i, :])
     if decades > 5:
         indentxaxis = int(decades / 2)
+    elif decades < 1:
+        indentxaxis = annees
     else:
         indentxaxis = decades
     ax.set_xticks(np.linspace(0, annees, indentxaxis + 1))
@@ -88,6 +90,6 @@ plt.text(0.1, 0.11, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf
 
 # Save the plot as a .png file
 my_path = os.path.abspath('Figures')
-plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_17.png"), dpi=180)
+plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_19.png"), dpi=180)
 
 plt.show()

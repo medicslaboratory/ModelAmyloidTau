@@ -24,7 +24,7 @@ class Parameters():
         self.d_ABi = (math.log(2)) / (9.4 / 24)
         """Degradation rate of Amyloid Beta42 inside (/day)"""
 
-        # TODO: Fait pas de sens...
+        # TODO: Pas sure de la méthode...
         #   Seyed: self.lambda_ABi = self.d_ABi * 1.0e-6  # self.ABi = 10**(-6)
         #   Je prends plutôt la valeur de Hao en attendant (9.51e-6).
         self.lambda_ABi = 9.51e-6
@@ -33,7 +33,7 @@ class Parameters():
         self.d_ABmo = self.d_ABi
         """Degradation rate of Amyloid Beta42 monomer outside (/day)"""
 
-        # TODO Fait pas de sens...
+        # TODO Pas sure de la méthode...
         #  Selon thèse : = self.d_ABmo * ABmo = self.d_ABmo * 1.5 * ABi = self.d_ABmo * 1.5 * 10**(-6)
         #                           = 9.51e-6 * 1.5 * 10e-6 = 1.4265e-11
         self.lambda_ABmo = self.d_ABmo * 1.5e-6  # self.ABmo = 1.5 * 10**(-6)
@@ -43,7 +43,7 @@ class Parameters():
         """Reference density of astrocytes (g/cm^3) (= g/mL) [Value from Hao]"""
         # Seyed avait : 7 * 10 ** (7) astrocytes/cm^3, mais unitées pas valides
 
-        self.lambda_AABpo = (1 / 10) * 8e-10
+        self.lambda_AABpo = 8e-11  # (1 / 10) * 8e-10
         """Creation rate of Amyloid Beta42 plaque outside by astrocytes (g/mL/day)"""
         # TODO : Seyed (méthode de Hao): = (1 / 10) * self.lambda_NABpo = (1 / 10) * 8 * 10 ** (-11) = 8e-12
         #   self.lambda_NABpo : Production rate of Amyloid Beta42 plaque outside by neuron (g/mL/day) [Hao: lambda_N = 8e-9]
@@ -87,12 +87,12 @@ class Parameters():
         self.d_ABoo = (1 / 10) * self.d_ABmo  # = 0.1 * 1.76
         """Degradation rate of Amyloid Beta42 oligomer outside (/day) [Computation method of Hao]"""
 
-        self.lambda_ABmoABoo = 5
+        self.lambda_ABmoABoo = 1/5
         """Creation rate of Amyloid Beta42 oligomer outside by Amyloid Beta42 monomer outside (/day)"""
         # TODO: Pas trop sure du pourquoi du calcul de Seyed. : = 5 * (1 / 25) * self.d_ABoo
         #  Hao : The ratio of soluble AO to total AB_out is approximately 1/25 => lambda_{A_O} = 1/25 * d_{A_O}
         #  Ce calcul d'applique pas ici.
-        #  Devrait être selon le nbr de mono pour 1 oligo en moyenne. Posons 5 pour le moment.
+        #  Devrait être selon le nbr de mono pour 1 oligo en moyenne. Posons 1/5 pour le moment.
 
         self.lambda_ABiG = 0.25
         """Creation rate of GSK-3 by Amyloid Beta42 inside neurons (/day)"""
@@ -148,7 +148,7 @@ class Parameters():
 
         self.K_Ta = 4e-5
         """Half-saturation of T_alpha (TNF-alpha) (g/mL)"""
-        # TODO: Seyed a mis 2.5e-5 et dit que velaur de Hao16, mais est plutôt de 4e-5 g/mL ?
+        # TODO: Seyed a mis 2.5e-5 et dit que c'est la valeur de Hao16, mais est plutôt de 4e-5 g/mL ?
 
         self.K_I10 = 2.5e-6  # 2.5 * 10 ** (-6)
         """Half-saturation of IL-10 (g/mL) [Value of Hao]"""
@@ -163,9 +163,10 @@ class Parameters():
         """Production/activation rate of astrocytes by TNF-alpha (/day) [Value from Hao lambda_{A T_alpha}]"""
 
         self.d_A = (math.log(2) / 600)
-        """Death rate of astrocytes (/day)"""
+        """Death rate of astrocytes (/day) [Computation method and value of Hao]"""
         # self.d_A = (math.log(2) / self.Astrocyteshalf) * (1 / 10)  # TODO: Pk *0.1 ? Retiré pour l'instant.
         # self.Astrocyteshalf : Half-life of astrocytes (day) = 600  [Valeur de Hao]
+        # (math.log(2) / 600) = 0.001155 = 1.155e-3 /day
         # Hao : 1.2e-3 /day
 
         self.lambda_FoM = 2e-2

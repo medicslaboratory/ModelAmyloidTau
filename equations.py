@@ -16,8 +16,8 @@ def ODEsystem(t, y):
     :param y:
         y[0]   AB^i (Amyloid-beta monomer inside the neurons)
         y[1]   Amyloid-beta monomer outside the neurons
-        y[2]   Amyloid-beta plaque outside the neurons
-        y[3]   Amyloid-beta oligomers outside
+        y[2]   Amyloid-beta oligomers outside
+        y[3]   Amyloid-beta plaque outside the neurons
         y[4]   GSK3
         y[5]   tau proteins
         y[6]   F_i (NFT inside the neurons)
@@ -49,15 +49,14 @@ def ODEsystem(t, y):
     # TODO: Pas certaine du premier terme (modif en fonction du dernier terme précécent).
     #  Retiré "+ p.lambda_ABmo * (y[8] / p.N_0)" => _15 (vs _14)
     #  Vérif. Ajout terme ABm -> ABo; ok?
-    dydt[1] = (y[0] / y[8]) * abs(dydt[8]) - p.d_ABmo * y[1] \
-              - p.lambda_ABmoABoo * y[1] * (1 + p.AP * p.delta_AP)
-
-    # Amyloid-beta plaque outside the neurons (AB_p^o)
-    dydt[2] = (p.lambda_AABpo * (y[9] / p.A_0) + p.lambda_ABooABpo * y[3] * (1 + p.AP * p.delta_AP)
-               - (p.d_M2hatABpo * y[14] + p.d_MABpo * (y[11] + p.theta * y[12])) * (y[2] / (y[2] + p.K_ABpo)))
+    dydt[1] = (y[0] / y[8]) * abs(dydt[8]) - p.d_ABmo * y[1] - p.lambda_ABmoABoo * y[1] * (1 + p.AP * p.delta_AP)
 
     # Amyloid Beta oligomers outside (AB_o^o)
-    dydt[3] = -p.d_ABoo * y[3] + (p.lambda_ABmoABoo * y[1] - p.lambda_ABooABpo * y[3]) * (1 + p.AP * p.delta_AP)
+    dydt[2] = - p.d_ABoo * y[2] + (p.lambda_ABmoABoo * y[1] - p.lambda_ABooABpo * y[2]) * (1 + p.AP * p.delta_AP)
+
+    # Amyloid-beta plaque outside the neurons (AB_p^o)
+    dydt[3] = p.lambda_AABpo * (y[9] / p.A_0) + p.lambda_ABooABpo * y[2] * (1 + p.AP * p.delta_AP) \
+              - (p.d_M2hatABpo * y[14] + p.d_MABpo * (y[11] + p.theta * y[12])) * (y[3] / (y[3] + p.K_ABpo))
 
     # Glycogen synthase kinase-type 3 (GSK-3) (G)
     dydt[4] = p.lambda_ABiG * y[0] - p.d_G * y[4]
@@ -73,20 +72,20 @@ def ODEsystem(t, y):
     dydt[7] = (y[6] / y[8]) * abs(dydt[8]) - p.d_Fo * y[7]
 
     # Living neurons (N)
-    dydt[8] = (-p.d_FiN * (y[6] / (y[6] + p.K_Fi)) * y[8]
-               - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8])
+    dydt[8] = -p.d_FiN * (y[6] / (y[6] + p.K_Fi)) * y[8] \
+              - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
 
     # Astrocytes (A)
     # TODO: Pourquoi 2 cstes plutôt qu'une?
-    #  p.lambda_ABpoA * y[2] / p.W_A + p.lambda_TaA * y[17] / p.W_A - p.d_A * y[9]
+    #  p.lambda_ABpoA * y[3] / p.W_A + p.lambda_TaA * y[17] / p.W_A - p.d_A * y[9]
     #  p.W_A retirés (valait 1 de toute façon)
-    dydt[9] = p.lambda_ABpoA * y[2] + p.lambda_TaA * y[17] - p.d_A * y[9]
+    dydt[9] = p.lambda_ABpoA * y[3] + p.lambda_TaA * y[17] - p.d_A * y[9]
 
     # Microglia (M)
-    # TODO: J'ai retiré le terme de conversion de M1 -> M2, car ne change pas le total ici théoriquement (- p.lambda_MM1 * y[10])
-    #  Dans Hao, ajout en fonction de ABO et non AB_out (ici plaque). Peut-être changer y[2] -> y[3].
+    # TODO: J'ai retiré le terme de conversion de M1 -> M2, car ne change pas le total ici (- p.lambda_MM1 * y[10])
+    #  Dans Hao, ajout en fonction de ABO et non AB_out (ici plaque). Peut-être changer y[3] -> y[2].
     #  J'ai multiplié le premier et 2e terme par [M] (et ajusté les unités de p.lambda_ABpoM en conséquence)
-    dydt[10] = (p.lambda_FoM * (y[7] / (y[7] + p.K_Fo)) + p.lambda_ABpoM * (y[2] / (y[2] + p.K_ABpo))) * y[10] \
+    dydt[10] = (p.lambda_FoM * (y[7] / (y[7] + p.K_Fo)) + p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpo))) * y[10] \
                - p.d_M * y[10]
 
     # Proinflammatory microglia (M_1)
@@ -99,8 +98,8 @@ def ODEsystem(t, y):
     # Anti-inflammatory microglia (M_2)
     # TODO: Revoir modif. Retiré "- p.d_M2 * y[12]", car déjà pris en compte dans l'eq pour M
     #  Modif terme "+ p.lambda_TBM2 * y[15]" -> celui de Hao (fait + de sens)
-    #  Modif "+ y[10] * (1 / (p.beta + 1)) * p.lambda_MM1" par "+ dydt[10] * (1 / (p.beta + 1))" probleme potentiel si
-    #  Neurons (donc F_o, donc M) diminu trop rapidement (changement fait à partir de fig _17)
+    #  Modif "+ y[10] * (1 / (p.beta + 1)) * p.lambda_MM1" par "+ dydt[10] * (1 / (p.beta + 1))" problème potentiel si
+    #   neurones (donc F_o, donc M) diminu trop rapidement (changement fait à partir de fig _17)
     dydt[12] = dydt[10] * (1 / (p.beta + 1)) + p.lambda_TBM2 * (y[15] / (y[15] + p.K_TB)) * y[11]
 
     # Avec modif faites sur eqns ci-avant, rendue à graph ...ModifEqns_8
