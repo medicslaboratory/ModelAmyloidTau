@@ -38,17 +38,15 @@ def ODEsystem(t, y):
 
     dydt = np.zeros(19)
 
+    # Living neurons (N)
+    dydt[8] = -p.d_FiN * (y[6] / (y[6] + p.K_Fi)) * y[8] \
+              - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
+
     # Amyloid-beta monomer inside the neurons (AB^i)
-    # TODO: Pas certaine du dernier terme.  (y[0] / y[8]) * abs(dydt[8])
-    #   Voudrait "[Ab^i] par neurones" * variation neurones
-    #  Si on se fie à Hao, au deuxième terme devrait aussi avoir "*(y[8] / p.N_0)"?
-    #  Ajout "* (1/(1 + y[0]/5e-7))" au 1er terme => graph ..._13
-    dydt[0] = (p.lambda_ABi - p.d_ABi * y[0]) * (y[8] / p.N_0) - (y[0] / y[8]) * abs(dydt[8])
+    dydt[0] = p.lambda_ABi * (y[8] / p.N_0) - p.d_ABi * y[0] - (y[0] / y[8]) * abs(dydt[8])
 
     # Amyloid-beta monomer outside the neurons (AB_m^o)
-    # TODO: Pas certaine du premier terme (modif en fonction du dernier terme précécent).
-    #  Retiré "+ p.lambda_ABmo * (y[8] / p.N_0)" => _15 (vs _14)
-    #  Vérif. Ajout terme ABm -> ABo; ok?
+    # TODO: Retiré "+ p.lambda_ABmo * (y[8] / p.N_0)" => _15 (vs _14)
     dydt[1] = (y[0] / y[8]) * abs(dydt[8]) - p.d_ABmo * y[1] - p.lambda_ABmoABoo * y[1] * (1 + p.AP * p.delta_AP)
 
     # Amyloid Beta oligomers outside (AB_o^o)
@@ -58,11 +56,13 @@ def ODEsystem(t, y):
     dydt[3] = p.lambda_AABpo * (y[9] / p.A_0) + p.lambda_ABooABpo * y[2] * (1 + p.AP * p.delta_AP) \
               - (p.d_M2hatABpo * y[14] + p.d_MABpo * (y[11] + p.theta * y[12])) * (y[3] / (y[3] + p.K_ABpo))
 
+    # print(str(p.lambda_AABpo * (y[9] / p.A_0)) + ",   " + str(p.lambda_ABooABpo * y[2] * (1 + p.AP * p.delta_AP)) + ",   " + str(- p.d_M2hatABpo * y[14] * (y[3] / (y[3] + p.K_ABpo))) + ",   " + str(- p.d_MABpo * (y[11] + p.theta * y[12]) * (y[3] / (y[3] + p.K_ABpo))))
+
     # Glycogen synthase kinase-type 3 (GSK-3) (G)
     dydt[4] = p.lambda_ABiG * y[0] - p.d_G * y[4]
 
     # tau proteins (tau)
-    dydt[5] = (y[8] / p.N_0) * (p.lambda_tau + p.lambda_Gtau * y[4] - p.d_tau * y[5])
+    dydt[5] = (y[8] / p.N_0) * p.lambda_tau + p.lambda_Gtau * y[4] - p.d_tau * y[5]
 
     # NFT inside the neurons (F_i)
     dydt[6] = p.lambda_tauFi * y[5] * (y[8] / p.N_0) - p.d_Fi * y[6] - (y[6] / y[8]) * abs(dydt[8])
@@ -71,22 +71,18 @@ def ODEsystem(t, y):
     # Avant: = (y[6] / p.N_0) * abs(dydt[8]) - p.d_Fo * y[7]
     dydt[7] = (y[6] / y[8]) * abs(dydt[8]) - p.d_Fo * y[7]
 
-    # Living neurons (N)
-    dydt[8] = -p.d_FiN * (y[6] / (y[6] + p.K_Fi)) * y[8] \
-              - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
-
     # Astrocytes (A)
-    # TODO: Pourquoi 2 cstes plutôt qu'une?
-    #  p.lambda_ABpoA * y[3] / p.W_A + p.lambda_TaA * y[17] / p.W_A - p.d_A * y[9]
-    #  p.W_A retirés (valait 1 de toute façon)
+    # Avant : p.lambda_ABpoA * y[3] / p.W_A + p.lambda_TaA * y[17] / p.W_A - p.d_A * y[9]
+    #         où p.W_A = 1
     dydt[9] = p.lambda_ABpoA * y[3] + p.lambda_TaA * y[17] - p.d_A * y[9]
 
     # Microglia (M)
-    # TODO: J'ai retiré le terme de conversion de M1 -> M2, car ne change pas le total ici (- p.lambda_MM1 * y[10])
-    #  Dans Hao, ajout en fonction de ABO et non AB_out (ici plaque). Peut-être changer y[3] -> y[2].
-    #  J'ai multiplié le premier et 2e terme par [M] (et ajusté les unités de p.lambda_ABpoM en conséquence)
-    dydt[10] = (p.lambda_FoM * (y[7] / (y[7] + p.K_Fo)) + p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpo))) * y[10] \
+    # TODO:
+    #  Dans Hao, ajout en fonction de ABO et non AB_out (ici plaque). Peut-être changer y[3] -> y[2]?
+    #  Mais revoir comment arranger les unitées/termes pour que être certain que les deux premiers termes fonctionnent.
+    dydt[10] = p.lambda_FoM * (y[7] / (y[7] + p.K_Fo)) + p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpo)) \
                - p.d_M * y[10]
+    # print(str(p.lambda_FoM * (y[7] / (y[7] + p.K_Fo))) + ",   " + str(p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpo))) + ",   " + str(-p.d_M * y[10]))
 
     # Proinflammatory microglia (M_1)
     # TODO: Revoir modif. Retiré "- p.d_M1 * y[11]", car déjà pris en compte dans l'eq pour M
@@ -118,7 +114,8 @@ def ODEsystem(t, y):
     # TGF-Beta = Transforming growth factor beta (T_beta)
     # TODO: Pourquoi M_1 et M_1^hat? Dans Hao, il est produit par M_2 et M_2^hat, et les constantes sont les mêmes.
     #         dydt[15] = p.lambda_M1TB * y[12] + p.lambda_M1hatTB * y[14] - p.d_TB * y[15] (graph ..._10)
-    dydt[15] = p.lambda_M1TB * y[11] + p.lambda_M1hatTB * y[13] - p.d_TB * y[15]
+    # dydt[15] = p.lambda_M1TB * y[11] + p.lambda_M1hatTB * y[13] - p.d_TB * y[15]
+    dydt[15] = p.lambda_M1TB * y[12] + p.lambda_M1hatTB * y[14] - p.d_TB * y[15]
 
     # IL-10 = Interleukin 10 (I_10)
     # Erreur : dydt[16] = p.lambda_M2I10 * y[12] / p.K_M2 - p.lambda_M2I10 * y[16]

@@ -162,15 +162,16 @@ class Parameters():
         self.lambda_TaA = 1.54
         """Production/activation rate of astrocytes by TNF-alpha (/day) [Value from Hao lambda_{A T_alpha}]"""
 
-        self.d_A = (math.log(2) / 600)
+        self.d_A = (math.log(2) / 600) * 0.2
         """Death rate of astrocytes (/day) [Computation method and value of Hao]"""
         # self.d_A = (math.log(2) / self.Astrocyteshalf) * (1 / 10)  # TODO: Pk *0.1 ? Retiré pour l'instant.
         # self.Astrocyteshalf : Half-life of astrocytes (day) = 600  [Valeur de Hao]
         # (math.log(2) / 600) = 0.001155 = 1.155e-3 /day
         # Hao : 1.2e-3 /day
 
-        self.lambda_FoM = 2e-2
-        """Creation rate of microglias by F_o (NFT) (/day) [Value from Hao (lambda_{MF})]"""
+        self.lambda_FoM = 1e-3  # 2e-2 changement à fig ..._26
+        """Creation rate of microglias by F_o (NFT) (/day) [Value from Hao (lambda_{MF} en /day)]. 
+        Devrait être en g/mL/day pour que le terme ait les bonnes unitées."""  # TODO Unitées
 
         # TODO: Revoir. Thèse: Valeur prise pour être < K_Fi = 3.36e-10 (car Hao "more NFT reside within neurons than
         #  outside of them"). Hao : K_{F_o} = 2.58e-11
@@ -179,8 +180,9 @@ class Parameters():
 
         # TODO: Revoir. He puts : (0.015 * 0.047 - 2e-2 * 1.0e-11) / 1.0e-6 = 705 ; pk? Non...
         #  La valeur de Hao (qui était pour ABO...) = 2.3e-3 /day
-        self.lambda_ABpoM = 705
-        """Creation rate of microglias by Amyloid Beta42 plaque outside (/day)"""
+        self.lambda_ABpoM = 2.3e-3
+        """Creation rate of microglias by Amyloid Beta42 plaque outside (/day). 
+        Devrait être en g/mL/day pour que le terme ait les bonnes unitées."""  # TODO Unitées
 
         self.d_M = 0.015
         """Degradation rate of microglias (/day) [Here he takes it equal to the death rate of M_1 and M_2 from Hao]"""
@@ -254,6 +256,7 @@ class Parameters():
         self.d_I10 = 8.32
         """Degradation rate of IL-10 (/day)"""
         # TODO: Hao donne 16.64 /day
+        # half-life est 60 minutes
 
         # TODO Vérif.. These: (3.09 ± 1.8) × 10^−12 g/ml/day. Unités??
         #   Seyed prend : 1.07e-1 /day

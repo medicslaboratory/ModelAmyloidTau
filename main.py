@@ -14,16 +14,18 @@ from scipy.integrate import solve_ivp
 from matplotlib import ticker
 
 import equations as eqns
+import parameters as param
+p = param.Parameters()
 
 y0 = np.zeros(19)
 # The initial conditions in g/mL
-y0[0] = 1e-6  # AB^i (Amyloid-beta monomer inside the neurons) # 1e-6 change pour éviter saut départ...
-y0[1] = 1e-8  # AB_m^o (Amyloid-beta monomer outside the neurons) # Todo ou  ??
+y0[0] = p.lambda_ABi/p.d_ABi  # AB^i (Amyloid-beta monomer inside the neurons) # 1e-6 change pour éviter saut départ...
+y0[1] = 1e-11  # AB_m^o (Amyloid-beta monomer outside the neurons) # Todo ou  ??
 y0[2] = 0  # AB_o^o (Amyloid-beta oligomers outside)
 y0[3] = 0  # AB_p^o (Amyloid-beta plaque outside the neurons)
-y0[4] = 2.5e-7  # G (GSK3)
+y0[4] = (p.lambda_ABiG*y0[0])/p.d_G  # = 3.1e-6  # G (GSK3)
 # Seyed : 0, mais fait choc à cause du terme "p.lambda_ABiG * y[0]" où p.lambda_ABiG = 0.25
-y0[5] = 1.37e-10  # tau (tau proteins)  # Hao: Concentration of tau proteins is, in health, 137 pg/ml and, in AD, 490 pg/ml
+y0[5] = (p.lambda_tau + p.lambda_Gtau * y0[4])/p.d_tau  # = 2.57e-5  # tau (tau proteins)  # Hao: Concentration of tau proteins is, in health, 137 pg/ml and, in AD, 490 pg/ml
 y0[6] = 3.36e-10  # F_i (NFT inside the neurons)
 y0[7] = 3.36e-11  # F_o (NFT outside the neurons)
 y0[8] = 0.14  # N (Living neurons)
@@ -31,9 +33,9 @@ y0[8] = 0.14  # N (Living neurons)
 #  LSODA_80y_2)
 y0[9] = 0.14  # A (Astrocytes)
 # TODO : Seyed:7e7 (LSODA_80y_1) Fait pas vrm de sens... ; Valeur trouvée dans Hao = 0.14 (LSODA_80y_3)
-y0[10] = 0.047  # M (Microglia) #TODO : lui avait 0.02... changé pour valeur trouvée dans Hao
-y0[11] = 0.02  # M_1 (Proinflammatory microglia)
-y0[12] = 0.02  # M_2 (Anti-inflammatory microglias)
+y0[10] = 0.047  # M (Microglia) #TODO : lui avait 0.02... changé pour valeur trouvée dans Hao 0.047
+y0[11] = y0[10] * (p.beta / (p.beta + 1))  # M_1 (Proinflammatory microglia)
+y0[12] = y0[10] * (1 / (p.beta + 1))  # M_2 (Anti-inflammatory microglias)
 y0[13] = 1e-3  # M_1^hat (Proinflammatory macrophages) # 0
 y0[14] = 0  # M_2^hat (Anti-inflammatory macrophages)
 y0[15] = 1.0e-6  # T_{beta} (TGF-beta)
@@ -44,8 +46,8 @@ y0[18] = 5e-9  # P (MCP-1)
 annees = 80
 decades = int(annees / 10)
 
-sol = solve_ivp(eqns.ODEsystem, [0, 365 * annees], y0, "LSODA")  # "BDF" "LSODA" "RK23
-method = "solve_ivp_LSODA"
+sol = solve_ivp(eqns.ODEsystem, [0, 365 * annees], y0, "BDF")  # "BDF" "LSODA" "RK23
+method = "solve_ivp_BDF"
 
 # t = np.linspace(0, annees, 365*annees)  # 365*annees pts equidistant between 0 and annees.
 # sol = odeint(eqns.ODEsystem, y0, t, tfirst=True)
@@ -90,6 +92,7 @@ plt.text(0.1, 0.11, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf
 
 # Save the plot as a .png file
 my_path = os.path.abspath('Figures')
-plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_19.png"), dpi=180)
+plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_28.png"), dpi=180)
+# _20 ... _27 : Figures produitent avec Nicolas.
 
 plt.show()
