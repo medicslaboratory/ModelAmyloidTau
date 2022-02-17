@@ -1,11 +1,6 @@
 # Date : 17 January 2022
 # Autor : Éléonore Chamberland
 
-# This is a sample Python script.
-
-# Press ⌃R to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -92,7 +87,7 @@ plt.text(0.1, 0.11, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf
 
 # Save the plot as a .png file
 my_path = os.path.abspath('Figures')
-plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_32.png"), dpi=180)
+plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_33.png"), dpi=180)
 # _20 ... _27 : Figures produitent avec Nicolas.
 
 plt.show()

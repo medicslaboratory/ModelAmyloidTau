@@ -35,7 +35,7 @@ class Parameters():
         # TODO Pas sure de la méthode...
         #  Selon thèse : = self.d_ABmo * ABmo = self.d_ABmo * 1.5 * ABi = self.d_ABmo * 1.5 * 10**(-6)
         #                           = 9.51e-6 * 1.5 * 10e-6 = 1.4265e-11
-        self.lambda_ABmo = self.d_ABmo * 1.5e-5  # self.ABmo = 1.5 * 10**(-6)
+        self.lambda_ABmo = self.d_ABmo * 1.5e-6
         """Creation rate of  Amyloid Beta42 monomer outside (g/mL/day)"""
 
         self.A_0 = 0.14
@@ -216,11 +216,12 @@ class Parameters():
             [Thèse : "We consider the value for MCP-1 saturation for influx of macrophages as K_P";
             Value in Hao: K_P = 6e-9]"""
 
-        self.M1hateq = 2.5e-2  # 8.64e-7
+        self.M1hateq = 5e-2  # 2.5e-2  # 8.64e-7
         """Concentration of M_1^hat at equilibrium (g/mL)"""
         # TODO: On devrait ici avoir la concentration de Proinflammatory macrophage dans le sang.
         #  J'ai pris la valeur de M_0 de Hao (concentration de monocyte dans le sang) divisé par 2 (supposant que
-        #   1/2 M_1^hat et 1/2 M_2^hat dans le sang) = (5e-2)/2 = 2.5e-2.
+        #   1/2 M_1^hat et 1/2 M_2^hat dans le sang) = (5e-2)/2 = 2.5e-2. => fig _32 vs retour à 5e-2 => _33, mieux pour
+        #   Astrocytes (A) et MCP-1 (P) (augmentation plutôt que diminution).
 
         self.d_M1hat = 0.015
         """Death rate of M_1^hat macrophages (/day) [Value from Hao]"""
