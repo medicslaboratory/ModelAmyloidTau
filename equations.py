@@ -80,9 +80,9 @@ def ODEsystem(t, y):
     # TODO:
     #  Dans Hao, ajout en fonction de ABO et non AB_out (ici plaque). Peut-être changer y[3] -> y[2]?
     #  Mais revoir comment arranger les unitées/termes pour que être certain que les deux premiers termes fonctionnent.
-    dydt[10] = p.lambda_FoM * (y[7] / (y[7] + p.K_Fo)) + p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpo)) \
+    dydt[10] = p.lambda_FoM * (y[7] / (y[7] + p.K_Fo)) + p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpoM)) \
                - p.d_M * y[10]
-    # print(str(p.lambda_FoM * (y[7] / (y[7] + p.K_Fo))) + ",   " + str(p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpo))) + ",   " + str(-p.d_M * y[10]))
+    # print(str(p.lambda_FoM * (y[7] / (y[7] + p.K_Fo))) + ",   " + str(p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpoM))) + ",   " + str(-p.d_M * y[10]))
 
     # Proinflammatory microglia (M_1)
     # TODO: Revoir modif. Retiré "- p.d_M1 * y[11]", car déjà pris en compte dans l'eq pour M
@@ -93,9 +93,9 @@ def ODEsystem(t, y):
 
     # Anti-inflammatory microglia (M_2)
     # TODO: Revoir modif. Retiré "- p.d_M2 * y[12]", car déjà pris en compte dans l'eq pour M
-    #  Modif terme "+ p.lambda_TBM2 * y[15]" -> celui de Hao (fait + de sens)
+    #  Modif terme conversion M1 -> M2 : "+ p.lambda_TBM2 * y[15]" -> celui de Hao (fait + de sens)
     #  Modif "+ y[10] * (1 / (p.beta + 1)) * p.lambda_MM1" par "+ dydt[10] * (1 / (p.beta + 1))" problème potentiel si
-    #   neurones (donc F_o, donc M) diminu trop rapidement (changement fait à partir de fig _17)
+    #   Neurons (donc F_o, donc M) diminu trop rapidement (changement fait à partir de fig _17)
     dydt[12] = dydt[10] * (1 / (p.beta + 1)) + p.lambda_TBM2 * (y[15] / (y[15] + p.K_TB)) * y[11]
 
     # Avec modif faites sur eqns ci-avant, rendue à graph ...ModifEqns_8
@@ -104,8 +104,7 @@ def ODEsystem(t, y):
     # TODO: Thèse : Dit que la forme serait la même que dans Hao, mais pas vraiment. Le premier terme devrait être en
     #  relation avec M^hat que nous n'avons pas ici.
     #  dydt[13] = (y[18] / (y[18] + p.K_P)) * (p.M1hateq - y[13]) * p.lambda_PM1hat - p.d_M1hat * y[13]
-    #  Ajout alpha = 5 et modif:
-    dydt[13] = 5 * (y[18] / (y[18] + p.K_P)) * (p.M1hateq - y[13]) - p.d_M1hat * y[13]
+    dydt[13] = (y[18] / (y[18] + p.K_P)) * (p.M1hateq - y[13]) - p.d_M1hat * y[13]
 
     # Anti-inflammatory macrophages (M_2^hat)
     # TODO: À discuter, voir note (OneNote)
@@ -115,7 +114,7 @@ def ODEsystem(t, y):
     # TODO: Pourquoi M_1 et M_1^hat? Dans Hao, il est produit par M_2 et M_2^hat, et les constantes sont les mêmes.
     #         dydt[15] = p.lambda_M1TB * y[12] + p.lambda_M1hatTB * y[14] - p.d_TB * y[15] (graph ..._10)
     # dydt[15] = p.lambda_M1TB * y[11] + p.lambda_M1hatTB * y[13] - p.d_TB * y[15]
-    dydt[15] = p.lambda_M1TB * y[12] + p.lambda_M1hatTB * y[14] - p.d_TB * y[15]
+    dydt[15] = p.lambda_M2TB * y[12] + p.lambda_M2hatTB * y[14] - p.d_TB * y[15]
 
     # IL-10 = Interleukin 10 (I_10)
     # Erreur : dydt[16] = p.lambda_M2I10 * y[12] / p.K_M2 - p.lambda_M2I10 * y[16]

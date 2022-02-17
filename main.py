@@ -20,8 +20,8 @@ p = param.Parameters()
 y0 = np.zeros(19)
 # The initial conditions in g/mL
 y0[0] = p.lambda_ABi/p.d_ABi  # AB^i (Amyloid-beta monomer inside the neurons) # 1e-6 change pour éviter saut départ...
-y0[1] = 1e-11  # AB_m^o (Amyloid-beta monomer outside the neurons) # Todo ou  ??
-y0[2] = 0  # AB_o^o (Amyloid-beta oligomers outside)
+y0[1] = 6e-11  # AB_m^o (Amyloid-beta monomer outside the neurons) # Todo ou  ??
+y0[2] = 5e-13  # 0  # AB_o^o (Amyloid-beta oligomers outside)
 y0[3] = 0  # AB_p^o (Amyloid-beta plaque outside the neurons)
 y0[4] = (p.lambda_ABiG*y0[0])/p.d_G  # = 3.1e-6  # G (GSK3)
 # Seyed : 0, mais fait choc à cause du terme "p.lambda_ABiG * y[0]" où p.lambda_ABiG = 0.25
@@ -36,12 +36,12 @@ y0[9] = 0.14  # A (Astrocytes)
 y0[10] = 0.047  # M (Microglia) #TODO : lui avait 0.02... changé pour valeur trouvée dans Hao 0.047
 y0[11] = y0[10] * (p.beta / (p.beta + 1))  # M_1 (Proinflammatory microglia)
 y0[12] = y0[10] * (1 / (p.beta + 1))  # M_2 (Anti-inflammatory microglias)
-y0[13] = 1e-3  # M_1^hat (Proinflammatory macrophages) # 0
-y0[14] = 0  # M_2^hat (Anti-inflammatory macrophages)
-y0[15] = 1.0e-6  # T_{beta} (TGF-beta)
-y0[16] = 1.0e-5  # I_10 (IL-10 = Interleukin 10)
-y0[17] = 75e-12  # 2e-5  # T_{alpha} (TNF-alpha) (source: https://doi-org.acces.bibl.ulaval.ca/10.1002/1097-0029(20000801)50:3<184::AID-JEMT2>3.0.CO;2-H)
-y0[18] = 5e-9  # P (MCP-1)
+y0[13] = p.M1hateq/1.5  # M_1^hat (Proinflammatory macrophages) # 0
+y0[14] = 1e-9  # ou (p.lambda_TB * y0[15])/p.d_M2hat, si y0[15] defini avant # M_2^hat (Anti-inflammatory macrophages), Hao: 0
+y0[15] = (p.lambda_M2TB*y0[12] + p.lambda_M2hatTB*y0[14])/p.d_TB  # 1.0e-6  # T_{beta} (TGF-beta)
+y0[16] = p.lambda_M2I10 * y0[12] / p.d_I10  # I_10 (IL-10 = Interleukin 10) Hao : 1.0e-5
+y0[17] = (p.lambda_M1Ta*y0[11] + p.lambda_M1hatTa*y0[13])/p.d_Ta  # Hao 2e-5  # T_{alpha} (TNF-alpha) (source: https://doi-org.acces.bibl.ulaval.ca/10.1002/1097-0029(20000801)50:3<184::AID-JEMT2>3.0.CO;2-H => 75e-12)
+y0[18] = p.lambda_AP*y0[9]/p.d_P  # P (MCP-1) Hao: 5e-9
 
 annees = 80
 decades = int(annees / 10)
@@ -87,12 +87,12 @@ for i in range(0, 19):
 # Write the initial values used
 plt.subplots_adjust(bottom=0.2)
 icNameValue = [str(labelname[i]) + "= " + "{:.2e}".format(y0[i]) for i in np.arange(18)]
-initcond = "Initial conditions used (in g/cm$^3$) : \n" + ", ".join(icNameValue)
+initcond = "Initial conditions used (in g/mL) : \n" + ", ".join(icNameValue)
 plt.text(0.1, 0.11, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf().transFigure, wrap=True)
 
 # Save the plot as a .png file
 my_path = os.path.abspath('Figures')
-plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_28.png"), dpi=180)
+plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_32.png"), dpi=180)
 # _20 ... _27 : Figures produitent avec Nicolas.
 
 plt.show()

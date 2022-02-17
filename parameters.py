@@ -16,7 +16,6 @@ class Parameters():
     def __init__(self):
         self.N_0 = 0.14
         """Reference density of neuron (g/cm^3) (= g/mL) [Value from Hao]"""
-        # Seyed avait : 7 * 10 ** (7) neurons/cm^3, mais unitées pas valides
 
         # TODO: Grande différence avec Hao : self.d_ABi = 9.51
         # self.d_ABi = (math.log(2)) / (self.ABihalf / 24) = 1.76
@@ -36,12 +35,11 @@ class Parameters():
         # TODO Pas sure de la méthode...
         #  Selon thèse : = self.d_ABmo * ABmo = self.d_ABmo * 1.5 * ABi = self.d_ABmo * 1.5 * 10**(-6)
         #                           = 9.51e-6 * 1.5 * 10e-6 = 1.4265e-11
-        self.lambda_ABmo = self.d_ABmo * 1.5e-6  # self.ABmo = 1.5 * 10**(-6)
+        self.lambda_ABmo = self.d_ABmo * 1.5e-5  # self.ABmo = 1.5 * 10**(-6)
         """Creation rate of  Amyloid Beta42 monomer outside (g/mL/day)"""
 
         self.A_0 = 0.14
         """Reference density of astrocytes (g/cm^3) (= g/mL) [Value from Hao]"""
-        # Seyed avait : 7 * 10 ** (7) astrocytes/cm^3, mais unitées pas valides
 
         self.lambda_AABpo = 8e-11  # (1 / 10) * 8e-10
         """Creation rate of Amyloid Beta42 plaque outside by astrocytes (g/mL/day)"""
@@ -68,20 +66,21 @@ class Parameters():
         self.theta = 0.9
         """Relative clearance power of amyloid-beta by M_2 compared to M_1 [Value from Hao]"""
 
-        self.d_M2hatABpo = self.theta * 1.0e-2
+        self.d_M2hatABpo = 1e-5  # self.theta * 1.0e-2
         """Degradation rate of Amyloid Beta42 plaque outside by M_2^hat (/day)"""
         # TODO: Revoir
         #   Seyed : 4e-7
         #   Hao : estime 10^-2, mais lui a plutôt le terme : d_M2hatABpo * (M_1^hat + theta * M_2^hat)
         #   Prenons: theta * valeur de Hao = 0.9 * 10^-2 (= 9e-3)
+        #  A pas mal d'impact, voir graph _28 (9e-3) vs _29 (1e-5). Je conserve 1e-5, les courbes sont plus douces.
 
         self.d_MABpo = (1 / 5) * (self.d_M2hatABpo / self.theta)
         """Degradation rate of Amyloid Beta42 plaque outside by microglias (M) (/day) [Computation from Hao : 
         (1 / 5) * self.d_M2hatABpo ; ajout de "/ self.theta" pour compenser pour la modification de self.d_M2hatABpo]"""
 
         self.K_ABpo = 7e-3
-        """Concentration of Amyloid Beta42 plaque outside at which the process rate is half maximal (Michaelis-Menten 
-        constant) (g/mL) \n 
+        """Concentration of Amyloid Beta42 plaque outside at which the destruction of AB_p^o by M_1, M_2 and M_2^hat 
+        rate is half maximal (Michaelis-Menten constant) (g/mL) \n 
         [Value of Hao] : self.K_ABpo = 10**(3) * self.ABo = 10**(3) * 7*10**(-6) = 7 * 10**(-3) """
 
         self.d_ABoo = (1 / 10) * self.d_ABmo  # = 0.1 * 1.76
@@ -169,7 +168,7 @@ class Parameters():
         # (math.log(2) / 600) = 0.001155 = 1.155e-3 /day
         # Hao : 1.2e-3 /day
 
-        self.lambda_FoM = 1e-3  # 2e-2 changement à fig ..._26
+        self.lambda_FoM = 1e-3  # 2e-2 ; changement pour 1e-3 à fig ..._26
         """Creation rate of microglias by F_o (NFT) (/day) [Value from Hao (lambda_{MF} en /day)]. 
         Devrait être en g/mL/day pour que le terme ait les bonnes unitées."""  # TODO Unitées
 
@@ -180,9 +179,13 @@ class Parameters():
 
         # TODO: Revoir. He puts : (0.015 * 0.047 - 2e-2 * 1.0e-11) / 1.0e-6 = 705 ; pk? Non...
         #  La valeur de Hao (qui était pour ABO...) = 2.3e-3 /day
-        self.lambda_ABpoM = 2.3e-3
+        self.lambda_ABpoM = 2.3e-3  # Diminuer la valeur ne semble pas avoir bcp d'impact.
         """Creation rate of microglias by Amyloid Beta42 plaque outside (/day). 
         Devrait être en g/mL/day pour que le terme ait les bonnes unitées."""  # TODO Unitées
+
+        self.K_ABpoM = 1e-7
+        """Concentration of Amyloid Beta42 plaque outside at which the creation rate of M by AB_p^o is half maximal 
+        (g/mL) [I take the value in Hao K_{A_O}]."""
 
         self.d_M = 0.015
         """Degradation rate of microglias (/day) [Here he takes it equal to the death rate of M_1 and M_2 from Hao]"""
@@ -213,11 +216,11 @@ class Parameters():
             [Thèse : "We consider the value for MCP-1 saturation for influx of macrophages as K_P";
             Value in Hao: K_P = 6e-9]"""
 
-        self.M1hateq = 5e-2  #8.64e-7
+        self.M1hateq = 2.5e-2  # 8.64e-7
         """Concentration of M_1^hat at equilibrium (g/mL)"""
         # TODO: On devrait ici avoir la concentration de Proinflammatory macrophage dans le sang.
-        #  J'ai pris la valeur de M_0 de Hao (concentration de monocyte dans le sang) et ajusté la M1hat initial pour
-        #  qu'elle soit pas trop loin de cette valeur.
+        #  J'ai pris la valeur de M_0 de Hao (concentration de monocyte dans le sang) divisé par 2 (supposant que
+        #   1/2 M_1^hat et 1/2 M_2^hat dans le sang) = (5e-2)/2 = 2.5e-2.
 
         self.d_M1hat = 0.015
         """Death rate of M_1^hat macrophages (/day) [Value from Hao]"""
@@ -240,11 +243,15 @@ class Parameters():
             self.K_TB : half-saturation of TGF-beta (T_beta) = 2.5*10**(-7) [Hao]"""
         # TODO: Calcul fait pas de sens et unitées seraient g/mL/day.
 
-        self.lambda_M1TB = 1.5e-2
-        """Production rate of TGF-beta by M_1 (/day) [Value from Hao (lambda_{T_{beta} M})]"""
+        # self.lambda_M1TB = 1.5e-2
+        # """Production rate of TGF-beta by M_1 (/day) [Value from Hao (lambda_{T_{beta} M})]"""
+        self.lambda_M2TB = 1.5e-2
+        """Production rate of TGF-beta by M_2 (/day) [Value from Hao (lambda_{T_{beta} M})]"""
 
-        self.lambda_M1hatTB = 1.5e-2
-        """Production rate of TGF-beta by M_1^hat (/day) [Value from Hao (lambda_{T_{beta} M^{hat}})]"""
+        # self.lambda_M1hatTB = 1.5e-2
+        # """Production rate of TGF-beta by M_1^hat (/day) [Value from Hao (lambda_{T_{beta} M^{hat}})]"""
+        self.lambda_M2hatTB = 1.5e-2
+        """Production rate of TGF-beta by M_2^hat (/day) [Value from Hao (lambda_{T_{beta} M^{hat}})]"""
 
         # TODO Vérif.. Thèse: (1.2 ± 0.16) × 10^−12 g/mL/day ??
         self.lambda_M2I10 = 6.67e-3
