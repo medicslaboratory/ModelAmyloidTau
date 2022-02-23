@@ -18,9 +18,9 @@ y0[0] = p.lambda_ABi/p.d_ABi  # AB^i (Amyloid-beta monomer inside the neurons) #
 y0[1] = 6e-11  # AB_m^o (Amyloid-beta monomer outside the neurons) # Todo ou  ??
 y0[2] = 5e-13  # 0  # AB_o^o (Amyloid-beta oligomers outside)
 y0[3] = 0  # AB_p^o (Amyloid-beta plaque outside the neurons)
-y0[4] = (p.lambda_ABiG*y0[0])/p.d_G  # = 3.1e-6  # G (GSK3)
+y0[4] = (p.kappa_IG*p.I)/p.d_G  # = 3.1e-6  # G (GSK3)
 # Seyed : 0, mais fait choc à cause du terme "p.lambda_ABiG * y[0]" où p.lambda_ABiG = 0.25
-y0[5] = (p.lambda_tau + p.lambda_Gtau * y0[4])/p.d_tau  # = 2.57e-5  # tau (tau proteins)  # Hao: Concentration of tau proteins is, in health, 137 pg/ml and, in AD, 490 pg/ml
+y0[5] = (p.lambda_tau + p.kappa_Gtau * y0[4])/p.d_tau  # = 2.57e-5  # tau (tau proteins)  # Hao: Concentration of tau proteins is, in health, 137 pg/ml and, in AD, 490 pg/ml
 y0[6] = 3.36e-10  # F_i (NFT inside the neurons)
 y0[7] = 3.36e-11  # F_o (NFT outside the neurons)
 y0[8] = 0.14  # N (Living neurons)
@@ -32,11 +32,11 @@ y0[10] = 0.047  # M (Microglia) #TODO : lui avait 0.02... changé pour valeur tr
 y0[11] = y0[10] * (p.beta / (p.beta + 1))  # M_1 (Proinflammatory microglia)
 y0[12] = y0[10] * (1 / (p.beta + 1))  # M_2 (Anti-inflammatory microglias)
 y0[13] = p.M1hateq/1.5  # M_1^hat (Proinflammatory macrophages) # 0
-y0[14] = 1e-9  # ou (p.lambda_TB * y0[15])/p.d_M2hat, si y0[15] defini avant # M_2^hat (Anti-inflammatory macrophages), Hao: 0
-y0[15] = (p.lambda_M2TB*y0[12] + p.lambda_M2hatTB*y0[14])/p.d_TB  # 1.0e-6  # T_{beta} (TGF-beta)
-y0[16] = p.lambda_M2I10 * y0[12] / p.d_I10  # I_10 (IL-10 = Interleukin 10) Hao : 1.0e-5
-y0[17] = (p.lambda_M1Ta*y0[11] + p.lambda_M1hatTa*y0[13])/p.d_Ta  # Hao 2e-5  # T_{alpha} (TNF-alpha) (source: https://doi-org.acces.bibl.ulaval.ca/10.1002/1097-0029(20000801)50:3<184::AID-JEMT2>3.0.CO;2-H => 75e-12)
-y0[18] = p.lambda_AP*y0[9]/p.d_P  # P (MCP-1) Hao: 5e-9
+y0[14] = 1e-9  # ou (p.kappa_TB * y0[15])/p.d_M2hat, si y0[15] defini avant # M_2^hat (Anti-inflammatory macrophages), Hao: 0
+y0[15] = (p.kappa_M1TB*y0[11] + p.kappa_M1hatTB*y0[13])/p.d_TB  # 1.0e-6  # T_{beta} (TGF-beta)
+y0[16] = p.kappa_M2I10 * y0[12] / p.d_I10  # I_10 (IL-10 = Interleukin 10) Hao : 1.0e-5
+y0[17] = (p.kappa_M1Ta*y0[11] + p.kappa_M1hatTa*y0[13])/p.d_Ta  # Hao 2e-5  # T_{alpha} (TNF-alpha) (source: https://doi-org.acces.bibl.ulaval.ca/10.1002/1097-0029(20000801)50:3<184::AID-JEMT2>3.0.CO;2-H => 75e-12)
+y0[18] = p.kappa_AP*y0[9]/p.d_P  # P (MCP-1) Hao: 5e-9
 
 annees = 80
 decades = int(annees / 10)
@@ -87,7 +87,7 @@ plt.text(0.1, 0.11, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf
 
 # Save the plot as a .png file
 my_path = os.path.abspath('Figures')
-plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_33.png"), dpi=180)
+plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_34.png"), dpi=180)
 # _20 ... _27 : Figures produitent avec Nicolas.
-
+# 34 : 1ere avec modif simon
 plt.show()
