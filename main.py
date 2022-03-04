@@ -38,10 +38,10 @@ y0[8] = p.N_0  # N (Living neurons)
 # TODO : Seyed:7e7 (LSODA_80y_1) Fait pas vrm de sens... ; Valeur trouvée dans Hao = 0.14 (si juste ça modifié
 #  LSODA_80y_2)
 
-y0[9] = 0.14  # A (Astrocytes)
+y0[9] = 0.14 /2  # A (Astrocytes)
 # TODO : Seyed:7e7 (LSODA_80y_1) Fait pas vrm de sens... ; Valeur trouvée dans Hao = 0.14 (LSODA_80y_3)
 
-y0[10] = 0.047  # M (Microglia) #TODO : lui avait 0.02... changé pour valeur trouvée dans Hao 0.047
+y0[10] = 0.02  # M (Microglia) #TODO : lui avait 0.02... changé pour valeur trouvée dans Hao 0.047
 
 y0[11] = y0[10] * (p.beta / (p.beta + 1))  # M_pro (Proinflammatory microglia)
 y0[12] = y0[10] * (1 / (p.beta + 1))  # M_anti (Anti-inflammatory microglias)
@@ -103,7 +103,7 @@ plt.text(0.1, 0.11, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf
 
 # Save the plot as a .png file
 my_path = os.path.abspath('Figures')
-plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_39.png"), dpi=180)
+plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_42.png"), dpi=180)
 # _20 ... _27 : Figures produitent avec Nicolas.
 # 34 : 1ere avec modif simon
 plt.show()

@@ -201,6 +201,10 @@ class Parameters():
         self.kappa_ABpoA = 1.793
         """Creation rate of astrocytes by Amyloid Beta42 plaque outside (/day) [Value from Hao lambda_{A A_beta^o}]"""
 
+        self.A_max = self.A_0
+        """Maximal density of astrocytes (g/mL)"""
+        # TODO Revoir valeur. Actuellement = A(0) de Hao.
+
         self.kappa_TaA = 1.54
         """Production/activation rate of astrocytes by TNF-alpha (/day) [Value from Hao lambda_{A T_alpha}]"""
 
@@ -219,6 +223,10 @@ class Parameters():
         #  outside of them"). Hao : K_{F_o} = 2.58e-11
         self.K_Fo = 1.0e-11
         """Average of extracellular NFTs (g/mL)"""
+
+        self.M_max = 0.047
+        """Maximal density of microglias (g/mL)"""
+        # TODO Revoir valeur. Actuellement = M(0) de Hao.
 
         # TODO: Revoir. He puts : (0.015 * 0.047 - 2e-2 * 1.0e-11) / 1.0e-6 = 705 ; pk? Non...
         #  La valeur de Hao (qui était pour ABO...) = 2.3e-3 /day
