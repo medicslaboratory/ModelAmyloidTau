@@ -43,7 +43,7 @@ def ODEsystem(t, y):
               - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
 
     # Amyloid-beta monomer inside the neurons (AB^i)
-    dydt[0] = p.lambda_ABi * (y[8] / p.N_0) - p.d_ABi * y[0] - (y[0] / y[8]) * abs(dydt[8])
+    dydt[0] = p.lambda_ABi * (1 + p.AP * p.delta_APi) * (y[8] / p.N_0) - p.d_ABi * y[0] - (y[0] / y[8]) * abs(dydt[8])
 
     # Amyloid-beta monomer outside the neurons (AB_m^o)
     dydt[1] = (y[0] / y[8]) * abs(dydt[8]) - p.d_ABmo(t) * y[1] + p.lambda_ABmo * (1 + p.AP * p.delta_APm) * \

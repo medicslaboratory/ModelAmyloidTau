@@ -25,16 +25,43 @@ class Parameters():
 
     def __init__(self):
         self.AP = 1
-        """AP equals to 1 if one has the APOE4 gene and 0 otherwise"""
+        """AP equals to 1 if one has the APOE4 gene and 0 otherwise."""
 
-        self.N_0 = 0.14
-        """Reference density of neuron (g/cm^3) (= g/mL) [Value from Hao]"""
-        # Voir Herculano-Houzel. Varie beaucoup selon la région. Dans néocortex pour nous. Nous prendrons N_0 pour une
-        # personne ayant environ 30 ans. Peut-être même variation avec sexe.
+        self.S = 0
+        """Value for the sex. S equals to 0 if the person is a woman, and 1 for a man."""
 
-        self.A_0 = 0.14
-        """Reference density of astrocytes (g/cm^3) (= g/mL) [Value from Hao]"""
-        # Même idée que N_0 (en prportion avec N_0)
+        self.N_0_F = 0.135
+        """Reference density of neuron in woman (g/cm^3) (= g/mL). [We take a little less than the value in Hao, 
+        temporarily]."""
+
+        self.N_0_M = 0.14
+        """Reference density of neuron in man (g/cm^3) (= g/mL). [We take the value in Hao, temporarily]."""
+
+        self.delta_SN = (self.N_0_M / self.N_0_F) - 1
+        """Constant for the differentiation of the sex on the reference density of neuron (N_0)."""
+
+        self.N_0 = self.N_0_F * (1 + self.S * self.delta_SN)
+        """Reference density of neuron with differentiation of the sex (g/cm^3) (= g/mL).
+        Voir Herculano-Houzel. Varie beaucoup selon la région. Dans néocortex pour nous. Nous prendrons N_0 pour une
+        personne ayant environ 30 ans."""
+
+        self.A_0_F = 0.135
+        """Reference density of astrocytes in woman (g/cm^3) (= g/mL). [We take a little less than the value in Hao, 
+        temporarily]."""
+
+        self.A_0_M = 0.14
+        """Reference density of astrocytes in man (g/cm^3) (= g/mL). [We take the value in Hao, temporarily]."""
+
+        self.delta_SA = (self.A_0_M / self.A_0_F) - 1
+        """Constant for the differentiation of the sex on the reference density of astrocytes (N_0)."""
+
+        self.A_0 = self.A_0_F * (1 + self.S * self.delta_SA)
+        """Reference density of astrocytes with differentiation of the sex (g/cm^3) (= g/mL).
+        Même idée que N_0."""
+
+        ##########################################
+        # CONSTANTS FOR THE EQUATION FOR NEURONS #
+        ##########################################
 
         self.d_FiN = 3e-5  # ((4 + 4 * 1) / (3 + 2 * 1)) * (math.log(2) / 3650)
         """Degradation rate of neurons by F_i (/day)"""
@@ -61,12 +88,18 @@ class Parameters():
         self.K_I10 = 2.5e-6  # 2.5 * 10 ** (-6)
         """Half-saturation of IL-10 (g/mL) [Value of Hao]"""
 
+        #######################################
+        # CONSTANTS FOR THE EQUATION FOR AB^i #
+        #######################################
+
         self.lambda_ABi = 9.51e-6
         """Creation rate of Amyloid Beta42 inside (g/mL/day)"""
         # TODO: Pas sure de la méthode...
         #   Seyed: self.lambda_ABi = self.d_ABi * 1.0e-6  # self.ABi = 10**(-6)
         #   Je prends plutôt la valeur de Hao en attendant (9.51e-6).
-        # Différence H/F et APOE.
+
+        self.delta_APi = 0.25
+        """Constant that quantifies the impact of the APOE4 gene on the creation rate of APP pathway inside neurons."""
 
         self.d_ABi = (math.log(2)) / (9.4 / 24)
         """Degradation rate of Amyloid Beta42 inside (/day)"""
