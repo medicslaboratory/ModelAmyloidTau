@@ -163,6 +163,9 @@ class Parameters():
         to Amyloid-Beta plaque outside."""
         # = (Rate with APOE / self.kappa_ABooABpo) - 1
 
+        self.d_ABoo = (1 / 10) * self.d_ABi  # = 0.1 * 1.76
+        """Degradation rate of Amyloid Beta42 oligomer outside (/day) [~Computation method of Hao]"""
+
         # self.theta =  0.9
         # """Relative clearance power of amyloid-beta by M_anti compared to M_pro [Value from Hao]"""
 
@@ -179,15 +182,12 @@ class Parameters():
 
         self.d_MproABpo = (1 / 80) * self.d_MprohatABpo
         """Degradation rate of Amyloid Beta42 plaque outside by proinflammatory microglias (M_pro) (/day).\n
-        Microgia are 80x slower than macrophage to degrade amyloid-beta plques."""
+        Microglia are 80x slower than macrophage to degrade amyloid-beta plaques."""
 
         self.K_ABpo = 7e-3
         """Concentration of Amyloid Beta42 plaque outside at which the destruction of AB_p^o by M_pro, M_anti and M_anti^hat 
         rate is half maximal (Michaelis-Menten constant) (g/mL) \n 
         [Value of Hao] : self.K_ABpo = 10**(3) * self.ABo = 10**(3) * 7*10**(-6) = 7 * 10**(-3) """
-
-        self.d_ABoo = (1 / 10) * self.d_ABi  # = 0.1 * 1.76
-        """Degradation rate of Amyloid Beta42 oligomer outside (/day) [~Computation method of Hao]"""
 
         ########################################
         # CONSTANTS FOR THE EQUATION FOR GSK-3 #
@@ -223,9 +223,8 @@ class Parameters():
             tauhalf : The half-life of tau proteins in humain = 23 days [Sato18]"""
         # Hao : 0.277/day (half-live = 60h)
 
-        self.lambda_Gtau = 0.25 / 3.1e-6
-        """Creation rate of tau by GSK3 (g/mL/day)\n
-        0.25 est une valeur posée par Seyed."""
+        self.lambda_Gtau = 26.3e-12
+        """Creation rate of tau by GSK3 (g/mL/day)"""
         # TODO Revoir valeur
 
         self.G_0 = (self.lambda_InsG * (self.Ins / self.Ins_0))/self.d_G
@@ -234,12 +233,12 @@ class Parameters():
         # TODO Revoir valeur
         #  2.45e-1 est la valeur approximative obtenue pour G_0 (3.1e-6 est l'ancienne cond init de GSK-3)
 
+        ############################################
+        # CONSTANTS FOR THE EQUATION FOR F_o & F_i #
+        ############################################
+
         self.d_Fi = 1.0e-2 * self.d_tau
         """Degradation rate of intracellular NFT (/day) [Computation method of Hao]"""
-
-        ######################################
-        # CONSTANTS FOR THE EQUATION FOR F_o #
-        ######################################
 
         self.d_Fo = 1/5 * self.d_tau  # 1.0e-1 * self.d_tau
         """Degradation rate of extracellular NFT (/day) [Computation method of Hao].\n
@@ -295,16 +294,17 @@ class Parameters():
 
         # TODO: Revoir. He puts : (0.015 * 0.047 - 2e-2 * 1.0e-11) / 1.0e-6 = 705 ; pk? Non...
         #  La valeur de Hao (qui était pour ABO...) = 2.3e-3 /day
-        self.lambda_ABpoM = 2.3e-3  # Diminuer la valeur ne semble pas avoir bcp d'impact.
-        """Creation rate of microglias by Amyloid Beta42 plaque outside (/day). 
+        self.kappa_ABooM = 2.3e-3  # Diminuer la valeur ne semble pas avoir bcp d'impact.
+        """Creation rate of microglias by Amyloid Beta42 oligomer outside (/day). 
         Devrait être en g/mL/day pour que le terme ait les bonnes unitées."""  # TODO Unitées (Si reste en /day => kappa)
 
-        self.K_ABpoM = 1e-7
-        """Concentration of Amyloid Beta42 plaque outside at which the creation rate of M by AB_p^o is half maximal 
+        self.K_ABooM = 1e-7
+        """Concentration of Amyloid Beta42 oligomer outside at which the creation rate of M by AB_o^o is half maximal 
         (g/mL) [I take the value in Hao K_{A_O}]."""
 
         self.d_M = 0.015
-        """Degradation rate of microglias (/day) [Here he takes it equal to the death rate of M_pro and M_anti from Hao]"""
+        """Degradation rate of microglias (/day) 
+        [Here we take it equal to the death rate of M_pro and M_anti from Hao]"""
 
         ###################################################
         # CONSTANTS FOR THE EQUATION FOR M_pro AND M_anti #

@@ -33,15 +33,17 @@ y0[4] = (p.lambda_InsG * (p.Ins / p.Ins_0))/p.d_G  # = 3.1e-6
 # Seyed : 0, mais fait choc à cause du terme "p.lambda_ABiG * y[0]" où p.lambda_ABiG = 0.25
 
 # tau (tau proteins)
-y0[5] = (p.lambda_tau + p.lambda_Gtau)/p.d_tau
+# y0[5] = (p.lambda_tau + p.lambda_Gtau)/p.d_tau
+y0[5] = 0
 # (p.lambda_tau + p.lambda_Gtau * (y0[4] / p.G_0))/p.d_tau => avant fig _39
 # = 2.57e-5    # Hao: Concentration of tau proteins is, in health, 137 pg/ml and, in AD, 490 pg/ml
 
 # F_i (NFT inside the neurons)
-y0[6] = p.kappa_tauFi * y0[5] / p.d_Fi  # 3.36e-10
+# y0[6] = p.kappa_tauFi * y0[5] / p.d_Fi
+y0[6] = 0
 
 # F_o (NFT outside the neurons)
-y0[7] = 3.36e-11
+y0[7] = 0
 
 # N (Living neurons)
 y0[8] = p.N_0
@@ -55,7 +57,7 @@ Q = (p.kappa_ABpoA * y0[3] + p.kappa_TaA * T_alpha_0)
 y0[9] = (Q * p.A_max) / (Q + p.d_A)
 
 # M (Microglia)
-y0[10] = 0.02
+y0[10] = 0
 # TODO : Seyed: 0.02 vs Hao: 0.047.
 
 # M_pro (Proinflammatory microglia)
@@ -131,7 +133,7 @@ plt.text(0.1, 0.11, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf
 
 # Save the plot as a .png file
 my_path = os.path.abspath('Figures')
-plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_44.png"), dpi=180)
+plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_45.png"), dpi=180)
 # _20 ... _27 : Figures produitent avec Nicolas.
 # 34 : 1ere avec modif simon
 plt.show()

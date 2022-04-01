@@ -18,7 +18,7 @@ def ODEsystem(t, y):
         y[1]   Amyloid-beta monomer outside the neurons
         y[2]   Amyloid-beta oligomers outside
         y[3]   Amyloid-beta plaque outside the neurons
-        y[4]   GSK3
+        y[4]   GSK-3
         y[5]   tau proteins
         y[6]   F_i (NFT inside the neurons)
         y[7]   F_o (NFT outside the neurons)
@@ -69,7 +69,6 @@ def ODEsystem(t, y):
     dydt[6] = p.kappa_tauFi * y[5] * (y[8] / p.N_0) - p.d_Fi * y[6] - (y[6] / y[8]) * abs(dydt[8])
 
     # NFT outside the neurons (F_o)
-    # Avant: = (y[6] / p.N_0) * abs(dydt[8]) - p.d_Fo * y[7]
     dydt[7] = (y[6] / y[8]) * abs(dydt[8]) - p.d_Fo * y[7]
 
     # Astrocytes (A)
@@ -81,24 +80,23 @@ def ODEsystem(t, y):
     # TODO:
     #  Dans Hao, ajout en fonction de ABO et non AB_out (ici plaque). Peut-être changer y[3] -> y[2]?
     #  Mais revoir comment arranger les unitées/termes pour que être certain que les deux premiers termes fonctionnent.
+    # dydt[10] = p.kappa_FoM * (y[7] / (y[7] + p.K_Fo)) * (p.M_max - y[10]) \
+    #            + p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpoM)) * (p.M_max - y[10]) - p.d_M * y[10]
     dydt[10] = p.kappa_FoM * (y[7] / (y[7] + p.K_Fo)) * (p.M_max - y[10]) \
-               + p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpoM)) * (p.M_max - y[10]) - p.d_M * y[10]
+               + p.kappa_ABooM * (y[2] / (y[2] + p.K_ABooM)) * (p.M_max - y[10]) - p.d_M * y[10]
 
     # Proinflammatory microglia (M_pro)
-    # TODO: Revoir modif. Retiré "- p.d_Mpro * y[11]", car déjà pris en compte dans l'eq pour M
-    #  Ajout terme conversion Mpro -> Manti
-    #  Modif "+ y[10] * (p.beta / (p.beta + 1)) * p.lambda_MMpro" par "+ dydt[10] * (p.beta / (p.beta + 1))" probleme
-    #  potentiel si Neurons (donc F_o, donc M) diminu trop rapidement (changement fait à partir de fig _17)
+    # TODO: Revoir modif.
+    #  "+ y[10] * (p.beta / (p.beta + 1)) * p.lambda_MMpro" par "+ dydt[10] * (p.beta / (p.beta + 1))" probleme
+    #  potentiel si Neurons (donc F_o, donc M) diminue trop rapidement (changement fait à partir de fig _17)
     dydt[11] = dydt[10] * (p.beta / (p.beta + 1)) - p.kappa_TBManti * (y[15] / (y[15] + p.K_TB)) * y[11]
 
     # Anti-inflammatory microglia (M_anti)
     # TODO: Revoir modif. Retiré "- p.d_Manti * y[12]", car déjà pris en compte dans l'eqn pour M
     #  Modif terme conversion Mpro -> Manti : "+ p.lambda_TBManti * y[15]" -> celui de Hao (fait + de sens)
     #  Modif "+ y[10] * (1 / (p.beta + 1)) * p.lambda_MMpro" par "+ dydt[10] * (1 / (p.beta + 1))" problème potentiel si
-    #   Neurons (donc F_o, donc M) diminu trop rapidement (changement fait à partir de fig _17)
+    #   Neurons (donc F_o, donc M) diminue trop rapidement (changement fait à partir de fig _17)
     dydt[12] = dydt[10] * (1 / (p.beta + 1)) + p.kappa_TBManti * (y[15] / (y[15] + p.K_TB)) * y[11]
-
-    # Avec modif faites sur eqns ci-avant, rendue à graph ...ModifEqns_8
 
     # Proinflammatory macrophages (M_pro^hat)
     # TODO: Thèse : Dit que la forme serait la même que dans Hao, mais pas vraiment. Le premier terme devrait être en
