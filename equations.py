@@ -75,13 +75,14 @@ def ODEsystem(t, y):
     # Astrocytes (A)
     # Avant : p.lambda_ABpoA * y[3] / p.W_A + p.lambda_TaA * y[17] / p.W_A - p.d_A * y[9]
     #         où p.W_A = 1
-    dydt[9] = p.kappa_ABpoA * y[3] * (p.A_max - y[9]) + p.kappa_TaA * y[17] * (p.A_max - y[9]) - p.d_A * y[9]
+    dydt[9] = (p.kappa_ABpoA * y[3] + p.kappa_TaA * y[17]) * (p.A_max - y[9]) - p.d_A * y[9]
 
     # Microglia (M)
     # TODO:
     #  Dans Hao, ajout en fonction de ABO et non AB_out (ici plaque). Peut-être changer y[3] -> y[2]?
     #  Mais revoir comment arranger les unitées/termes pour que être certain que les deux premiers termes fonctionnent.
-    dydt[10] = p.kappa_FoM * (y[7] / (y[7] + p.K_Fo)) * (p.M_max - y[10]) + p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpoM)) * (p.M_max - y[10]) - p.d_M * y[10]
+    dydt[10] = p.kappa_FoM * (y[7] / (y[7] + p.K_Fo)) * (p.M_max - y[10]) \
+               + p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpoM)) * (p.M_max - y[10]) - p.d_M * y[10]
 
     # Proinflammatory microglia (M_pro)
     # TODO: Revoir modif. Retiré "- p.d_Mpro * y[11]", car déjà pris en compte dans l'eq pour M

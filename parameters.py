@@ -112,6 +112,10 @@ class Parameters():
         # self.d_ABmo = self.d_ABi
         # """Degradation rate of Amyloid Beta42 monomer outside (/day)"""
 
+        #########################################
+        # CONSTANTS FOR THE EQUATION FOR AB_m^o #
+        #########################################
+
         self.lambda_ABmo = self.d_ABi * 1.5e-6
         """Creation rate of Amyloid Beta42 monomer outside (without APOE allele) (g/mL/day)"""
         # TODO Pas sure de la méthode...
@@ -144,6 +148,10 @@ class Parameters():
         # Hao: 8e-10 g/mL/day (lambda_A)
         # Nom modifié, car changé d'équation (plaque -> monomer)
 
+        #########################################
+        # CONSTANTS FOR THE EQUATION FOR AB_o^o #
+        #########################################
+
         self.kappa_ABooABpo = 25.09
         """Creation rate of Amyloid Beta42 plaque outside by Amyloid Beta oligomers outside (/day)"""
         # TODO: Revoir relations avec article de Cohen 2013
@@ -157,6 +165,10 @@ class Parameters():
 
         # self.theta =  0.9
         # """Relative clearance power of amyloid-beta by M_anti compared to M_pro [Value from Hao]"""
+
+        #########################################
+        # CONSTANTS FOR THE EQUATION FOR AB_p^o #
+        #########################################
 
         self.d_MprohatABpo = 4e-7  # self.theta * 1.0e-2
         """Degradation rate of Amyloid Beta42 plaque outside by proinflammatory macrophages (M_pro^hat) (/day)"""
@@ -177,6 +189,10 @@ class Parameters():
         self.d_ABoo = (1 / 10) * self.d_ABi  # = 0.1 * 1.76
         """Degradation rate of Amyloid Beta42 oligomer outside (/day) [~Computation method of Hao]"""
 
+        ########################################
+        # CONSTANTS FOR THE EQUATION FOR GSK-3 #
+        ########################################
+
         self.Ins = 1e-9
         """Concentration of insulin (supposed constant for now) (g/mL)"""
 
@@ -192,6 +208,10 @@ class Parameters():
         """Degradation rate of GSK-3 (/day)"""
         # Seyed : self.d_G = (math.log(2)) / (self.GSK3half / 24) où self.GSK3half : The half-life of GSK3 = (41 ± 4)h
         # De la même source que Seyed : (0.017 ± 0.02)/h = (0.408 ± 0.48)/day  # TODO: Valeur chez souris; pour humain?
+
+        ######################################
+        # CONSTANTS FOR THE EQUATION FOR tau #
+        ######################################
 
         self.lambda_tau = 2.63e-12
         """Creation rate of tau in health (g/ml/day) [Value from Sato18]"""
@@ -217,6 +237,10 @@ class Parameters():
         self.d_Fi = 1.0e-2 * self.d_tau
         """Degradation rate of intracellular NFT (/day) [Computation method of Hao]"""
 
+        ######################################
+        # CONSTANTS FOR THE EQUATION FOR F_o #
+        ######################################
+
         self.d_Fo = 1/5 * self.d_tau  # 1.0e-1 * self.d_tau
         """Degradation rate of extracellular NFT (/day) [Computation method of Hao].\n
         "large" effect : (1/10), "medium" effect : (1/5), and "small" effect : (1/2)
@@ -231,12 +255,16 @@ class Parameters():
         # self.W_A = 1  # 10 ** (-12)
         # """?? (g/astrocyte)"""
 
+        #################################################
+        # CONSTANTS FOR THE EQUATION FOR ASTROCYTES (A) #
+        #################################################
+
         self.kappa_ABpoA = 1.793
         """Creation rate of astrocytes by Amyloid Beta42 plaque outside (/day) [Value from Hao lambda_{A A_beta^o}]"""
 
         self.A_max = self.A_0
         """Maximal density of astrocytes (g/mL)"""
-        # TODO Revoir valeur. Actuellement = A(0) de Hao.
+        # TODO Revoir valeur. Actuellement = A(0).
 
         self.kappa_TaA = 1.54
         """Production/activation rate of astrocytes by TNF-alpha (/day) [Value from Hao lambda_{A T_alpha}]"""
@@ -247,6 +275,10 @@ class Parameters():
         # self.Astrocyteshalf : Half-life of astrocytes (day) = 600  [Valeur de Hao]
         # (math.log(2) / 600) = 0.001155 = 1.155e-3 /day
         # Hao : 1.2e-3 /day
+
+        ####################################
+        # CONSTANTS FOR THE EQUATION FOR M #
+        ####################################
 
         self.kappa_FoM = 1e-3  # 2e-2 ; changement pour 1e-3 à fig ..._26
         """Creation rate of microglias by F_o (NFT) (/day) [Value from Hao (lambda_{MF} en /day)]. 
@@ -274,6 +306,10 @@ class Parameters():
         self.d_M = 0.015
         """Degradation rate of microglias (/day) [Here he takes it equal to the death rate of M_pro and M_anti from Hao]"""
 
+        ###################################################
+        # CONSTANTS FOR THE EQUATION FOR M_pro AND M_anti #
+        ###################################################
+
         # self.lambda_MMpro = 9.3e-3
         # """Creation rate of M_pro by microglias (/day)"""
         # # TODO: Pas certaine de la provenance de cette valeur (voir thèse...)
@@ -294,6 +330,10 @@ class Parameters():
 
         # self.d_Manti = 0.015
         # """Death rate of M_anti (anti-inflammatory microglia) (/day)"""
+
+        ############################################
+        # CONSTANTS FOR THE EQUATION FOR M_pro^hat #
+        ############################################
 
         self.K_P = 5e-9
         """Half-saturation of MCP-1 (g/mL) \n
@@ -316,6 +356,10 @@ class Parameters():
         # self.Mprohat : M_prohat (g/ml) = 0.04  #TODO: pk?
         # self.K_P : Half-saturation of MCP-1 (g/ml) = 5*10**(-9)  #TODO: pk? (Hao: 6e-9)
 
+        #############################################
+        # CONSTANTS FOR THE EQUATION FOR M_anti^hat #
+        #############################################
+
         self.d_Mantihat = 0.015
         """Death rate of M_anti^hat macrophages (/day) [Value from Hao]"""
 
@@ -328,6 +372,12 @@ class Parameters():
             self.K_TB : half-saturation of TGF-beta (T_beta) = 2.5*10**(-7) [Hao]"""
         # TODO: Calcul fait pas de sens et unitées seraient g/mL/day.
 
+        #########################################
+        # CONSTANTS FOR THE EQUATION FOR T_beta #
+        #########################################
+
+        # self.d_TB => section précédente
+
         self.kappa_MproTB = 1.5e-2
         """Production rate of TGF-beta by M_pro (/day) [Value from Hao (lambda_{T_{beta} M})]"""
         # self.kappa_MantiTB = 1.5e-2
@@ -337,6 +387,10 @@ class Parameters():
         """Production rate of TGF-beta by M_pro^hat (/day) [Value from Hao (lambda_{T_{beta} M^{hat}})]"""
         # self.kappa_MantihatTB = 1.5e-2
         # """Production rate of TGF-beta by M_anti^hat (/day) [Value from Hao (lambda_{T_{beta} M^{hat}})]"""
+
+        #######################################
+        # CONSTANTS FOR THE EQUATION FOR I_10 #
+        #######################################
 
         # TODO Vérif.. Thèse: (1.2 ± 0.16) × 10^−12 g/mL/day ??
         self.kappa_MantiI10 = 6.67e-3
@@ -349,6 +403,10 @@ class Parameters():
         """Degradation rate of IL-10 (/day)"""
         # TODO: Hao donne 16.64 /day
         # half-life est 60 minutes
+
+        ##########################################
+        # CONSTANTS FOR THE EQUATION FOR T_alpha #
+        ##########################################
 
         # TODO Vérif.. These: (3.09 ± 1.8) × 10^−12 g/ml/day. Unités??
         #   Seyed prend : 1.07e-1 /day
@@ -368,6 +426,10 @@ class Parameters():
 
         self.d_Ta = 55.45
         """Degradation rate of TNF-alpha (/day) [Value from Hao]"""
+
+        ############################################
+        # CONSTANTS FOR THE EQUATION FOR MCP-1 (P) #
+        ############################################
 
         self.d_P = 1.73
         """Degradation rate of  MCP-1 (/day) [Value from Hao]"""
