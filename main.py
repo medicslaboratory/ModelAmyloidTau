@@ -67,10 +67,12 @@ y0[11] = y0[10] * (p.beta / (p.beta + 1))
 y0[12] = y0[10] * (1 / (p.beta + 1))
 
 # M_pro^hat (Proinflammatory macrophages)
-y0[13] = p.Mprohateq/1.5  # 0
+# y0[13] = p.Mprohateq/1.5  # 0
+y0[13] = 0
 
 # M_anti^hat (Anti-inflammatory macrophages)
-y0[14] = 1e-9  # ou (p.kappa_TB * y0[15])/p.d_Mantihat, si y0[15] defini avant # Hao: 0
+# y0[14] = 1e-9  # ou (p.kappa_TB * y0[15])/p.d_Mantihat, si y0[15] defini avant # Hao: 0
+y0[14] = 0
 
 # T_{beta} (TGF-beta)
 y0[15] = (p.kappa_MproTB*y0[11] + p.kappa_MprohatTB*y0[13])/p.d_TB  # 1.0e-6
@@ -125,6 +127,8 @@ for i in range(0, 19):
     formatter.set_powerlimits((-1, 1))
     ax.yaxis.set_major_formatter(formatter)
 
+plt.tight_layout()
+
 # Write the initial values used
 plt.subplots_adjust(bottom=0.2)
 icNameValue = [str(labelname[i]) + "= " + "{:.2e}".format(y0[i]) for i in np.arange(19)]
@@ -133,7 +137,7 @@ plt.text(0.1, 0.11, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf
 
 # Save the plot as a .png file
 my_path = os.path.abspath('Figures')
-plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_45.png"), dpi=180)
+plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(annees) + "y_ModifEqns_46.png"), dpi=180)
 # _20 ... _27 : Figures produitent avec Nicolas.
 # 34 : 1ere avec modif simon
 plt.show()

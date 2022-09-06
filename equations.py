@@ -57,7 +57,7 @@ def ODEsystem(t, y):
     # TODO (Simon) Revoir si (1 + p.AP * p.delta_AP) a rapport ici
     # Changé Manti -> Mpro et Mantihat -> Mprohat, change pas vrm figure (_37)
     dydt[3] = p.kappa_ABooABpo * y[2] * (1 + p.AP * p.delta_APop) \
-              - (p.d_MproABpo * y[11] + p.d_MprohatABpo * y[13]) * (y[3] / (y[3] + p.K_ABpo))
+              - (p.d_MproABpo * y[11] + p.d_MprohatABpo * y[13]) * (1 + p.AP * p.delta_APdp) * (y[3] / (y[3] + p.K_ABpo))
 
     # Glycogen synthase kinase-type 3 (GSK-3) (G)
     dydt[4] = p.lambda_InsG * (p.Ins / p.Ins_0) - p.d_G * y[4]

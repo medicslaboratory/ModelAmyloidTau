@@ -37,10 +37,10 @@ class Parameters():
         self.N_0_M = 0.14
         """Reference density of neuron in man (g/cm^3) (= g/mL). [We take the value in Hao, temporarily]."""
 
-        self.delta_SN = (self.N_0_M / self.N_0_F) - 1
+        self.gamma_N = (self.N_0_M / self.N_0_F) - 1
         """Constant for the differentiation of the sex on the reference density of neuron (N_0)."""
 
-        self.N_0 = self.N_0_F * (1 + self.S * self.delta_SN)
+        self.N_0 = self.N_0_F * (1 + self.S * self.gamma_N)
         """Reference density of neuron with differentiation of the sex (g/cm^3) (= g/mL).
         Voir Herculano-Houzel. Varie beaucoup selon la région. Dans néocortex pour nous. Nous prendrons N_0 pour une
         personne ayant environ 30 ans."""
@@ -52,10 +52,10 @@ class Parameters():
         self.A_0_M = 0.14
         """Reference density of astrocytes in man (g/cm^3) (= g/mL). [We take the value in Hao, temporarily]."""
 
-        self.delta_SA = (self.A_0_M / self.A_0_F) - 1
+        self.gamma_A = (self.A_0_M / self.A_0_F) - 1
         """Constant for the differentiation of the sex on the reference density of astrocytes (N_0)."""
 
-        self.A_0 = self.A_0_F * (1 + self.S * self.delta_SA)
+        self.A_0 = self.A_0_F * (1 + self.S * self.gamma_A)
         """Reference density of astrocytes with differentiation of the sex (g/cm^3) (= g/mL).
         Même idée que N_0."""
 
@@ -108,7 +108,7 @@ class Parameters():
         # self.ABihalf = 9.4 : Half-life of Amyloid Beta42 inside the neurons (hour) (semble ok)
         #   (Simon) Half-life à revoir (souris vs humain).
 
-        # Devenu une fonction du temps!
+        # Devenu une fonction du temps (voir ci-haut).
         # self.d_ABmo = self.d_ABi
         # """Degradation rate of Amyloid Beta42 monomer outside (/day)"""
 
@@ -116,17 +116,27 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR AB_m^o #
         #########################################
 
-        self.lambda_ABmo = self.d_ABi * 1.5e-6
-        """Creation rate of Amyloid Beta42 monomer outside (without APOE allele) (g/mL/day)"""
+        if self.S == 0:  # If woman
+            self.lambda_ABmo = self.d_ABi * 1.5e-6
+            """Creation rate of Amyloid Beta42 monomer outside (without APOE allele) (g/mL/day)"""
+        elif self.S == 1:  # If man
+            self.lambda_ABmo = self.d_ABi * 1.5e-6
+            """Creation rate of Amyloid Beta42 monomer outside (without APOE allele) (g/mL/day)"""
         # TODO Pas sure de la méthode...
         #  Selon thèse : = self.d_ABmo * ABmo = self.d_ABmo * 1.5 * ABi = self.d_ABmo * 1.5 * 10**(-6)
         #                           = 9.51e-6 * 1.5 * 10e-6 = 1.4265e-11
-        # Différence H/F et APOE.
+        # Différence H/F et APOE => OK.
 
-        self.delta_APm = 0.25
-        """This constant quantifies the impact of the APOE4 gene on the cration rate of Amyloid Beta42 
-        monomer outside."""
-        # = (Rate with APOE / self.lambda_ABmo) - 1
+        if self.S == 0:  # If woman
+            self.delta_APm = 0.25
+            """This constant quantifies the impact of the APOE4 gene on the cration rate of Amyloid Beta42 
+                    monomer outside (on lambda_ABmo)."""
+            # = (Rate for woman with APOE / self.lambda_ABmo woman) - 1
+        elif self.S == 1:  # If man
+            self.delta_APm = 0.25
+            """This constant quantifies the impact of the APOE4 gene on the cration rate of Amyloid Beta42 
+                monomer outside (on lambda_ABmo)."""
+            # = (Rate for man with APOE / self.lambda_ABmo man) - 1
 
         self.kappa_ABmoABoo = 1 / 5
         """Creation rate of Amyloid Beta42 oligomer outside by Amyloid Beta42 monomer outside (/day)"""
@@ -179,6 +189,11 @@ class Parameters():
         #   Seyed : 4e-7, Dit que vient de Hao, mais
         #   Hao : estime 1e-2, mais lui a plutôt le terme : d_MantihatABpo * (M_pro^hat + theta * M_anti^hat)
         #  A pas mal d'impact, voir graph _28 (9e-3) vs _29 (1e-5). Je conserve 1e-5, les courbes sont plus douces.
+
+        self.delta_APdp = 0
+        """This constant quantifies the impact of the APOE4 gene on the degradation rate of Amyloid Beta42 plaque 
+            outside by proinflammatory macrophages."""
+        # = (Rate with APOE / self.d_MprohatABpo) - 1
 
         self.d_MproABpo = (1 / 80) * self.d_MprohatABpo
         """Degradation rate of Amyloid Beta42 plaque outside by proinflammatory microglias (M_pro) (/day).\n
