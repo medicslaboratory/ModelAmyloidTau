@@ -39,97 +39,94 @@ def ODEsystem(t, y):
     dydt = np.zeros(19)
 
     # Living neurons (N)
-    dydt[8] = -p.d_FiN * (y[6] / (y[6] + p.K_Fi)) * y[8] \
+    # dydt[8] = -p.d_FiN * (y[6] / (y[6] + p.K_Fi)) * y[8] \
+    #           - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
+    # dydt[8] = -p.d_FiN * (1 / (1 + np.exp(- p.n * (y[6] - p.K_Fi) / p.K_Fi))) * y[8] \
+    #           - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
+    # TODO: Division ("/ p.K_Fi") dans sigmoïde utile? Retiré
+    dydt[8] = -p.d_FiN * (1 / (1 + np.exp(- p.n * (y[6] - p.K_Fi)))) * y[8] \
               - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
+    # dydt[8] = - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
 
     # Amyloid-beta monomer inside the neurons (AB^i)
     dydt[0] = p.lambda_ABi * (1 + p.AP * p.delta_APi) * (y[8] / p.N_0) - p.d_ABi * y[0] - (y[0] / y[8]) * abs(dydt[8])
 
     # Amyloid-beta monomer outside the neurons (AB_m^o)
-    dydt[1] = (y[0] / y[8]) * abs(dydt[8]) - p.d_ABmo(t) * y[1] + p.lambda_ABmo * (1 + p.AP * p.delta_APm) * \
-              (y[8] / p.N_0) - p.kappa_ABmoABoo * y[1] * (1 + p.AP * p.delta_APmo) + p.lambda_AABmo * (y[9] / p.A_0)
+    dydt[1] = (y[0] / y[8]) * abs(dydt[8]) + p.lambda_ABmo * (1 + p.AP * p.delta_APm) * (y[8] / p.N_0) \
+              + p.lambda_AABmo * (y[9] / p.A_0) - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y[1] ** 2) \
+              - p.d_ABmo(t) * y[1]
 
-    # Amyloid Beta oligomers outside (AB_o^o)
-    dydt[2] = - p.d_ABoo * y[2] + p.kappa_ABmoABoo * y[1] * (1 + p.AP * p.delta_APmo) \
-              - p.kappa_ABooABpo * y[2] * (1 + p.AP * p.delta_APop)
+    # Amyloid-beta oligomers outside (AB_o^o)
+    dydt[2] = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y[1] ** 2) - p.kappa_ABooABpo * (y[2] ** 2) \
+              - p.d_ABoo * y[2]
 
     # Amyloid-beta plaque outside the neurons (AB_p^o)
-    # TODO (Simon) Revoir si (1 + p.AP * p.delta_AP) a rapport ici
-    # Changé Manti -> Mpro et Mantihat -> Mprohat, change pas vrm figure (_37)
-    dydt[3] = p.kappa_ABooABpo * y[2] * (1 + p.AP * p.delta_APop) \
-              - (p.d_MproABpo * y[11] + p.d_MprohatABpo * y[13]) * (1 + p.AP * p.delta_APdp) * (y[3] / (y[3] + p.K_ABpo))
+    dydt[3] = p.kappa_ABooABpo * (y[2] ** 2) - ((p.d_MantiABpo * y[12] + p.d_hatMantiABpo * y[14])
+                                                * (1 + p.AP * p.delta_APdp) * (y[3] / (y[3] + p.K_ABpo)))
 
     # Glycogen synthase kinase-type 3 (GSK-3) (G)
-    dydt[4] = p.lambda_InsG * (p.Ins / p.Ins_0) - p.d_G * y[4]
+    dydt[4] = p.lambda_InsG * (p.Ins(t, p.S) / p.Ins_0) - p.d_G * y[4]
 
     # tau proteins (tau)
-    dydt[5] = p.lambda_tau * (y[8] / p.N_0) + p.lambda_Gtau * (y[4] / p.G_0) - p.d_tau * y[5]
+    dydt[5] = p.lambda_tau * (y[8] / p.N_0) + p.lambda_Gtau * (y[4] / p.G_0) \
+              - p.kappa_tauFi * (y[5] ** 2) * (y[8] / p.N_0) - (y[5] / y[8]) * abs(dydt[8]) - p.d_tau * y[5]
 
     # NFT inside the neurons (F_i)
-    dydt[6] = p.kappa_tauFi * y[5] * (y[8] / p.N_0) - p.d_Fi * y[6] - (y[6] / y[8]) * abs(dydt[8])
+    dydt[6] = p.kappa_tauFi * (y[5] ** 2) * (y[8] / p.N_0) - (y[6] / y[8]) * abs(dydt[8]) - p.d_Fi * y[6]
 
     # NFT outside the neurons (F_o)
-    dydt[7] = (y[6] / y[8]) * abs(dydt[8]) - p.d_Fo * y[7]
+    # TODO: Ajout "* F_o" au terme de dégradation par microglies, sinon bizarre (_01 vs _02).
+    dydt[7] = (y[6] / y[8]) * abs(dydt[8]) - p.lambda_MFo * (y[12] / (y[12] + p.K_Manti)) * y[7] - p.d_Fo * y[7]
 
     # Astrocytes (A)
-    # Avant : p.lambda_ABpoA * y[3] / p.W_A + p.lambda_TaA * y[17] / p.W_A - p.d_A * y[9]
-    #         où p.W_A = 1
     dydt[9] = (p.kappa_ABpoA * y[3] + p.kappa_TaA * y[17]) * (p.A_max - y[9]) - p.d_A * y[9]
 
     # Microglia (M)
-    # TODO:
-    #  Dans Hao, ajout en fonction de ABO et non AB_out (ici plaque). Peut-être changer y[3] -> y[2]?
-    #  Mais revoir comment arranger les unitées/termes pour que être certain que les deux premiers termes fonctionnent.
     # dydt[10] = p.kappa_FoM * (y[7] / (y[7] + p.K_Fo)) * (p.M_max - y[10]) \
     #            + p.lambda_ABpoM * (y[3] / (y[3] + p.K_ABpoM)) * (p.M_max - y[10]) - p.d_M * y[10]
-    dydt[10] = p.kappa_FoM * (y[7] / (y[7] + p.K_Fo)) * (p.M_max - y[10]) \
-               + p.kappa_ABooM * (y[2] / (y[2] + p.K_ABooM)) * (p.M_max - y[10]) - p.d_M * y[10]
+    # dydt[10] = p.kappa_FoM * (y[7] / (y[7] + p.K_Fo)) * (p.M_max - y[10]) \
+    #            + p.kappa_ABooM * (y[2] / (y[2] + p.K_ABooM)) * (p.M_max - y[10]) - p.d_M * y[10]
+
+    M_activ = p.kappa_FoM * (y[7] / (y[7] + p.K_Fo)) * y[10] + p.kappa_ABooM * (y[2] / (y[2] + p.K_ABooM)) * y[10]
+
+    # Not activated microglia (M_NA)
+    dydt[10] = p.d_Mpro * y[11] + p.d_Manti * y[12] - M_activ
+
+    epsilon_Ta = y[17] / (y[17] + p.K_TaAct)
+    epsilon_I10 = y[16] / (y[16] + p.K_I10Act)
 
     # Proinflammatory microglia (M_pro)
-    # TODO: Revoir modif.
-    #  "+ y[10] * (p.beta / (p.beta + 1)) * p.lambda_MMpro" par "+ dydt[10] * (p.beta / (p.beta + 1))" probleme
-    #  potentiel si Neurons (donc F_o, donc M) diminue trop rapidement (changement fait à partir de fig _17)
-    dydt[11] = dydt[10] * (p.beta / (p.beta + 1)) - p.kappa_TBManti * (y[15] / (y[15] + p.K_TB)) * y[11]
+    dydt[11] = ((p.beta * epsilon_Ta) / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ \
+               - p.kappa_TbMpro * (y[15] / (y[15] + p.K_TbM)) * y[11] \
+               + p.kappa_TaManti * (y[17] / (y[17] + p.K_TaM)) * y[12] - p.d_Mpro * y[11]
 
     # Anti-inflammatory microglia (M_anti)
-    # TODO: Revoir modif. Retiré "- p.d_Manti * y[12]", car déjà pris en compte dans l'eqn pour M
-    #  Modif terme conversion Mpro -> Manti : "+ p.lambda_TBManti * y[15]" -> celui de Hao (fait + de sens)
-    #  Modif "+ y[10] * (1 / (p.beta + 1)) * p.lambda_MMpro" par "+ dydt[10] * (1 / (p.beta + 1))" problème potentiel si
-    #   Neurons (donc F_o, donc M) diminue trop rapidement (changement fait à partir de fig _17)
-    dydt[12] = dydt[10] * (1 / (p.beta + 1)) + p.kappa_TBManti * (y[15] / (y[15] + p.K_TB)) * y[11]
+    dydt[12] = (epsilon_I10 / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ \
+               + p.kappa_TbMpro * (y[15] / (y[15] + p.K_TbM)) * y[11] \
+               - p.kappa_TaManti * (y[17] / (y[17] + p.K_TaM)) * y[12] - p.d_Manti * y[12]
 
-    # Proinflammatory macrophages (M_pro^hat)
-    # TODO: Thèse : Dit que la forme serait la même que dans Hao, mais pas vraiment. Le premier terme devrait être en
-    #  relation avec M^hat (= M_pro^hat + M_anti^hat).
-    dydt[13] = p.kappa_PMprohat * (y[18] / (y[18] + p.K_P)) * (p.Mprohateq - y[13]) - p.d_Mprohat * y[13]
+    # Proinflammatory macrophages (hat{M}_pro)
+    dydt[13] = p.kappa_PMhatpro * (y[18] / (y[18] + p.K_P)) * (p.Mhatmax - (y[13] + y[14])) * \
+               ((p.beta * epsilon_Ta) / (p.beta * epsilon_Ta + epsilon_I10)) \
+               - p.kappa_TbMhatpro * (y[15] / (y[15] + p.K_TbMhat)) * y[13] \
+               + p.kappa_TaMhatanti * (y[17] / (y[17] + p.K_TaMhat)) * y[14] - p.d_Mhatpro * y[13]
 
-    # Anti-inflammatory macrophages (M_anti^hat)
-    # TODO: À discuter, voir note (OneNote)
-    dydt[14] = p.kappa_TB * y[15] - p.d_Mantihat * y[14]
+    # Anti-inflammatory macrophages (hat{M}_anti)
+    dydt[14] = p.kappa_PMhatpro * (y[18] / (y[18] + p.K_P)) * (p.Mhatmax - (y[13] + y[14])) * \
+               (epsilon_I10 / (p.beta * epsilon_Ta + epsilon_I10)) \
+               + p.kappa_TbMhatpro * (y[15] / (y[15] + p.K_TbMhat)) * y[13] \
+               - p.kappa_TaMhatanti * (y[17] / (y[17] + p.K_TaMhat)) * y[14] - p.d_Mhatanti * y[14]
 
     # TGF-Beta = Transforming growth factor beta (T_beta)
-    # TODO: Pourquoi M_pro et M_pro^hat? Dans Hao, il est produit par M_anti et M_anti^hat, et les constantes sont les mêmes.
-    #         dydt[15] = p.kappa_MproTB * y[12] + p.kappa_MprohatTB * y[14] - p.d_TB * y[15] (graph ..._10)
-    dydt[15] = p.kappa_MproTB * y[11] + p.kappa_MprohatTB * y[13] - p.d_TB * y[15]
-    # dydt[15] = p.kappa_MantiTB * y[12] + p.kappa_MantihatTB * y[14] - p.d_TB * y[15]
+    dydt[15] = p.kappa_MantiTb * y[12] + p.kappa_MhatantiTb * y[14] - p.d_Tb * y[15]
 
     # IL-10 = Interleukin 10 (I_10)
-    # Erreur : dydt[16] = p.lambda_MantiI10 * y[12] / p.K_Manti - p.lambda_MantiI10 * y[16]
-    # TODO: Pourquoi 2 cstes plutôt qu'une?
-    #  p.kappa_MantiI10 * y[12] / p.K_Manti -> p.kappa_MantiI10 * y[12]
-    #  Différence d'ordre de grandeur: (Cependant, ne change pas vrm les résultats).
-    #  p.kappa_MantiI10/p.K_Manti = 6.67e-3/0.017 = 0.3924 vs. Hao (1 cste) = 6.67e-3.
-    dydt[16] = p.kappa_MantiI10 * y[12] - p.d_I10 * y[16]
+    dydt[16] = p.kappa_MantiI10 * y[12] + p.kappa_MhatantiI10 * y[12] - p.d_I10 * y[16]
 
     # TNF-alpha = Tumor necrosis factor alpha (T_alpha)
-    # #TODO: Pourquoi 2 cstes plutôt qu'une?
-    #   p.lambda_MprohatTa/p.K_Mprohat = 2.675 ; Hao (1 cste) = 3e-2
-    #   p.lambda_MproTa/p.K_Mpro = 3.56667 ; Hao (1 cste) = 3e-2
-    # Avant : dydt[17] = p.kappa_MproTa * y[11] / p.K_Mpro + p.kappa_MprohatTa * y[13] / p.K_Mprohat - p.d_Ta * y[17]
-    # (modif: graph ..._11 vs ..._9)
-    dydt[17] = p.kappa_MproTa * y[11] + p.kappa_MprohatTa * y[13] - p.d_Ta * y[17]
+    dydt[17] = p.kappa_MproTa * y[11] + p.kappa_MhatproTa * y[13] - p.d_Ta * y[17]
 
     # MCP-1 (P)
-    dydt[18] = p.kappa_AP * y[9] - p.d_P * y[18]
+    dydt[18] = p.kappa_MproP * y[11] + p.kappa_MhatproP * y[13] + p.kappa_AP * y[9] - p.d_P * y[18]
 
     return dydt

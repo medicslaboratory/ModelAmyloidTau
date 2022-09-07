@@ -1,4 +1,4 @@
-# Date : 17 January 2022
+# Date : 6 septembre 2022
 # Autor : Éléonore Chamberland
 
 # This file contains the equations of the model
@@ -6,6 +6,7 @@
 # Recall : 1 cm^3 = 1 mL (for water)
 
 import math
+from scipy.constants import Avogadro  # Avogadro number
 
 
 class Parameters():
@@ -15,13 +16,27 @@ class Parameters():
 
     def d_ABmo(self, t):
         """
-        Fonction for degradation rate of extracellular amyloid-beta 42 monomer. The half-life is linear with age,
+        Fonction for the degradation rate of extracellular amyloid-beta 42 monomer. The half-life is linear with age,
         with 3.8h at 30 y.o. to 9.4h at 80 y.o.
-        :param t: Age of the person (in days)
-        :return: The degradation rate of extracellular amyloid-beta 42 monomer.
+        :param t: Age of the person (in days).
+        :return: The degradation rate of extracellular amyloid-beta 42 monomer (/day).
         """
-        halflife = t/1204500 + (197/1320)
-        return math.log(2)/halflife
+        halflife = (7/547500) * t + (11/600)
+        return math.log(2) / halflife
+
+    def Ins(self, t, S):
+        """
+        Function for the concentration on insulin in the brain in function of age and the sex. From the data for
+        peripherical insulin of Bryhni et al. (2010), with a molar mass of insulin of 5808 g/mol (Litwack, 2022).
+        We suppose that brain insulin is 10 times smaller than the peripheral one (Gray et al., 2014).
+        :param t: Age of the person (in days).
+        :param S: Sex of the person (0 for a woman, and 1 for a man).
+        :return: Insulin concentration in brain (g/mL).
+        """
+        if S == 0:  # woman
+            return 0.1 * (-4.151e-15 * t + 3.460e-10)
+        elif S == 1:  # men
+            return 0.1 * (-4.257e-15 * t + 3.763e-10)
 
     def __init__(self):
         self.AP = 1
@@ -30,430 +45,388 @@ class Parameters():
         self.S = 0
         """Value for the sex. S equals to 0 if the person is a woman, and 1 for a man."""
 
-        self.N_0_F = 0.135
-        """Reference density of neuron in woman (g/cm^3) (= g/mL). [We take a little less than the value in Hao, 
-        temporarily]."""
+        self.rho_cerveau = 1.03
+        """Density of the brain (g/mL)."""
 
-        self.N_0_M = 0.14
-        """Reference density of neuron in man (g/cm^3) (= g/mL). [We take the value in Hao, temporarily]."""
+        if self.S == 0:  # If woman
+            self.N_0 = 0.45
+            """Reference density of neuron in woman (g/cm^3) (= g/mL)."""
+            self.A_0 = 0.10
+            """Reference density of astrocytes in woman (g/cm^3) (= g/mL)."""
+        elif self.S == 1:  # If man
+            self.N_0 = 0.42
+            """Reference density of neuron in man (g/cm^3) (= g/mL)."""
+            self.A_0 = 0.12
+            """Reference density of astrocytes in man (g/cm^3) (= g/mL)."""
 
-        self.gamma_N = (self.N_0_M / self.N_0_F) - 1
-        """Constant for the differentiation of the sex on the reference density of neuron (N_0)."""
+        # self.N_0_F = 0.45
+        # """Reference density of neuron in woman (g/cm^3) (= g/mL)."""
+        #
+        # self.N_0_M = 0.42
+        # """Reference density of neuron in man (g/cm^3) (= g/mL)."""
+        #
+        # self.gamma_N = (self.N_0_M / self.N_0_F) - 1
+        # """Constant for the differentiation of the sex on the reference density of neuron (N_0)."""
+        #
+        # self.N_0 = self.N_0_F * (1 + self.S * self.gamma_N)
+        # """Reference density of neuron with differentiation for the sex (g/cm^3) (= g/mL).
+        # Voir Herculano-Houzel. Varie beaucoup selon la région. Dans néocortex pour nous. Nous prendrons N_0 pour une
+        # personne ayant environ 30 ans."""
+        #
+        # self.A_0_F = 0.10
+        # """Reference density of astrocytes in woman (g/cm^3) (= g/mL)."""
+        #
+        # self.A_0_M = 0.12
+        # """Reference density of astrocytes in man (g/cm^3) (= g/mL)."""
+        #
+        # self.gamma_A = (self.A_0_M / self.A_0_F) - 1
+        # """Constant for the differentiation of the sex on the reference density of astrocytes (N_0)."""
+        #
+        # self.A_0 = self.A_0_F * (1 + self.S * self.gamma_A)
+        # """Reference density of astrocytes with differentiation for the sex (g/cm^3) (= g/mL).
+        # Même idée que N_0."""
 
-        self.N_0 = self.N_0_F * (1 + self.S * self.gamma_N)
-        """Reference density of neuron with differentiation of the sex (g/cm^3) (= g/mL).
-        Voir Herculano-Houzel. Varie beaucoup selon la région. Dans néocortex pour nous. Nous prendrons N_0 pour une
-        personne ayant environ 30 ans."""
+        M_ABm = 4514
+        """Molar mass of a peptide (monomer) of AB42 (g/mol)."""
 
-        self.A_0_F = 0.135
-        """Reference density of astrocytes in woman (g/cm^3) (= g/mL). [We take a little less than the value in Hao, 
-        temporarily]."""
-
-        self.A_0_M = 0.14
-        """Reference density of astrocytes in man (g/cm^3) (= g/mL). [We take the value in Hao, temporarily]."""
-
-        self.gamma_A = (self.A_0_M / self.A_0_F) - 1
-        """Constant for the differentiation of the sex on the reference density of astrocytes (N_0)."""
-
-        self.A_0 = self.A_0_F * (1 + self.S * self.gamma_A)
-        """Reference density of astrocytes with differentiation of the sex (g/cm^3) (= g/mL).
-        Même idée que N_0."""
+        m_Mhat = 4.990e-9
+        """Mass of a macrophage (or microglia) (g)."""
 
         ##########################################
         # CONSTANTS FOR THE EQUATION FOR NEURONS #
         ##########################################
 
-        self.d_FiN = 3e-5  # ((4 + 4 * 1) / (3 + 2 * 1)) * (math.log(2) / 3650)
-        """Degradation rate of neurons by F_i (/day)"""
-        # self.d_FiN = ((4 + 4 * self.gamma) / (3 + 2 * self.gamma)) * self.d_N  = 3.038e-4  [Hao: 3.4e-4]
-        # self.gamma : I_10 inhibition ratio = 1 (Hao)
-        # self.d_N : the death rate of neuron (/day) = ln2/10ans = ln2/3650
-        # TODO: Revoir d_N (Seyed semble pas sur)
-        #  J'ai modifié pour 3e-5, fait bien ralentir décroissance de neurones et fait plus de sens. (fig _17)
+        self.d_FiN = 1/math.log(2.51 * 365) *1e-2  # = 1.0915e-3  # TODO: Val trop grande... *1e-2
+        """Degradation rate of neurons by F_i (/day)."""
 
-        self.K_Fi = 0.7 * 490e-12  # 0.7 * 490 * 10 ** (-12) = 3.42999e-10
-        """Half-saturation of intracellular NFTs (g/mL)"""
-        # These: Assuming that in AD, 70% of hyperphosphorylated tau proteins (whose concentration in disease is
-        # 490 pg/ml) are in NFT form.
-        # self.K_Fi = 0.7 * self.htau = 0.7 * 490 * 10 ** (-12) = 3.43e-10   [Hao : 3.36e-10]
-        # self.htau : concentration of hyperphosphorylated tau in disease (g/ml) = 490 * 10**(-12)
+        self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4  # TODO: Val trop petite... *1e3
+        """Half-saturation of intracellular NFTs (g/mL)."""
+
+        self.n = 4
+        """Sigmoid function coefficient (unitless)."""
+        # TODO: À déterminer avec le modèle.
 
         self.d_TaN = (1 / 2) * self.d_FiN
-        """Degradation rate of neurons by T_alpha (TNF-alpha) (/day) [Computation method of Hao]"""
+        """Degradation rate of neurons by T_alpha (TNF-alpha) (/day)."""
 
-        self.K_Ta = 4e-5
-        """Half-saturation of T_alpha (TNF-alpha) (g/mL)"""
-        # TODO: Seyed a mis 2.5e-5 et dit que c'est la valeur de Hao16, mais est plutôt de 4e-5 g/mL ?
+        self.K_Ta = 4.48e-12
+        """Half-saturation of T_alpha (TNF-alpha) (g/mL)."""
 
-        self.K_I10 = 2.5e-6  # 2.5 * 10 ** (-6)
-        """Half-saturation of IL-10 (g/mL) [Value of Hao]"""
+        self.K_I10 = 2.12e-12
+        """Half-saturation of IL-10 (g/mL)."""
 
         #######################################
         # CONSTANTS FOR THE EQUATION FOR AB^i #
         #######################################
 
-        self.lambda_ABi = 9.51e-6
-        """Creation rate of Amyloid Beta42 inside (g/mL/day)"""
-        # TODO: Pas sure de la méthode...
-        #   Seyed: self.lambda_ABi = self.d_ABi * 1.0e-6  # self.ABi = 10**(-6)
-        #   Je prends plutôt la valeur de Hao en attendant (9.51e-6).
+        self.lambda_ABi = (1/2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau # env. = 1.3681e-10
+        """Creation rate of amyloid-beta42 inside neuron from APP (g/mL/day)."""
 
-        self.delta_APi = 0.25
-        """Constant that quantifies the impact of the APOE4 gene on the creation rate of APP pathway inside neurons."""
+        self.delta_APi = (8373e-9 - 2178e-9) / (5631e-9 - 783e-9) - 1  # approx. 0.2778
+        """Constant that quantifies the impact of the APOE4 gene on the creation rate amyloid from APP pathway inside 
+        neurons (unitless). Equals to the rate of creation with the allele divided by the rate without APOE4, minus 1. 
+        Here is the calculation after simplifications."""
 
-        self.d_ABi = (math.log(2)) / (9.4 / 24)
-        """Degradation rate of Amyloid Beta42 inside (/day)"""
-        # Grande différence avec Hao : self.d_ABi = 9.51
-        # self.d_ABi = (math.log(2)) / (self.ABihalf / 24) = 1.76
-        # self.ABihalf = 9.4 : Half-life of Amyloid Beta42 inside the neurons (hour) (semble ok)
-        #   (Simon) Half-life à revoir (souris vs humain).
-
-        # Devenu une fonction du temps (voir ci-haut).
-        # self.d_ABmo = self.d_ABi
-        # """Degradation rate of Amyloid Beta42 monomer outside (/day)"""
+        self.d_ABi = (math.log(2)) / (1.75 / 24)  # approx. 9.5060
+        """Degradation rate of amyloid-beta42 inside neurons (/day)."""
 
         #########################################
         # CONSTANTS FOR THE EQUATION FOR AB_m^o #
         #########################################
 
-        if self.S == 0:  # If woman
-            self.lambda_ABmo = self.d_ABi * 1.5e-6
-            """Creation rate of Amyloid Beta42 monomer outside (without APOE allele) (g/mL/day)"""
-        elif self.S == 1:  # If man
-            self.lambda_ABmo = self.d_ABi * 1.5e-6
-            """Creation rate of Amyloid Beta42 monomer outside (without APOE allele) (g/mL/day)"""
-        # TODO Pas sure de la méthode...
-        #  Selon thèse : = self.d_ABmo * ABmo = self.d_ABmo * 1.5 * ABi = self.d_ABmo * 1.5 * 10**(-6)
-        #                           = 9.51e-6 * 1.5 * 10e-6 = 1.4265e-11
-        # Différence H/F et APOE => OK.
+        self.lambda_ABmo = self.lambda_ABi
+        """Creation rate of Amyloid Beta42 monomer outside (without APOE allele) (g/mL/day)."""
 
-        if self.S == 0:  # If woman
-            self.delta_APm = 0.25
-            """This constant quantifies the impact of the APOE4 gene on the cration rate of Amyloid Beta42 
-                    monomer outside (on lambda_ABmo)."""
-            # = (Rate for woman with APOE / self.lambda_ABmo woman) - 1
-        elif self.S == 1:  # If man
-            self.delta_APm = 0.25
-            """This constant quantifies the impact of the APOE4 gene on the cration rate of Amyloid Beta42 
-                monomer outside (on lambda_ABmo)."""
-            # = (Rate for man with APOE / self.lambda_ABmo man) - 1
+        self.delta_APm = self.delta_APi
+        """This constant quantifies the impact of the APOE4 gene on the creation rate of amyloid-beta42 monomer outside 
+        neurons, i.e. on lambda_ABmo (unitless)."""
 
-        self.kappa_ABmoABoo = 1 / 5
-        """Creation rate of Amyloid Beta42 oligomer outside by Amyloid Beta42 monomer outside (/day)"""
-        # TODO: Pas trop sure du pourquoi du calcul de Seyed. : = 5 * (1 / 25) * self.d_ABoo
-        #  Hao : The ratio of soluble AO to total AB_out is approximately 1/25 => lambda_{A_O} = 1/25 * d_{A_O}
-        #  Ce calcul d'applique pas ici.
-        #  Devrait être selon le nbr de mono pour 1 oligo en moyenne. Posons 1/5 pour le moment.
+        self.lambda_AABmo = (1 / 13) * self.lambda_ABmo  # approx. 1.0524e-11
+        """Creation rate of amyloid-beta42 monomer outside by astrocytes (g/mL/day)"""
 
-        # TODO : Sayed puts a value for delta_AP
-        self.delta_APmo = 0.25
-        """This constant quantifies the impact of the APOE4 gene on the conversion rate of Amyloid-Beta monomer outside 
-        to Amyloid-Beta oligomer outside."""
-        # = (Rate with APOE / self.kappa_ABmoABoo) - 1
+        kappa_ABmoABoo_min = 38 * 1000 * (1 / (2 * M_ABm)) * 86400  # approx. 3.63669e5
+        kappa_ABmoABoo_max = 38 * 1000 * (1 / M_ABm) * 86400        # approx. 7.27337e5
+        self.kappa_ABmoABoo = kappa_ABmoABoo_min
+        """Conversion rate of extracellular amyloid-beta monomer to extracellular amyloid-beta oligomer (mL/g/day)."""
+        # TODO: In the interval kappa_ABmoABoo_min to kappa_ABmoABoo_max, à tester.
 
-        self.lambda_AABmo = 1/15 * 8e-11  # (1 / 10) * 8e-10
-        """Creation rate of Amyloid Beta42 monomer outside by astrocytes (g/mL/day)"""
-        # Seyed (méthode de Hao): = (1 / 10) * lambda_NABpo = (1 / 10) * 8 * 10 ** (-11) = 8e-12
-        # lambda_NABpo : Production rate of Amyloid Beta42 plaque outside by neuron (g/mL/day) [Hao: lambda_N = 8e-9]
-        # Hao: 8e-10 g/mL/day (lambda_A)
-        # Nom modifié, car changé d'équation (plaque -> monomer)
+        self.delta_APmo = 2.7 - 1
+        """This constant quantifies the impact of the APOE4 gene on the conversion rate of extracellular amyloid-beta 
+        monomer to extracellular amyloid-beta oligomer (unitless)."""
+
+        # self.d_ABmo = self.d_ABi
+        # """Degradation rate of Amyloid Beta42 monomer outside (/day)."""
+        # Devenu une fonction du temps (voir ci-haut).
 
         #########################################
         # CONSTANTS FOR THE EQUATION FOR AB_o^o #
         #########################################
 
-        self.kappa_ABooABpo = 25.09
-        """Creation rate of Amyloid Beta42 plaque outside by Amyloid Beta oligomers outside (/day)"""
-        # TODO: Revoir relations avec article de Cohen 2013
-        # Testé avec 9e-7 (_5) et change pas grand chose (LSODA_4 vs _5)
+        self.kappa_ABooABpo = (3 / 7) * 1e6 * 1000 / (2 * M_ABm)  # approx 4.7471e4
+        """Conversion rate of extracellular amyloid-beta42 oligomer to plaques (mL/g/day)."""
 
-        # TODO : Sayed puts a value for delta_AP
-        self.delta_APop = 0.25
-        """This constant quantifies the impact of the APOE4 gene on the conversion rate of Amyloid-Beta oligomer outside 
-        to Amyloid-Beta plaque outside."""
-        # = (Rate with APOE / self.kappa_ABooABpo) - 1
+        # self.delta_APop = 1  # (no difference)
+        # """This constant quantifies the impact of the APOE4 gene on the conversion rate of extracellular
+        # amyloid-beta42 oligomer to plaques."""
 
-        self.d_ABoo = (1 / 10) * self.d_ABi  # = 0.1 * 1.76
-        """Degradation rate of Amyloid Beta42 oligomer outside (/day) [~Computation method of Hao]"""
-
-        # self.theta =  0.9
-        # """Relative clearance power of amyloid-beta by M_anti compared to M_pro [Value from Hao]"""
+        self.d_ABoo = 0.3e-3 * 86400  # approx 25.92
+        """Degradation rate of extracellular amyloid-beta42 oligomer (/day)."""
 
         #########################################
         # CONSTANTS FOR THE EQUATION FOR AB_p^o #
         #########################################
 
-        self.d_MprohatABpo = 4e-7  # self.theta * 1.0e-2
-        """Degradation rate of Amyloid Beta42 plaque outside by proinflammatory macrophages (M_pro^hat) (/day)"""
-        # TODO: Revoir
-        #   Seyed : 4e-7, Dit que vient de Hao, mais
-        #   Hao : estime 1e-2, mais lui a plutôt le terme : d_MantihatABpo * (M_pro^hat + theta * M_anti^hat)
-        #  A pas mal d'impact, voir graph _28 (9e-3) vs _29 (1e-5). Je conserve 1e-5, les courbes sont plus douces.
+        self.d_hatMantiABpo = math.log(2) / 3  # approx 0.2310
+        """Degradation rate of extracellular amyloid-beta42 plaque by anti-inflammatory macrophages 
+        (hat{M}_pro) (/day)"""
 
-        self.delta_APdp = 0
+        self.d_MantiABpo = math.log(2) / 0.85  # approx 0.8155
+        """Degradation rate of extracellular amyloid-beta42 plaque by anti-inflammatory microglia (M_pro) (/day)."""
+
+        self.delta_APdp = (5 / 20) - 1  # = -0.75
         """This constant quantifies the impact of the APOE4 gene on the degradation rate of Amyloid Beta42 plaque 
             outside by proinflammatory macrophages."""
         # = (Rate with APOE / self.d_MprohatABpo) - 1
 
-        self.d_MproABpo = (1 / 80) * self.d_MprohatABpo
-        """Degradation rate of Amyloid Beta42 plaque outside by proinflammatory microglias (M_pro) (/day).\n
-        Microglia are 80x slower than macrophage to degrade amyloid-beta plaques."""
-
-        self.K_ABpo = 7e-3
-        """Concentration of Amyloid Beta42 plaque outside at which the destruction of AB_p^o by M_pro, M_anti and M_anti^hat 
-        rate is half maximal (Michaelis-Menten constant) (g/mL) \n 
-        [Value of Hao] : self.K_ABpo = 10**(3) * self.ABo = 10**(3) * 7*10**(-6) = 7 * 10**(-3) """
+        self.K_ABpo = (1.11 + 0.53) / 527.4 / 1000  # approx 3.11e-6
+        """Concentration of extracellular amyloid-beta42 plaques at which the degradation rate of AB_p^o by M_anti and 
+        hat{M}_anti is half maximal (Michaelis-Menten constant) (g/mL) """
 
         ########################################
         # CONSTANTS FOR THE EQUATION FOR GSK-3 #
         ########################################
 
-        self.Ins = 1e-9
-        """Concentration of insulin (supposed constant for now) (g/mL)"""
-
-        self.lambda_InsG = 0.1  # 0.25
+        self.lambda_InsG = 0.18e-6 * 47000 * 1440 * 1.077 * 0.005  # approx 0.065602
         """Creation rate of GSK-3 induced by the insulin (g/mL/day)"""
-        # If insuline is to high => inhibition of GSK3.
-        # TODO Revoir relation et valeur. Pris 0.1 pour avoir une valeur de GSK3 convenable...
 
-        self.Ins_0 = 1e-9
-        """Normal concentration of insulin (supposed constant for now) (g/mL)"""
+        # self.Ins = fct
+        # """Concentration of insulin (g/mL)"""
+        # A function of age. See beginning.
 
-        self.d_G = 0.408
-        """Degradation rate of GSK-3 (/day)"""
-        # Seyed : self.d_G = (math.log(2)) / (self.GSK3half / 24) où self.GSK3half : The half-life of GSK3 = (41 ± 4)h
-        # De la même source que Seyed : (0.017 ± 0.02)/h = (0.408 ± 0.48)/day  # TODO: Valeur chez souris; pour humain?
+        if self.S == 0:  # woman
+            self.Ins_0 = 3.006e-11  # 0.1 * (-4.151e-15 * (365 * 30) + 3.460e-10) = 3.0054655e-11
+            """Normal concentration of insulin, sex dependent (g/mL). 
+            Correspond to the brain concentration at 30 years old."""
+        elif self.S == 1:  # men
+            self.Ins_0 = 3.296e-11  # 0.1 * (-4.257e-15 * (365 * 30) + 3.763e-10) = 3.2968585e-11
+            """Normal concentration of insulin, sex dependent (g/mL). 
+            Correspond to the brain concentration at 30 years old."""
+
+        self.d_G = math.log(2) / (41 / 24)  # approx 0.4057
+        """Degradation rate of GSK-3 (/day)."""
 
         ######################################
         # CONSTANTS FOR THE EQUATION FOR tau #
         ######################################
 
-        self.lambda_tau = 2.63e-12
-        """Creation rate of tau in health (g/ml/day) [Value from Sato18]"""
-        # Hao : 8.1e−11 g/ml/day
+        self.lambda_tau = 26.3e-12
+        """Phosphorylation rate of tau in health by other mechanism than GSK-3 (g/ml/day)."""
 
-        self.d_tau = math.log(2) / 23
-        """Degradation rate of tau proteins (/day) \n 
-            d_tau = ln(2) / tauhalf = ln(2) / 23 = 0.03014...\n 
-            tauhalf : The half-life of tau proteins in humain = 23 days [Sato18]"""
-        # Hao : 0.277/day (half-live = 60h)
-
-        self.lambda_Gtau = 26.3e-12
+        self.lambda_Gtau = ((20/21) - (20/57)) * 1e-6 / 0.5 / 1000 / 1000 * 72500  # approx 8.72e-8
         """Creation rate of tau by GSK3 (g/mL/day)"""
-        # TODO Revoir valeur
 
-        self.G_0 = (self.lambda_InsG * (self.Ins / self.Ins_0))/self.d_G
-        """Normal concentration of GSK-3 at a normal insulin concentration (g/mL). \n
-        Ce calcul correspond à l'équilibre de G (la valeur de G(0))."""
-        # TODO Revoir valeur
-        #  2.45e-1 est la valeur approximative obtenue pour G_0 (3.1e-6 est l'ancienne cond init de GSK-3)
+        if self.S == 0:  # woman
+            self.G_0 = 1104e-12 * 47000 * self.rho_cerveau  # approx 5.3445e-05
+            """Normal concentration of GSK-3 at a normal insulin concentration (g/mL)."""
+        elif self.S == 1:  # men
+            self.G_0 = 310e-12 * 47000 * self.rho_cerveau  # = 1.50071e-05
+            """Normal concentration of GSK-3 at a normal insulin concentration (g/mL)."""
 
-        ############################################
-        # CONSTANTS FOR THE EQUATION FOR F_o & F_i #
-        ############################################
+        self.kappa_tauFi = (100/3) * 1e-6 / 19344 * 86400 * 1000  # approx 0.1489
+        """Conversion rate of tau in NFT (/day)."""
 
-        self.d_Fi = 1.0e-2 * self.d_tau
-        """Degradation rate of intracellular NFT (/day) [Computation method of Hao]"""
+        self.d_tau = math.log(2) / 5.16  # approx 0.1343
+        """Degradation and un-hyperphosphorylation rate of intracellular tau proteins (/day)."""
 
-        self.d_Fo = 1/5 * self.d_tau  # 1.0e-1 * self.d_tau
-        """Degradation rate of extracellular NFT (/day) [Computation method of Hao].\n
-        "large" effect : (1/10), "medium" effect : (1/5), and "small" effect : (1/2)
-        """
-        # TODO: Revoir. J'ai modifié "1.0e-1" pour "1.0e-3". Ralentis la décroissance de F_o, donc de M. (fig _17)
-        #   J'ai modifié "1.0e-3" pour "1/5". Augmente la décroissance de F_o (fig_36)
+        ######################################
+        # CONSTANTS FOR THE EQUATION FOR F_i #
+        ######################################
 
-        self.kappa_tauFi = 0.6 * self.d_Fo
-        """Production rate of NFT by tau (/day) [Computation method of Hao]"""
-        # 60% of the hyperphosphorylated tau become NFT
+        self.d_Fi = 1.0e-2 * self.d_tau  # approx 1.343e-3
+        """Degradation rate of intracellular NFT (/day)."""
 
-        # self.W_A = 1  # 10 ** (-12)
-        # """?? (g/astrocyte)"""
+        ######################################
+        # CONSTANTS FOR THE EQUATION FOR F_o #
+        ######################################
+
+        # self.lambda_MFo = 0.8 * 1e-6 / 2  # = 4e-7
+        self.lambda_MFo = 0.4
+        # TODO: Ajout "* F_o" au terme de dégradation par microglies, sinon bizarre. (_01 vs _02).
+        #  Unité ici en /day et devrait alors être un kappa.
+        """Maximal rate for the degradation of extracellular NFTs by anti-inflammatory microglia (g/mL/day)."""
+
+        if self.S == 0:  # woman
+            self.K_Manti = (1/4) * 3.811e-2  # = 0.0095275
+            """Concentration of anti-inflammatory microglia at which the rate of degradation of extracellular NFTs by 
+            these cells is half-maximal (g/mL). Sex dependent."""
+        elif self.S == 1:  # man
+            self.K_Manti = (1/4) * 3.193e-2  # = 0.0079825
+            """Concentration of anti-inflammatory microglia at which the rate of degradation of extracellular NFTs by 
+            these cells is half-maximal (g/mL). Sex dependent."""
+
+        self.d_Fo = 1/10 * self.d_tau  # approx 1.343e-2
+        """Degradation rate of extracellular NFT (/day)."""
 
         #################################################
         # CONSTANTS FOR THE EQUATION FOR ASTROCYTES (A) #
         #################################################
 
-        self.kappa_ABpoA = 1.793
-        """Creation rate of astrocytes by Amyloid Beta42 plaque outside (/day) [Value from Hao lambda_{A A_beta^o}]"""
-
         self.A_max = self.A_0
-        """Maximal density of astrocytes (g/mL)"""
-        # TODO Revoir valeur. Actuellement = A(0).
+        """Maximal density of astrocytes (g/mL)."""
 
-        self.kappa_TaA = 1.54
-        """Production/activation rate of astrocytes by TNF-alpha (/day) [Value from Hao lambda_{A T_alpha}]"""
+        self.kappa_TaA = 0.92 / 100e-9  # = 9.2e6
+        """Activation rate of astrocytes by TNF-alpha (mL/g/day)."""
 
-        self.d_A = (math.log(2) / 600) * 0.2
-        """Death rate of astrocytes (/day) [Computation method and value of Hao]"""
-        # self.d_A = (math.log(2) / self.Astrocyteshalf) * (1 / 10)  # TODO: Pk *0.1 ? Retiré pour l'instant.
-        # self.Astrocyteshalf : Half-life of astrocytes (day) = 600  [Valeur de Hao]
-        # (math.log(2) / 600) = 0.001155 = 1.155e-3 /day
-        # Hao : 1.2e-3 /day
+        self.kappa_ABpoA = (self.kappa_TaA * 2.24e-12) / (2 * self.K_ABpo)  # approx 3.3136
+        """Activation rate of astrocytes by extracellular amyloid-beta42 plaque (mL/g/day)."""
 
-        ####################################
-        # CONSTANTS FOR THE EQUATION FOR M #
-        ####################################
+        self.d_A = 0.4
+        """Death rate of astrocytes (/day)."""
 
-        self.kappa_FoM = 1e-3  # 2e-2 ; changement pour 1e-3 à fig ..._26
-        """Creation rate of microglias by F_o (NFT) (/day) [Value from Hao (lambda_{MF} en /day)]. 
-        Devrait être en g/mL/day pour que le terme ait les bonnes unitées."""  # TODO Unitées
+        #######################################
+        # CONSTANTS FOR THE EQUATION FOR M_NA #
+        #######################################
 
-        # TODO: Revoir. Thèse: Valeur prise pour être < K_Fi = 3.36e-10 (car Hao "more NFT reside within neurons than
-        #  outside of them"). Hao : K_{F_o} = 2.58e-11
-        self.K_Fo = 1.0e-11
-        """Average of extracellular NFTs (g/mL)"""
+        self.kappa_FoM = 0.2141 * 2/3  # TODO: 28.32 * 2?
+        """Activation rate of microglia by F_o (NFT) (/day)."""
 
-        self.M_max = 0.047
-        """Maximal density of microglias (g/mL)"""
-        # TODO Revoir valeur. Actuellement = M(0) de Hao.
+        self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000  # approx 1.3243e-12
+        """Concentration of extracellular NFTs at which the rate of activation of microglia by F_o 
+        is half-maximal (g/mL)."""
 
-        # TODO: Revoir. He puts : (0.015 * 0.047 - 2e-2 * 1.0e-11) / 1.0e-6 = 705 ; pk? Non...
-        #  La valeur de Hao (qui était pour ABO...) = 2.3e-3 /day
-        self.kappa_ABooM = 2.3e-3  # Diminuer la valeur ne semble pas avoir bcp d'impact.
-        """Creation rate of microglias by Amyloid Beta42 oligomer outside (/day). 
-        Devrait être en g/mL/day pour que le terme ait les bonnes unitées."""  # TODO Unitées (Si reste en /day => kappa)
+        self.kappa_ABooM = 0.2141 * 1/3 # TODO: 28.32 ?
+        """Activation rate of microglia by extracellular amyloid-beta42 oligomer (/day). """
 
-        self.K_ABooM = 1e-7
-        """Concentration of Amyloid Beta42 oligomer outside at which the creation rate of M by AB_o^o is half maximal 
-        (g/mL) [I take the value in Hao K_{A_O}]."""
+        self.K_ABooM = 0.060 / 527.4 / 1000  # approx 1.1377e-7
+        """Concentration of extracellular amyloid-beta42 oligomer at which the rate of activation of microglia by 
+        oligomer is half-maximal (g/mL)."""
 
-        self.d_M = 0.015
-        """Degradation rate of microglias (/day) 
-        [Here we take it equal to the death rate of M_pro and M_anti from Hao]"""
+        self.d_Mpro = 7.67e-4
+        """Degradation rate of proinflammatory microglia (/day)."""
+
+        self.d_Manti = 7.67e-4
+        """Degradation rate of anti-inflammatory microglia (/day)."""
 
         ###################################################
         # CONSTANTS FOR THE EQUATION FOR M_pro AND M_anti #
         ###################################################
 
-        # self.lambda_MMpro = 9.3e-3
-        # """Creation rate of M_pro by microglias (/day)"""
-        # # TODO: Pas certaine de la provenance de cette valeur (voir thèse...)
+        self.beta = 1
+        """Proinflammatory / anti-inflammatory environnemental ratio (M_pro/M_anti ratio)"""
 
-        # self.d_Mpro = 0.015
-        # """Death rate of M_pro (proinflammatory microglia) (/day)"""
+        self.K_TaAct = 2.24e-12  # = self.K_TaM (def after)
+        """Half-saturation constant of TNF-alpha for the activation of microglia to a proinflammatory 
+        polarization (g/mL)."""
 
-        self.beta = 10
-        """Proinflammatory / anti-inflammatory microglia ratio (M_pro/M_anti ratio) [Value from Hao]"""
+        self.K_I10Act = 2.12e-12  # = self.K_I10 (def sect. neurones)
+        """Half-saturation constant of TNF-alpha for the activation of microglia to a proinflammatory 
+        polarization (g/mL)."""
 
-        self.kappa_TBManti = 6e-3
-        """Production rate of M_anti by TGF-beta (/day) [Value from Hao lambda_{M_pro T_beta}]\n
-            [The rate (maximal) by which TGF-beta affects the change of phenotype from Mpro to Manti]"""
+        self.kappa_TbMpro = 4.8
+        """Maximal conversion rate of proinflammatory microglia to anti-inflammatory under TGF-beta signaling (/day)."""
 
-        self.K_TB = 2.5e-7
-        """Half-saturation of TGF-beta (g/mL) [Value from Hao K_{T_beta}]\n
-            [Concentration of TGF-beta for which the convertion of Mpro to Manti is half maximal]"""
+        self.K_TbM = 5.9e-11
+        """Concentration of TGF-beta for which the conversion of Mpro to Manti is half maximal (g/mL)."""
 
-        # self.d_Manti = 0.015
-        # """Death rate of M_anti (anti-inflammatory microglia) (/day)"""
+        self.kappa_TaManti = 4.8
+        """Maximal conversion rate of anti-inflammatory microglia to proinflammatory under TNF-alpha 
+        signaling (/day)."""
 
-        ############################################
-        # CONSTANTS FOR THE EQUATION FOR M_pro^hat #
-        ############################################
+        self.K_TaM = 2.24e-12
+        """Concentration of TNF-alpha for which the conversion of Manti to Mpro is half maximal (g/mL)."""
 
-        self.K_P = 5e-9
-        """Half-saturation of MCP-1 (g/mL) \n
-            [Thèse : "We consider the value for MCP-1 saturation for influx of macrophages as K_P";
-            Value in Hao: K_P = 6e-9]"""
+        #############################################################
+        # CONSTANTS FOR THE EQUATION FOR hat{M}_pro AND hat{M}_anti #
+        #############################################################
 
-        self.Mprohateq = 5e-2  # 2.5e-2  # 8.64e-7
-        """Concentration of M_pro^hat at equilibrium (g/mL)"""
-        # TODO: On devrait ici avoir la concentration de Proinflammatory macrophage dans le sang.
-        #  J'ai pris la valeur de M_0 de Hao (concentration de monocyte dans le sang) divisé par 2 (supposant que
-        #   1/2 M_pro^hat et 1/2 M_anti^hat dans le sang) = (5e-2)/2 = 2.5e-2. => fig _32 vs retour à 5e-2 => _33,
-        #   mieux pour Astrocytes (A) et MCP-1 (P) (augmentation plutôt que diminution).
+        self.kappa_PMhatpro = 0.33
+        """Maximal importation rate of macrophage in the brain under MCP-1 signaling (/day)."""
 
-        self.d_Mprohat = 0.015
-        """Death rate of M_pro^hat macrophages (/day) [Value from Hao]"""
+        self.K_P = 5.00e-10
+        """Concentration of MCP-1 for which the rate of importation of macrophage is half-maximal (g/mL)."""
 
-        self.kappa_PMprohat = (0.04 * self.d_Mprohat) / 5e-9
-        """Production rate of M_pro^hat by MCP-1 (/day)"""
-        # self.lambda_PMprohat = (self.Mprohat * self.d_Mprohat) / self.K_P
-        # self.Mprohat : M_prohat (g/ml) = 0.04  #TODO: pk?
-        # self.K_P : Half-saturation of MCP-1 (g/ml) = 5*10**(-9)  #TODO: pk? (Hao: 6e-9)
+        self.Mhatmax = (830 * m_Mhat) / 2e-4  # = 0.0207085
+        """Maximal concentration of macrophage in the brain (g/mL)."""
 
-        #############################################
-        # CONSTANTS FOR THE EQUATION FOR M_anti^hat #
-        #############################################
+        self.kappa_TbMhatpro = 1/(10/24)  # = 2.4
+        """Maximal conversion rate of proinflammatory macrophage to anti-inflammatory under TGF-beta 
+        signaling (/day)."""
 
-        self.d_Mantihat = 0.015
-        """Death rate of M_anti^hat macrophages (/day) [Value from Hao]"""
+        self.K_TbMhat = self.K_TbM
+        """Concentration of TGF-beta for which the conversion of hat{M}_pro to hat{M}_anti is half maximal (g/mL)."""
 
-        self.d_TB = 3.33e2  # 3.33 * 10 ** (2)
-        """Degradation rate of TGF-beta (/day) """
+        self.kappa_TaMhatanti = 1/(10/24)  # = 2.4
+        """Maximal conversion rate of anti-inflammatory macrophage to proinflammatory under TNF-alpha 
+        signaling (/day)."""
 
-        self.kappa_TB = self.d_TB * 2.5e-7
-        """Production rate of T_beta (/day) \n
-            self.lambda_TB = self.d_TB * self.K_TB \n
-            self.K_TB : half-saturation of TGF-beta (T_beta) = 2.5*10**(-7) [Hao]"""
-        # TODO: Calcul fait pas de sens et unitées seraient g/mL/day.
+        self.K_TaMhat = self.K_TaM
+        """Concentration of TNF-alpha for which the conversion of hat{M}_anti to hat{M}_pro is half maximal (g/mL)."""
+
+        self.d_Mhatpro = 7.67e-4
+        """Death rate of proinflammatory macrophages (/day)."""
+
+        self.d_Mhatanti = 7.67e-4
+        """Death rate of anti-inflammatory macrophages (/day)."""
 
         #########################################
         # CONSTANTS FOR THE EQUATION FOR T_beta #
         #########################################
 
-        # self.d_TB => section précédente
+        kappa_MhatantiTb_min = 2 * (47e-12 / 18 * 24) / (4e6 * m_Mhat)  # approx 6.279e-9 /j
+        kappa_MhatantiTb_max = 2 * (47e-12 / 18 * 24) / (2e6 * m_Mhat)  # approx 1.256e-8 /j
 
-        self.kappa_MproTB = 1.5e-2
-        """Production rate of TGF-beta by M_pro (/day) [Value from Hao (lambda_{T_{beta} M})]"""
-        # self.kappa_MantiTB = 1.5e-2
-        # """Production rate of TGF-beta by M_anti (/day) [Value from Hao (lambda_{T_{beta} M})]"""
+        self.kappa_MhatantiTb = kappa_MhatantiTb_min
+        """Production rate of TGF-beta by hat{M}_pro (/day)."""
+        # TODO: In the interval kappa_MhatantiTb_min to kappa_MhatantiTb_max, à tester.
 
-        self.kappa_MprohatTB = 1.5e-2
-        """Production rate of TGF-beta by M_pro^hat (/day) [Value from Hao (lambda_{T_{beta} M^{hat}})]"""
-        # self.kappa_MantihatTB = 1.5e-2
-        # """Production rate of TGF-beta by M_anti^hat (/day) [Value from Hao (lambda_{T_{beta} M^{hat}})]"""
+        self.kappa_MantiTb = kappa_MhatantiTb_min
+        """Production rate of TGF-beta by M_pro (/day)."""
+        # TODO: In the interval kappa_MhatantiTb_min to kappa_MhatantiTb_max, à tester.
+
+        self.d_Tb = math.log(2) / (3/1440)  # approx 332.71
+        """Degradation rate of TGF-beta (/day)."""
 
         #######################################
         # CONSTANTS FOR THE EQUATION FOR I_10 #
         #######################################
 
-        # TODO Vérif.. Thèse: (1.2 ± 0.16) × 10^−12 g/mL/day ??
-        self.kappa_MantiI10 = 6.67e-3
-        """Production rate of IL-10 by M_anti (/day) [Value from Hao (lambda_{I_{10} M_anti})]"""
+        self.kappa_MhatantiI10 = 47 * (52e-9 / 2) / (4e6 * m_Mhat)  # approx 6.12e-5
+        """Production rate of IL-10 by anti-inflammatory macrophages (hat{M}_anti) (/day)."""
 
-        # self.K_Manti = 0.017
-        # """Half-saturation of Manti (g/ml) [Value from Hao]"""
+        self.kappa_MantiI10 = self.kappa_MhatantiI10
+        """Production rate of IL-10 by anti-inflammatory microglia (M_anti) (/day)."""
 
-        self.d_I10 = 8.32
-        """Degradation rate of IL-10 (/day)"""
-        # TODO: Hao donne 16.64 /day
-        # half-life est 60 minutes
+        self.d_I10 = math.log(2) / (3.556 / 24)  # approx. 4.6782 /j
+        """Degradation rate of IL-10 (/day)."""
 
         ##########################################
         # CONSTANTS FOR THE EQUATION FOR T_alpha #
         ##########################################
 
-        # TODO Vérif.. These: (3.09 ± 1.8) × 10^−12 g/ml/day. Unités??
-        #   Seyed prend : 1.07e-1 /day
-        #   Hao : lambda_{T_{alpha} M_pro} = 3e-2 /day
-        self.kappa_MprohatTa = 3e-2
-        """Production rate of TNF-alpha by M_pro^hat (/day)"""
+        self.kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat)  # approx 3.186e-6
+        """Production rate of TNF-alpha by proinflammatory macrophages (hat{M}_pro) (/day)."""
 
-        # self.K_Mpro = 0.03
-        # """Half-saturation of Mpro (g/ml) [Value from Hao]"""
+        self.kappa_MproTa = self.kappa_MhatproTa
+        """Production rate of TNF-alpha by proinflammatory microglia (M_pro) (/day)."""
 
-        self.kappa_MproTa = self.kappa_MprohatTa
-        """Production rate of TNF-alpha by M_pro (/day)"""
-        # Hao : lambda_{T_{alpha} M_pro^hat} = 3e-2 /day (ie même val que lambda_MprohatTa)
-
-        # self.K_Mprohat = 0.04
-        # """Half-saturation of M_pro^hat (g/ml) [Value from Hao]"""
-
-        self.d_Ta = 55.45
-        """Degradation rate of TNF-alpha (/day) [Value from Hao]"""
+        self.d_Ta = math.log(2) / (18.2 / 1440)  # approx 54.84
+        """Degradation rate of TNF-alpha (/day)."""
 
         ############################################
         # CONSTANTS FOR THE EQUATION FOR MCP-1 (P) #
         ############################################
 
-        self.d_P = 1.73
-        """Degradation rate of  MCP-1 (/day) [Value from Hao]"""
+        self.kappa_MhatproP = 11e-9 / (2e6 * m_Mhat)  # approx 1.102e-6
+        """Production rate of MCP-1 by proinflammatory macrophages (hat{M}_pro) (/day)."""
 
-        self.kappa_AP = 6.6e-8
-        """Creation rate of MCP-1 by astrocytes (/day)"""
-        # Code : self.lambda_AP = (self.K_P*self.d_P)/self.A_0
-        # Problème : thèse :
-        #       lambda_AP = (d_P * P) / A_0
-        #                 = (1.73/day * 3e-10g/ml) / 0.14g/cm^3 = 3e-9 /day
-        # TODO: Revoir. En attendant je prends la valeur de Hao
+        self.kappa_MproP = self.kappa_MhatproP
+        """Production rate of MCP-1 by proinflammatory microglia (M_pro) (/day)."""
 
+        kappa_AP_min = (1/10) * self.kappa_MhatproP  # approx 1.1e-7
+        kappa_AP_max = (1/2) * self.kappa_MhatproP   # approx 5.5e-7
+        self.kappa_AP = kappa_AP_min
+        """Production rate of MCP-1 by astrocytes (/day)."""
+        # TODO: In the interval kappa_AP_min to kappa_AP_max, à tester.
+
+        self.d_P = math.log(2) / (3 / 24)  # approx 5.5452
+        """Degradation rate of  MCP-1 (/day)."""
