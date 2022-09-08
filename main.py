@@ -25,24 +25,27 @@ y0[0] = p.lambda_ABi * (1 + p.AP * p.delta_APi) / p.d_ABi
 # y0[1] = 1e-11   # Todo ou  ??
 # y0[1] = (p.lambda_ABmo * (1 + p.AP * p.delta_APm) + p.lambda_AABmo) / (p.d_ABmo(AgeStart*365) + p.kappa_ABmoABoo *
 #                                                                        (1 + p.AP * p.delta_APmo))
-A = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo)
-B = p.d_ABmo(AgeStart*365)
-C = -(p.lambda_ABmo * (1 + p.AP * p.delta_APm) + p.lambda_AABmo)
-y0[1] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
+# A = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo)
+# B = p.d_ABmo(AgeStart*365)
+# C = -(p.lambda_ABmo * (1 + p.AP * p.delta_APm) + p.lambda_AABmo)
+# y0[1] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
 # Prendre + donne nég. Avec AgeStart=30, = 4.233652303020852e-11.
+# Par expérience, pour pas avoir de différence au départ, prendre (22-09-07_..._12 vs _13):
+y0[1] = 4e-11
 
 # AB_o^o (Amyloid-beta oligomers extracell.)
 # y0[2] = 5e-13  # 0
 # y0[2] = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2) / (p.d_ABoo + p.kappa_ABooABpo)
-A = p.kappa_ABooABpo
-B = p.d_ABoo
-C = - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2)
-y0[2] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
+# A = p.kappa_ABooABpo
+# B = p.d_ABoo
+# C = - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2)
+# y0[2] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
 # Prendre + donne nég. Avec AgeStart=30, = 6.791648132775663e-17.
+# Par expérience, pour pas avoir de différence au départ, prendre (22-09-07_..._12 vs _13):
+y0[2] = 6e-17
 
 # AB_p^o (Amyloid-beta plaque extracell.)
-y0[3] = 0  # 1e-10
-
+y0[3] = 1e-10
 
 # G (GSK3)
 # y0[4] = p.lambda_InsG / p.d_G  # ~= 0.16168
@@ -50,9 +53,15 @@ y0[4] = p.G_0   # ~ 5.344e-05 (for women)
 
 # tau (tau proteins)
 # y0[5] = (p.lambda_tau + p.lambda_Gtau)/p.d_tau
-y0[5] = 6e-7
+# y0[5] = 6e-7
 # (p.lambda_tau + p.lambda_Gtau * (y0[4] / p.G_0))/p.d_tau => avant fig _39
 # = 2.57e-5    # Hao: Concentration of tau proteins is, in health, 137 pg/ml and, in AD, 490 pg/ml
+A = p.kappa_tauFi
+B = p.d_tau
+C = -(p.lambda_tau + p.lambda_Gtau)
+y0[5] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
+# Prendre "+" donne nég. Donc, prend "-" et donne ~ 6.4947e-07.
+
 
 # F_i (NFT inside the neurons)
 y0[6] = p.kappa_tauFi * (y0[5] ** 2) / p.d_Fi
@@ -112,8 +121,8 @@ y0[18] = (p.kappa_MproP * y0[11] + p.kappa_MhatproP * y0[13] + p.kappa_AP * y0[9
 AgeEnd = 35
 decades = int((AgeEnd - AgeStart) / 10)
 
-# LSODA converge pas...
-# sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "LSODA", max_step=1e4, min_step=1e3)
+
+# sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "LSODA")
 # method = "solve_ivp_LSODA"
 
 sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "BDF")
@@ -173,7 +182,7 @@ else:  # p.AP == 0:
 
 my_path = os.path.abspath('Figures')
 plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(AgeEnd - AgeStart) + "y_22-09-08_APOE" + APOE + "_" +
-                         sex + "_12.png"), dpi=180)
+                         sex + "_15.png"), dpi=180)
 # _20 ... _27 : Figures produitent avec Nicolas.
 # 34 : 1ere avec modif simon
 

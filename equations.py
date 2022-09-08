@@ -60,6 +60,8 @@ def ODEsystem(t, y):
               - p.d_ABoo * y[2]
 
     # Amyloid-beta plaque outside the neurons (AB_p^o)
+    # Deuxième terme problématique pour les plaques (22-09-08_..._14 vs _15 ; 15 retire le terme), mais règle pas les
+    # autres. Donc, vrai problème ailleurs.
     dydt[3] = p.kappa_ABooABpo * (y[2] ** 2) - ((p.d_MantiABpo * y[12] + p.d_hatMantiABpo * y[14])
                                                 * (1 + p.AP * p.delta_APdp) * (y[3] / (y[3] + p.K_ABpo)))
 
