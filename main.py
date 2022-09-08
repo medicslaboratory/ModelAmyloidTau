@@ -31,10 +31,9 @@ C = -(p.lambda_ABmo * (1 + p.AP * p.delta_APm) + p.lambda_AABmo)
 y0[1] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
 # Prendre + donne nég. Avec AgeStart=30, = 4.233652303020852e-11.
 
-
 # AB_o^o (Amyloid-beta oligomers extracell.)
 # y0[2] = 5e-13  # 0
-y0[2] = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2) / (p.d_ABoo + p.kappa_ABooABpo)
+# y0[2] = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2) / (p.d_ABoo + p.kappa_ABooABpo)
 A = p.kappa_ABooABpo
 B = p.d_ABoo
 C = - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2)
@@ -42,22 +41,22 @@ y0[2] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
 # Prendre + donne nég. Avec AgeStart=30, = 6.791648132775663e-17.
 
 # AB_p^o (Amyloid-beta plaque extracell.)
-y0[3] = 1e-10  # 0
+y0[3] = 0  # 1e-10
+
 
 # G (GSK3)
-# y0[4] = p.lambda_InsG / p.d_G  # = 3.1e-6
-y0[4] = p.G_0
-# Seyed : 0, mais fait choc à cause du terme "p.lambda_ABiG * y[0]" où p.lambda_ABiG = 0.25
+# y0[4] = p.lambda_InsG / p.d_G  # ~= 0.16168
+y0[4] = p.G_0   # ~ 5.344e-05 (for women)
 
 # tau (tau proteins)
 # y0[5] = (p.lambda_tau + p.lambda_Gtau)/p.d_tau
-y0[5] = 1.37e-10
+y0[5] = 6e-7
 # (p.lambda_tau + p.lambda_Gtau * (y0[4] / p.G_0))/p.d_tau => avant fig _39
 # = 2.57e-5    # Hao: Concentration of tau proteins is, in health, 137 pg/ml and, in AD, 490 pg/ml
 
 # F_i (NFT inside the neurons)
-# y0[6] = p.kappa_tauFi * y0[5] / p.d_Fi
-y0[6] = 0
+y0[6] = p.kappa_tauFi * (y0[5] ** 2) / p.d_Fi
+# y0[6] = 0
 
 # F_o (NFT outside the neurons)
 y0[7] = 0
@@ -65,7 +64,7 @@ y0[7] = 0
 # N (Living neurons)
 y0[8] = p.N_0
 
-# A (Astrocytes)
+# A (Activated astrocytes)
 # y0[9] = 0.14 /2
 # T_alpha_0 = 2.79e-5
 # Q = (p.kappa_ABpoA * y0[3] + p.kappa_TaA * T_alpha_0)
@@ -77,7 +76,6 @@ if p.S == 0:  # women
     y0[10] = 3.811e-2
 else:  # men
     y0[10] = 3.193e-2
-# TODO : Seyed: 0.02 vs Hao: 0.047.
 
 # M_pro (Proinflammatory microglia)
 y0[11] = 1e-12  # y0[10] * (p.beta / (p.beta + 1))
@@ -97,24 +95,31 @@ y0[14] = 1e-12
 y0[15] = (p.kappa_MantiTb * y0[12] + p.kappa_MhatantiTb * y0[14])/p.d_Tb  # 1.0e-6
 
 # I_10 (IL-10 = Interleukin 10)
-y0[16] = 1e-8  # p.kappa_MantiI10 * y0[12] / p.d_I10  # Hao : 1.0e-5
+y0[16] = (p.kappa_MantiI10 * y0[12] + p.kappa_MhatantiI10 * y0[14]) / p.d_I10  # = 2.6173735792085045e-17
+# Hao : 1.0e-5
 
 # T_{alpha} (TNF-alpha)
-y0[17] = 1e-12  # (p.kappa_MproTa * y0[11] + p.kappa_MhatproTa * y0[13]) / p.d_Ta
+# y0[17] = 1e-12
+y0[17] = (p.kappa_MproTa * y0[11] + p.kappa_MhatproTa * y0[13]) / p.d_Ta  # 1.1620103844701855e-19
 # Hao 2e-5
 # (source: https://doi-org.acces.bibl.ulaval.ca/10.1002/1097-0029(20000801)50:3<184::AID-JEMT2>3.0.CO;2-H => 75e-12)
 
 # P (MCP-1)
-y0[18] = p.kappa_AP * y0[9]/p.d_P  # Hao: 5e-9
+y0[18] = (p.kappa_MproP * y0[11] + p.kappa_MhatproP * y0[13] + p.kappa_AP * y0[9]) / p.d_P  # 3.975362086617884e-19
+# Hao: 5e-9
 
 
-AgeEnd = 31
+AgeEnd = 35
 decades = int((AgeEnd - AgeStart) / 10)
 
-sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "BDF")  # "BDF" "LSODA" "RK23"
+# LSODA converge pas...
+# sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "LSODA", max_step=1e4, min_step=1e3)
 # method = "solve_ivp_LSODA"
-method = "solve_ivp_BDF"
 
+sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "BDF")
+method = "solve_ivp_BDF"
+# sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "Radau")
+# method = "solve_ivp_Radau"
 
 """Generate the figure"""
 fig = plt.figure()
@@ -167,8 +172,9 @@ else:  # p.AP == 0:
     APOE = "-"
 
 my_path = os.path.abspath('Figures')
-plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(AgeEnd - AgeStart) + "y_22-09-07_APOE" + APOE + "_" +
-                         sex + "_08.png"), dpi=180)
+plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(AgeEnd - AgeStart) + "y_22-09-08_APOE" + APOE + "_" +
+                         sex + "_12.png"), dpi=180)
 # _20 ... _27 : Figures produitent avec Nicolas.
 # 34 : 1ere avec modif simon
+
 plt.show()

@@ -1,9 +1,8 @@
 # Date : 6 septembre 2022
 # Autor : Éléonore Chamberland
 
-# This file contains the equations of the model
-# It generates a class for the parameters of the model.
-# Recall : 1 cm^3 = 1 mL (for water)
+# This file defines a class for the parameters of the model.
+# Recall : 1 cm^3 = 1 mL
 
 import math
 from scipy.constants import Avogadro  # Avogadro number
@@ -96,30 +95,32 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR NEURONS #
         ##########################################
 
-        self.d_FiN = 1/math.log(2.51 * 365) *1e-2  # = 1.0915e-3  # TODO: Val trop grande... *1e-2
-        """Degradation rate of neurons by F_i (/day)."""
+        self.d_FiN = 1/math.log(2.51 * 365) * 1e-4  # = 1.0915e-3  # TODO: Val trop grande... *1e-2
+        """Maximal death rate of neurons induced by F_i (/day)."""
 
         self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4  # TODO: Val trop petite... *1e3
-        """Half-saturation of intracellular NFTs (g/mL)."""
+        """Concentration of intracellular NFTs (F_i) for which the death rate of neuron induced by F_i is 
+        half-maximal (g/mL)."""
 
         self.n = 4
         """Sigmoid function coefficient (unitless)."""
         # TODO: À déterminer avec le modèle.
 
         self.d_TaN = (1 / 2) * self.d_FiN
-        """Degradation rate of neurons by T_alpha (TNF-alpha) (/day)."""
+        """Maximal death rate of neurons induced by T_alpha (TNF-alpha) (/day)."""
 
         self.K_Ta = 4.48e-12
-        """Half-saturation of T_alpha (TNF-alpha) (g/mL)."""
+        """Concentration of T_alpha (TNF-alpha) for which the death rate of neuron induced by TNF-alpha is 
+        half-maximal (g/mL)."""
 
         self.K_I10 = 2.12e-12
-        """Half-saturation of IL-10 (g/mL)."""
+        """Concentration of IL-10 for which the rate of neuron death induced by TNF-alpha is divided by two (g/mL)."""
 
         #######################################
         # CONSTANTS FOR THE EQUATION FOR AB^i #
         #######################################
 
-        self.lambda_ABi = (1/2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau # env. = 1.3681e-10
+        self.lambda_ABi = (1/2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau  # env. = 1.3681e-10
         """Creation rate of amyloid-beta42 inside neuron from APP (g/mL/day)."""
 
         self.delta_APi = (8373e-9 - 2178e-9) / (5631e-9 - 783e-9) - 1  # approx. 0.2778
@@ -196,7 +197,12 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR GSK-3 #
         ########################################
 
-        self.lambda_InsG = 0.18e-6 * 47000 * 1440 * 1.077 * 0.005  # approx 0.065602
+        # self.lambda_InsG = 0.18e-6 * 47000 * 1440 * 1.077 * 0.005  # approx 0.065602
+        # TODO: Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
+        #    lambda_InsG = d_G * G_0 . Résultat "Figure_solve_ivp_Radau_1y_22-09-08_APOE+_F_04.png" Pas beau :(
+        #    Okay avec BDF. Voir "Figure_solve_ivp_BDF_5y_22-09-08_APOE+_F_11.png"
+        #    À confirmer et mettre correctement si accepté.
+        self.lambda_InsG = (math.log(2) / (41 / 24)) * (1104e-12 * 47000 * self.rho_cerveau)  # ~ 2.1685e-05
         """Creation rate of GSK-3 induced by the insulin (g/mL/day)"""
 
         # self.Ins = fct
@@ -213,16 +219,20 @@ class Parameters():
             Correspond to the brain concentration at 30 years old."""
 
         self.d_G = math.log(2) / (41 / 24)  # approx 0.4057
+        # TODO: Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
+        #    d_G = lambda_InsG / G_0 . Résultat "Figure_solve_ivp_Radau_5y_22-09-08_APOE+_F_10.png" Pas beau :(
+        # self.d_G = self.lambda_InsG / (1104e-12 * 47000 * self.rho_cerveau)
         """Degradation rate of GSK-3 (/day)."""
 
         ######################################
         # CONSTANTS FOR THE EQUATION FOR tau #
         ######################################
 
-        self.lambda_tau = 26.3e-12
+        self.lambda_tau = 26.3e-12  # "*1e-3" pour test, et peu impact
         """Phosphorylation rate of tau in health by other mechanism than GSK-3 (g/ml/day)."""
 
         self.lambda_Gtau = ((20/21) - (20/57)) * 1e-6 / 0.5 / 1000 / 1000 * 72500  # approx 8.72e-8
+        # "*1e-3" pour test, et pas mal impact
         """Creation rate of tau by GSK3 (g/mL/day)"""
 
         if self.S == 0:  # woman
@@ -251,8 +261,8 @@ class Parameters():
 
         # self.lambda_MFo = 0.8 * 1e-6 / 2  # = 4e-7
         self.lambda_MFo = 0.4
-        # TODO: Ajout "* F_o" au terme de dégradation par microglies, sinon bizarre. (_01 vs _02).
-        #  Unité ici en /day et devrait alors être un kappa.
+        # TODO: À confirmer. Ajout "* F_o" au terme de dégradation par microglies, sinon bizarre
+        #  (2022-09-07_..._01 vs _02). Unité ici en /day et devrait alors être un kappa.
         """Maximal rate for the degradation of extracellular NFTs by anti-inflammatory microglia (g/mL/day)."""
 
         if self.S == 0:  # woman
@@ -291,10 +301,11 @@ class Parameters():
         """Activation rate of microglia by F_o (NFT) (/day)."""
 
         self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000  # approx 1.3243e-12
+        # TODO: Trop bas. Test *1e8, mieux, mais pas beau pour autant.
         """Concentration of extracellular NFTs at which the rate of activation of microglia by F_o 
         is half-maximal (g/mL)."""
 
-        self.kappa_ABooM = 0.2141 * 1/3 # TODO: 28.32 ?
+        self.kappa_ABooM = 0.2141 * 1/3  # TODO: 28.32 ?
         """Activation rate of microglia by extracellular amyloid-beta42 oligomer (/day). """
 
         self.K_ABooM = 0.060 / 527.4 / 1000  # approx 1.1377e-7
