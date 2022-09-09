@@ -163,8 +163,8 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR AB_o^o #
         #########################################
 
-        self.kappa_ABooABpo = (3 / 7) * 1e6 * 1000 / (2 * M_ABm) *1e2  # approx 4.7471e4
-        # Test *1e2 22-09-09_..._02 et pas de grande différence
+        self.kappa_ABooABpo = (3 / 7) * 1e6 * 1000 / (2 * M_ABm)  # approx 4.7471e4
+        # Test *1e2 22-09-09_..._02 (vs _01) et pas de grande différence.
         """Conversion rate of extracellular amyloid-beta42 oligomer to plaques (mL/g/day)."""
 
         # self.delta_APop = 1  # (no difference)

@@ -1,6 +1,5 @@
 # Date : 17 January 2022
 # Autor : Éléonore Chamberland
-import math
 
 import numpy as np
 
@@ -22,7 +21,7 @@ AgeStart = 30
 
 y0 = InitialConditions(AgeStart)
 
-AgeEnd = 35
+AgeEnd = 50
 decades = int((AgeEnd - AgeStart) / 10)
 
 # sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "LSODA")
