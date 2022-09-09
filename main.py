@@ -118,14 +118,14 @@ y0[18] = (p.kappa_MproP * y0[11] + p.kappa_MhatproP * y0[13] + p.kappa_AP * y0[9
 # Hao: 5e-9
 
 
-AgeEnd = 35
+AgeEnd = 80
 decades = int((AgeEnd - AgeStart) / 10)
 
 
 # sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "LSODA")
 # method = "solve_ivp_LSODA"
 
-sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "BDF")
+sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "BDF", max_step=0.01)
 method = "solve_ivp_BDF"
 # sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "Radau")
 # method = "solve_ivp_Radau"
@@ -181,8 +181,8 @@ else:  # p.AP == 0:
     APOE = "-"
 
 my_path = os.path.abspath('Figures')
-plt.savefig(os.path.join(my_path, "Figure_" + method + "_" + str(AgeEnd - AgeStart) + "y_22-09-08_APOE" + APOE + "_" +
-                         sex + "_15.png"), dpi=180)
+plt.savefig(os.path.join(my_path, "Figure_22-09-09_" + method + "_" + str(AgeEnd - AgeStart) + "y_APOE" + APOE + "_" +
+                         sex + "_01.png"), dpi=180)
 # _20 ... _27 : Figures produitent avec Nicolas.
 # 34 : 1ere avec modif simon
 
