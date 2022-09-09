@@ -265,7 +265,8 @@ class Parameters():
         # self.lambda_MFo = 0.8 * 1e-6 / 2  # = 4e-7
         self.lambda_MFo = 0.4
         # TODO: À confirmer. Ajout "* F_o" au terme de dégradation par microglies, sinon bizarre
-        #  (2022-09-07_..._01 vs _02). Unité ici en /day et devrait alors être un kappa.
+        #  (2022-09-07_..._01 vs _02). Same pour quand réessayé (22-09-09_..._12)
+        #  Unité ici en /day et devrait alors être un kappa.
         """Maximal rate for the degradation of extracellular NFTs by anti-inflammatory microglia (g/mL/day)."""
 
         if self.S == 0:  # woman
@@ -300,15 +301,19 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR M_NA #
         #######################################
 
-        self.kappa_FoM = 0.2141 * 2/3  # TODO: 28.32 * 2? Trop grand!
+        self.kappa_FoM = 0.2141 * 2/3  # TODO: 28.32 * 2?
+        # TODO: Trop grand! *1e-2 yark ... 22-09-09_..._09 où dim aussi kappa_ABooM.
         """Activation rate of microglia by F_o (NFT) (/day)."""
 
         self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000  # approx 1.3243e-12
-        # TODO: Trop bas. Test *1e8, mieux, mais pas beau pour autant.
+        # TODO: Trop bas. Test *1e8, mieux, mais ordres de grandeur bizarres (22-09-09_..._07).
+        #    Tentons plus grand : * 1e2: pas vrm de différence (22-09-09_..._08) (aussi présent pour ..._09);
+        #    * 1e4: ..._10; * 1e5: ..._11; s'améliore pas...
         """Concentration of extracellular NFTs at which the rate of activation of microglia by F_o 
         is half-maximal (g/mL)."""
 
-        self.kappa_ABooM = 0.2141 * 1/3  # TODO: 28.32 ? Trop grand!
+        self.kappa_ABooM = 0.2141 * 1/3  # TODO: 28.32 ?
+        # TODO: Trop grand! *1e-2. yark, 22-09-09_..._09 où dim aussi kappa_FoM.
         """Activation rate of microglia by extracellular amyloid-beta42 oligomer (/day). """
 
         self.K_ABooM = 0.060 / 527.4 / 1000  # approx 1.1377e-7

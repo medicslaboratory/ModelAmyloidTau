@@ -21,20 +21,22 @@ AgeStart = 30
 
 y0 = InitialConditions(AgeStart)
 
-AgeEnd = 50
+AgeEnd = 35
 decades = int((AgeEnd - AgeStart) / 10)
 
 # sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "LSODA")
 # method = "solve_ivp_LSODA"
 
 max_step = 0.1
+maxstepstr = "01"
 sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "BDF", max_step=max_step)
 method = "solve_ivp_BDF"
 # sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "Radau")
 # method = "solve_ivp_Radau"
 
 """Generate the figure"""
-fig = plt.figure()
+# fig = plt.figure()
+fig, axs = plt.subplots(nrows=4, ncols=5, sharex="all")
 fig.set_size_inches(35 / 2.54, 20 / 2.54, forward=True)
 
 # Making a list for Label names in the plot
@@ -43,28 +45,55 @@ labelname = [r'$A \beta^{i}$', r'$A \beta_{m}^{o}$', r'$A \beta_{o}^{o}$', r'$A 
              r'$T_{\beta}$', '$I_{10}$', r'$T_{\alpha}$', '$P$']
 
 plt.subplots_adjust(hspace=.8, wspace=.8)
-for i in range(0, 19):
-    ax = fig.add_subplot(4, 5, i + 1)
 
-    # For odeint
-    # ax.plot(t, sol[:, i])
+# for i in range(0, 19):
+#     ax = fig.add_subplot(4, 5, i + 1)
+#
+#     ax.plot(sol.t / 365, sol.y[i, :])
+#     if decades > 5:
+#         indentxaxis = int(decades / 2)
+#     elif decades < 1:
+#         indentxaxis = AgeEnd - AgeStart
+#     else:
+#         indentxaxis = decades
+#     ax.set_xticks(np.linspace(AgeStart, AgeEnd, indentxaxis + 1))
+#     ax.set(xlabel='Age (years)', ylabel=labelname[i])
+#     formatter = ticker.ScalarFormatter(useMathText=True)
+#     formatter.set_scientific(True)
+#     formatter.set_powerlimits((-1, 1))
+#     # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
+#     # notation will be used if exp <= -1 or exp >= 1.
+#     ax.yaxis.set_major_formatter(formatter)
 
-    # For solve_ivp
-    ax.plot(sol.t / 365, sol.y[i, :])
-    if decades > 5:
-        indentxaxis = int(decades / 2)
-    elif decades < 1:
-        indentxaxis = AgeEnd - AgeStart
-    else:
-        indentxaxis = decades
-    ax.set_xticks(np.linspace(AgeStart, AgeEnd, indentxaxis + 1))
-    ax.set(xlabel='Age (years)', ylabel=labelname[i])
-    formatter = ticker.ScalarFormatter(useMathText=True)
-    formatter.set_scientific(True)
-    formatter.set_powerlimits((-1, 1))
-    # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-    # notation will be used if exp <= -1 or exp >= 1.
-    ax.yaxis.set_major_formatter(formatter)
+# axs.tolist()
+# axs = [item for sublist in axs for item in sublist]
+
+axs[3, 4].remove()
+
+i = 0
+for ax in axs.flat:
+    if i < 19:
+        ax.plot(sol.t / 365, sol.y[i, :])
+        if i >= 14:
+            ax.set_xlabel('Age (years)')
+        ax.set_ylabel(labelname[i])
+        formatter = ticker.ScalarFormatter(useMathText=True)
+        formatter.set_scientific(True)
+        formatter.set_powerlimits((-1, 1))
+        # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
+        # notation will be used if exp <= -1 or exp >= 1.
+        ax.yaxis.set_major_formatter(formatter)
+    i = i+1
+
+# ax2 = axs[3, 4].twinx()
+# axs[3, 4].plot(sol.t / 365, sol.y[12, :], "b-")  # M_anti
+# axs[3, 4].set_ylabel("Manti", color='b')
+# ax2.plot(sol.t / 365, sol.y[16, :], "g-")  # I_10
+# ax2.set_ylabel("I10", color='g')
+# À partir de la figure 22-09-09_..._05_.._Zoom, on constate que, parmi les graphs ayant un pis de départ abérant,
+# M_anti serait le premier (pourrait causer les autres). Pour ce qui est de celui des plaques, on peut tenter de le
+# résorber en mettant la cond. init. plus petite. Si prend 0 bug, prend 1e-18 (voir _06). Mais je ne pense pas que ce
+# soit la cause du problème.
 
 plt.tight_layout()
 
@@ -86,15 +115,13 @@ else:  # p.AP == 0:
     APOE = "-"
 
 my_path = os.path.abspath('Figures')
-FigName = "Figure_22-09-09_" + method + "_" + str(AgeEnd - AgeStart) + "y_APOE" + APOE + "_" + sex + "_02_maxstep01.png"
+FigName = "Figure_22-09-09_" + method + "_" + str(AgeEnd - AgeStart) + "y_APOE" + APOE + "_" + sex + "_13_maxstep"\
+          + maxstepstr + ".png"
 plt.savefig(os.path.join(my_path, FigName), dpi=180)
-# _20 ... _27 : Figures produitent avec Nicolas.
-# 34 : 1ere avec modif simon
-
 
 """Add information to the figure."""
 FigInfos = {"max_step": str(max_step),
-            "Modification(s)": "kappa_ABooABpo = (3 / 7) * 1e6 * 1000 / (2 * M_ABm) *1e2; Ajout du *1e2."}
+            "Modification(s)": ""}
 
 im = Image.open("Figures/" + FigName)
 Infos = PngImagePlugin.PngInfo()

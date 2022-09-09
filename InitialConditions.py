@@ -40,7 +40,7 @@ def InitialConditions(AgeStart=30):
     y0[2] = 6e-17
 
     # AB_p^o (Amyloid-beta plaque extracell.)
-    y0[3] = 1e-10
+    y0[3] = 1e-18  # 1e-10
 
     # G (GSK3)
     # y0[4] = p.lambda_InsG / p.d_G  # ~= 0.16168
@@ -85,6 +85,7 @@ def InitialConditions(AgeStart=30):
 
     # M_anti (Anti-inflammatory microglias)
     y0[12] = 1e-12  # y0[10] * (1 / (p.beta + 1))
+    # Changement 1e-12 pour 1e-5 (fig 22-09-09_..._03 vs _01) pas vrm amélioration
 
     # M_pro^hat (Proinflammatory macrophages)
     # y0[13] = p.Mprohateq/1.5  # 0
@@ -93,6 +94,7 @@ def InitialConditions(AgeStart=30):
     # M_anti^hat (Anti-inflammatory macrophages)
     # y0[14] = 1e-9  # ou (p.kappa_TB * y0[15])/p.d_Mantihat, si y0[15] defini avant # Hao: 0
     y0[14] = 1e-12
+    # Changement 1e-12 pour 1e-5 (fig 22-09-09_..._03 vs _01) pas vrm amélioration
 
     # T_{beta} (TGF-beta)
     y0[15] = (p.kappa_MantiTb * y0[12] + p.kappa_MhatantiTb * y0[14])/p.d_Tb  # 1.0e-6

@@ -81,6 +81,7 @@ def ODEsystem(t, y):
 
     # NFT outside the neurons (F_o)
     # TODO: Ajout "* F_o" au terme de dégradation par microglies, sinon bizarre (2022-09-07_..._01 vs _02).
+    #  Same pour quand réessayé (22-09-09_..._12).
     dydt[7] = (y[6] / y[8]) * abs(dydt[8]) - p.lambda_MFo * (y[12] / (y[12] + p.K_Manti)) * y[7] - p.d_Fo * y[7]
 
     # Astrocytes (A)
@@ -106,9 +107,13 @@ def ODEsystem(t, y):
                + p.kappa_TaManti * (y[17] / (y[17] + p.K_TaM)) * y[12] - p.d_Mpro * y[11]
 
     # Anti-inflammatory microglia (M_anti)
+    # Sans terme de création : 22-09-09_..._04. Tout de même saut en M_anti, hat{M}_anti, T_b et I_10, donc
+    # peu concluant.
     dydt[12] = (epsilon_I10 / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ \
                + p.kappa_TbMpro * (y[15] / (y[15] + p.K_TbM)) * y[11] \
                - p.kappa_TaManti * (y[17] / (y[17] + p.K_TaM)) * y[12] - p.d_Manti * y[12]
+    # dydt[12] = p.kappa_TbMpro * (y[15] / (y[15] + p.K_TbM)) * y[11] \
+    #            - p.kappa_TaManti * (y[17] / (y[17] + p.K_TaM)) * y[12] - p.d_Manti * y[12]
 
     # Proinflammatory macrophages (hat{M}_pro)
     dydt[13] = p.kappa_PMhatpro * (y[18] / (y[18] + p.K_P)) * (p.Mhatmax - (y[13] + y[14])) * \
@@ -117,10 +122,14 @@ def ODEsystem(t, y):
                + p.kappa_TaMhatanti * (y[17] / (y[17] + p.K_TaMhat)) * y[14] - p.d_Mhatpro * y[13]
 
     # Anti-inflammatory macrophages (hat{M}_anti)
+    # Sans terme de création : 22-09-09_..._04. Tout de même saut en M_anti, hat{M}_anti, T_b et I_10, donc
+    # peu concluant.
     dydt[14] = p.kappa_PMhatpro * (y[18] / (y[18] + p.K_P)) * (p.Mhatmax - (y[13] + y[14])) * \
                (epsilon_I10 / (p.beta * epsilon_Ta + epsilon_I10)) \
                + p.kappa_TbMhatpro * (y[15] / (y[15] + p.K_TbMhat)) * y[13] \
                - p.kappa_TaMhatanti * (y[17] / (y[17] + p.K_TaMhat)) * y[14] - p.d_Mhatanti * y[14]
+    # dydt[14] = p.kappa_TbMhatpro * (y[15] / (y[15] + p.K_TbMhat)) * y[13] \
+    #            - p.kappa_TaMhatanti * (y[17] / (y[17] + p.K_TaMhat)) * y[14] - p.d_Mhatanti * y[14]
 
     # TGF-Beta = Transforming growth factor beta (T_beta)
     dydt[15] = p.kappa_MantiTb * y[12] + p.kappa_MhatantiTb * y[14] - p.d_Tb * y[15]
