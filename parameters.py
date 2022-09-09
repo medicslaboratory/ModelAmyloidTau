@@ -163,7 +163,8 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR AB_o^o #
         #########################################
 
-        self.kappa_ABooABpo = (3 / 7) * 1e6 * 1000 / (2 * M_ABm)  # approx 4.7471e4
+        self.kappa_ABooABpo = (3 / 7) * 1e6 * 1000 / (2 * M_ABm) *1e2  # approx 4.7471e4
+        # Test *1e2 22-09-09_..._02 et pas de grande différence
         """Conversion rate of extracellular amyloid-beta42 oligomer to plaques (mL/g/day)."""
 
         # self.delta_APop = 1  # (no difference)
@@ -199,8 +200,8 @@ class Parameters():
 
         # self.lambda_InsG = 0.18e-6 * 47000 * 1440 * 1.077 * 0.005  # approx 0.065602
         # TODO: Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
-        #    lambda_InsG = d_G * G_0 . Résultat "Figure_solve_ivp_Radau_1y_22-09-08_APOE+_F_04.png" Pas beau :(
-        #    Okay avec BDF. Voir "Figure_solve_ivp_BDF_5y_22-09-08_APOE+_F_11.png" et suivantes
+        #    lambda_InsG = d_G * G_0 . Résultat "Figure_22-09-08_solve_ivp_Radau_1y_APOE+_F_04.png" Pas beau :(
+        #    Okay avec BDF. Voir "Figure_22-09-08_solve_ivp_BDF_5y_APOE+_F_11.png" et suivantes
         #    À confirmer et mettre correctement si accepté.
         self.lambda_InsG = (math.log(2) / (41 / 24)) * (1104e-12 * 47000 * self.rho_cerveau)  # ~ 2.1685e-05
         """Creation rate of GSK-3 induced by the insulin (g/mL/day)"""
@@ -220,8 +221,8 @@ class Parameters():
 
         self.d_G = math.log(2) / (41 / 24)  # approx 0.4057
         # TODO: Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
-        #    d_G = lambda_InsG / G_0 . Résultat "Figure_solve_ivp_Radau_5y_22-09-08_APOE+_F_10.png" Pas beau :(
-        #    Okay avec BDF, donne même chose que "Figure_solve_ivp_BDF_5y_22-09-08_APOE+_F_11.png", où modif faite
+        #    d_G = lambda_InsG / G_0 . Résultat "Figure_22-09-08_solve_ivp_Radau_5y_APOE+_F_10.png" Pas beau :(
+        #    Okay avec BDF, donne même chose que "Figure_22-09-08_solve_ivp_BDF_5y_APOE+_F_11.png", où modif faite
         #    sur lambda_InsG.
         # self.d_G = self.lambda_InsG / (1104e-12 * 47000 * self.rho_cerveau)
         """Degradation rate of GSK-3 (/day)."""
@@ -299,7 +300,7 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR M_NA #
         #######################################
 
-        self.kappa_FoM = 0.2141 * 2/3  # TODO: 28.32 * 2?
+        self.kappa_FoM = 0.2141 * 2/3  # TODO: 28.32 * 2? Trop grand!
         """Activation rate of microglia by F_o (NFT) (/day)."""
 
         self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000  # approx 1.3243e-12
@@ -307,7 +308,7 @@ class Parameters():
         """Concentration of extracellular NFTs at which the rate of activation of microglia by F_o 
         is half-maximal (g/mL)."""
 
-        self.kappa_ABooM = 0.2141 * 1/3  # TODO: 28.32 ?
+        self.kappa_ABooM = 0.2141 * 1/3  # TODO: 28.32 ? Trop grand!
         """Activation rate of microglia by extracellular amyloid-beta42 oligomer (/day). """
 
         self.K_ABooM = 0.060 / 527.4 / 1000  # approx 1.1377e-7
