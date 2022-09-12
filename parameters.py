@@ -95,14 +95,19 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR NEURONS #
         ##########################################
 
-        self.d_FiN = 1/math.log(2.51 * 365) * 1e-4  # = 1.0915e-3  # TODO: Val trop grande... *1e-2
+        # self.d_FiN = 1/(2.51 * 365)  # = 1.0915e-3
+        self.d_FiN = 1 / (2.51 * 365) * 1e-2
+        # TODO: Val trop grande? (voir 22-09-12_..._04). Ajoute *1e-1 (22-09-12_..._06), mieux, mais AB_m^o et AB_o^o
+        #  bizarre. Ajoute *1e-2 (22-09-12_..._07) encore mieux. Conserve ça pour la suite, jusqu'à nouvel ordre.
         """Maximal death rate of neurons induced by F_i (/day)."""
 
         self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4  # TODO: Val trop petite... *1e3
         """Concentration of intracellular NFTs (F_i) for which the death rate of neuron induced by F_i is 
         half-maximal (g/mL)."""
 
-        self.n = 4
+        self.n = 2
+        # TODO: 4 -> 2 (22-09-12_..._04 -> _05). Différence seulement pour hat{M}_pro (pic plus haut) et
+        #      hat{M}_anti (moins grande variation au départ). Conserve 2 jusqu'à nouvel ordre.
         """Sigmoid function coefficient (unitless)."""
         # TODO: À déterminer avec le modèle.
 
@@ -301,19 +306,24 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR M_NA #
         #######################################
 
-        self.kappa_FoM = 0.2141 * 2/3  # TODO: 28.32 * 2?
-        # TODO: Trop grand! *1e-2 yark ... 22-09-09_..._09 où dim aussi kappa_ABooM.
+        self.kappa_FoM = 0.2141 * 2/3  # TODO: 28.32 * 2? Trop grand!
+        # self.kappa_FoM = 0.2141 * 2 / 3 * 1e-2
+        # TODO: *1e-2 yark ... 22-09-09_..._09 où dim aussi kappa_ABooM.
+        #  22-09-12_..._02: kappa_FoM * 1e-1 : Pas d'amélioration.
+        #  22-09-12_..._03: kappa_FoM * 1e-2 : Pas d'amélioration. Ralentis création M_pro, mais pas d'effet sur M_anti.
+        #  22-09-12_..._09: kappa_FoM * 1e-2 : ~ Same que _03.
         """Activation rate of microglia by F_o (NFT) (/day)."""
 
         self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000  # approx 1.3243e-12
-        # TODO: Trop bas. Test *1e8, mieux, mais ordres de grandeur bizarres (22-09-09_..._07).
+        # TODO: Trop bas. Test *1e8, mieux, mais ordres de grandeur bizarres (22-09-09_..._07), sur 5 ans. Laid sur 50
+        #    ans... (22-09-12_..._01)
         #    Tentons plus grand : * 1e2: pas vrm de différence (22-09-09_..._08) (aussi présent pour ..._09);
         #    * 1e4: ..._10; * 1e5: ..._11; s'améliore pas...
         """Concentration of extracellular NFTs at which the rate of activation of microglia by F_o 
         is half-maximal (g/mL)."""
 
-        self.kappa_ABooM = 0.2141 * 1/3  # TODO: 28.32 ?
-        # TODO: Trop grand! *1e-2. yark, 22-09-09_..._09 où dim aussi kappa_FoM.
+        self.kappa_ABooM = 0.2141 * 1/3  # TODO: 28.32 ? Trop grand!
+        # TODO: *1e-2. yark, 22-09-09_..._09 où dim aussi kappa_FoM.
         """Activation rate of microglia by extracellular amyloid-beta42 oligomer (/day). """
 
         self.K_ABooM = 0.060 / 527.4 / 1000  # approx 1.1377e-7
@@ -341,13 +351,20 @@ class Parameters():
         """Half-saturation constant of TNF-alpha for the activation of microglia to a proinflammatory 
         polarization (g/mL)."""
 
-        self.kappa_TbMpro = 4.8
+        self.kappa_TbMpro = 4.8  # * 1e-2
+        # TODO: Peut-être transfert trop rapide. 22-09-12_..._12: * 1e-1 (et pour kappa_TaManti);
+        #       22-09-12_..._13: * 1e-2 (et pour kappa_TaManti);
+        #       22-09-12_..._14: * 1e-2 pour kappa_TbMpro, kappa_TaManti, kappa_TbMhatpro et kappa_TaMhatanti.
         """Maximal conversion rate of proinflammatory microglia to anti-inflammatory under TGF-beta signaling (/day)."""
 
         self.K_TbM = 5.9e-11
         """Concentration of TGF-beta for which the conversion of Mpro to Manti is half maximal (g/mL)."""
 
-        self.kappa_TaManti = 4.8
+        self.kappa_TaManti = 4.8  # * 1e-2
+        # TODO: Peut-être transfert trop rapide. 22-09-12_..._11: * 1e-2;
+        #       22-09-12_..._12: * 1e-1 (et pour kappa_TbMpro);
+        #       22-09-12_..._13: * 1e-2 (et pour kappa_TbMpro);
+        #       22-09-12_..._14: * 1e-2 pour kappa_TbMpro, kappa_TaManti, kappa_TbMhatpro et kappa_TaMhatanti.
         """Maximal conversion rate of anti-inflammatory microglia to proinflammatory under TNF-alpha 
         signaling (/day)."""
 
@@ -368,6 +385,8 @@ class Parameters():
         """Maximal concentration of macrophage in the brain (g/mL)."""
 
         self.kappa_TbMhatpro = 1/(10/24)  # = 2.4
+        # self.kappa_TbMhatpro = 1 / (10 / 24) * 1e-2
+        # TODO: 22-09-12_..._14: * 1e-2 pour kappa_TbMpro, kappa_TaManti, kappa_TbMhatpro et kappa_TaMhatanti.
         """Maximal conversion rate of proinflammatory macrophage to anti-inflammatory under TGF-beta 
         signaling (/day)."""
 
@@ -375,6 +394,8 @@ class Parameters():
         """Concentration of TGF-beta for which the conversion of hat{M}_pro to hat{M}_anti is half maximal (g/mL)."""
 
         self.kappa_TaMhatanti = 1/(10/24)  # = 2.4
+        # self.kappa_TaMhatanti = 1 / (10 / 24) * 1e-2
+        # TODO: 22-09-12_..._14: * 1e-2 pour kappa_TbMpro, kappa_TaManti, kappa_TbMhatpro et kappa_TaMhatanti.
         """Maximal conversion rate of anti-inflammatory macrophage to proinflammatory under TNF-alpha 
         signaling (/day)."""
 
@@ -395,10 +416,12 @@ class Parameters():
         kappa_MhatantiTb_max = 2 * (47e-12 / 18 * 24) / (2e6 * m_Mhat)  # approx 1.256e-8 /j
 
         self.kappa_MhatantiTb = kappa_MhatantiTb_min
+        # self.kappa_MhatantiTb = kappa_MhatantiTb_max * 1e2
+        # TODO: 22-09-12_..._15: self.kappa_MhatantiTb = kappa_MhatantiTb_max * 1e2.
         """Production rate of TGF-beta by hat{M}_pro (/day)."""
         # TODO: In the interval kappa_MhatantiTb_min to kappa_MhatantiTb_max, à tester.
 
-        self.kappa_MantiTb = kappa_MhatantiTb_min
+        self.kappa_MantiTb = self.kappa_MhatantiTb
         """Production rate of TGF-beta by M_pro (/day)."""
         # TODO: In the interval kappa_MhatantiTb_min to kappa_MhatantiTb_max, à tester.
 

@@ -21,18 +21,18 @@ AgeStart = 30
 
 y0 = InitialConditions(AgeStart)
 
-AgeEnd = 35
+AgeEnd = 80
 decades = int((AgeEnd - AgeStart) / 10)
 
 # sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "LSODA")
-# method = "solve_ivp_LSODA"
+# method = "LSODA"
 
 max_step = 0.1
 maxstepstr = "01"
-sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "BDF", max_step=max_step)
-method = "solve_ivp_BDF"
-# sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, "Radau")
-# method = "solve_ivp_Radau"
+method = "BDF"
+# method = "Radau"
+sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step)
+# method = "solve_ivp_BDF"
 
 """Generate the figure"""
 # fig = plt.figure()
@@ -90,10 +90,6 @@ for ax in axs.flat:
 # axs[3, 4].set_ylabel("Manti", color='b')
 # ax2.plot(sol.t / 365, sol.y[16, :], "g-")  # I_10
 # ax2.set_ylabel("I10", color='g')
-# À partir de la figure 22-09-09_..._05_.._Zoom, on constate que, parmi les graphs ayant un pis de départ abérant,
-# M_anti serait le premier (pourrait causer les autres). Pour ce qui est de celui des plaques, on peut tenter de le
-# résorber en mettant la cond. init. plus petite. Si prend 0 bug, prend 1e-18 (voir _06). Mais je ne pense pas que ce
-# soit la cause du problème.
 
 plt.tight_layout()
 
@@ -115,12 +111,13 @@ else:  # p.AP == 0:
     APOE = "-"
 
 my_path = os.path.abspath('Figures')
-FigName = "Figure_22-09-09_" + method + "_" + str(AgeEnd - AgeStart) + "y_APOE" + APOE + "_" + sex + "_13_maxstep"\
+FigName = "Figure_22-09-13_" + method + "_APOE" + APOE + "_" + sex + "_01_" + str(AgeEnd - AgeStart) + "y_maxstep"\
           + maxstepstr + ".png"
 plt.savefig(os.path.join(my_path, FigName), dpi=180)
 
 """Add information to the figure."""
 FigInfos = {"max_step": str(max_step),
+            "Début": "Début intégration",  # "Ignore la première demi-année."
             "Modification(s)": ""}
 
 im = Image.open("Figures/" + FigName)
@@ -140,3 +137,4 @@ im.save("Figures/" + FigName, "png", pnginfo=Infos)
 # im.info
 
 plt.show()
+

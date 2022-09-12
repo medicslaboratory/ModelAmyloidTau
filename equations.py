@@ -135,7 +135,7 @@ def ODEsystem(t, y):
     dydt[15] = p.kappa_MantiTb * y[12] + p.kappa_MhatantiTb * y[14] - p.d_Tb * y[15]
 
     # IL-10 = Interleukin 10 (I_10)
-    dydt[16] = p.kappa_MantiI10 * y[12] + p.kappa_MhatantiI10 * y[12] - p.d_I10 * y[16]
+    dydt[16] = p.kappa_MantiI10 * y[12] + p.kappa_MhatantiI10 * y[14] - p.d_I10 * y[16]
 
     # TNF-alpha = Tumor necrosis factor alpha (T_alpha)
     dydt[17] = p.kappa_MproTa * y[11] + p.kappa_MhatproTa * y[13] - p.d_Ta * y[17]
