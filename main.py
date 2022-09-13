@@ -111,13 +111,14 @@ if p.AP == 1:
 else:  # p.AP == 0:
     APOE = "-"
 
-number = 12
+number = 1
+date = "22-09-14"
 my_path = os.path.abspath('Figures')
-FigName = "Figure_22-09-13_" + method + "_APOE" + APOE + "_" + sex + "_" + f"{number:02}" + "_" + \
+FigName = "Figure_" + date + "_" + method + "_APOE" + APOE + "_" + sex + "_" + f"{number:02}" + "_" + \
           str(AgeEnd - AgeStart) + "y_maxstep" + maxstepstr + ".png"
 while os.path.exists(os.path.join(my_path, FigName)):
     number = number+1
-    FigName = "Figure_22-09-13_" + method + "_APOE" + APOE + "_" + sex + "_" + f"{number:02}" + "_" + \
+    FigName = "Figure_" + date + "_" + method + "_APOE" + APOE + "_" + sex + "_" + f"{number:02}" + "_" + \
               str(AgeEnd - AgeStart) + "y_maxstep" + maxstepstr + ".png"
 
 plt.savefig(os.path.join(my_path, FigName), dpi=180)
@@ -125,11 +126,7 @@ plt.savefig(os.path.join(my_path, FigName), dpi=180)
 """Add information to the figure."""
 FigInfos = {"max_step": str(max_step),
             "Début": "Début intégration",  # "Ignore la première demi-année."
-            "Modification(s)": "TotalMaxActivRateM * 1e-3 & kappa_PMhat * 1e-3. "
-                               "kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-1, diminution prod Ta. Impact aussi kappa_MproTa."
-                               "kappa_MhatantiTb = kappa_MhatantiTb_max *1e2, (nouveau max); impact aussi kappa_MantiTb. "
-                               "lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau * 1e3; aug. prod AB^i, impact également lambda_ABmo."
-                               "Cond. init. pour AB_m^o et AB_o^o avec équilibre."}
+            "Modification(s)": ""}
 
 im = Image.open("Figures/" + FigName)
 Infos = PngImagePlugin.PngInfo()
