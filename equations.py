@@ -116,7 +116,7 @@ def ODEsystem(t, y):
     #            - p.kappa_TaManti * (y[17] / (y[17] + p.K_TaM)) * y[12] - p.d_Manti * y[12]
 
     # Proinflammatory macrophages (hat{M}_pro)
-    dydt[13] = p.kappa_PMhatpro * (y[18] / (y[18] + p.K_P)) * (p.Mhatmax - (y[13] + y[14])) * \
+    dydt[13] = p.kappa_PMhat * (y[18] / (y[18] + p.K_P)) * (p.Mhatmax - (y[13] + y[14])) * \
                ((p.beta * epsilon_Ta) / (p.beta * epsilon_Ta + epsilon_I10)) \
                - p.kappa_TbMhatpro * (y[15] / (y[15] + p.K_TbMhat)) * y[13] \
                + p.kappa_TaMhatanti * (y[17] / (y[17] + p.K_TaMhat)) * y[14] - p.d_Mhatpro * y[13]
@@ -124,7 +124,7 @@ def ODEsystem(t, y):
     # Anti-inflammatory macrophages (hat{M}_anti)
     # Sans terme de création : 22-09-09_..._04. Tout de même saut en M_anti, hat{M}_anti, T_b et I_10, donc
     # peu concluant.
-    dydt[14] = p.kappa_PMhatpro * (y[18] / (y[18] + p.K_P)) * (p.Mhatmax - (y[13] + y[14])) * \
+    dydt[14] = p.kappa_PMhat * (y[18] / (y[18] + p.K_P)) * (p.Mhatmax - (y[13] + y[14])) * \
                (epsilon_I10 / (p.beta * epsilon_Ta + epsilon_I10)) \
                + p.kappa_TbMhatpro * (y[15] / (y[15] + p.K_TbMhat)) * y[13] \
                - p.kappa_TaMhatanti * (y[17] / (y[17] + p.K_TaMhat)) * y[14] - p.d_Mhatanti * y[14]

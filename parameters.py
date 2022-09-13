@@ -125,7 +125,17 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR AB^i #
         #######################################
 
-        self.lambda_ABi = (1/2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau  # env. = 1.3681e-10
+        # self.lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau  # env. = 1.3681e-10
+        self.lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau * 1e4
+        # TODO:
+        #   22-09-13_..._12 : kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-1, diminution prod Ta,
+        #       impact aussi kappa_MproTa.
+        #       kappa_MhatantiTb = kappa_MhatantiTb_max *1e2, (nouveau max) ; impact aussi kappa_MantiTb.
+        #       lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau * 1e3 ; aug. prod AB^i,
+        #       impact également lambda_ABmo.
+        #    22-09-13_..._13 : Same as _12, mais 1e4 plutôt que 1e3; et cond. init. selon le point fixe.
+        #       => mieux pour plaques, mais pas parfait.
+        #    De ces graphs, on peut conclure que ce paramètre a beaucoup d'impact.
         """Creation rate of amyloid-beta42 inside neuron from APP (g/mL/day)."""
 
         self.delta_APi = (8373e-9 - 2178e-9) / (5631e-9 - 783e-9) - 1  # approx. 0.2778
@@ -141,6 +151,7 @@ class Parameters():
         #########################################
 
         self.lambda_ABmo = self.lambda_ABi
+        # Voir lambda_ABi pour tests.
         """Creation rate of Amyloid Beta42 monomer outside (without APOE allele) (g/mL/day)."""
 
         self.delta_APm = self.delta_APi
@@ -306,8 +317,12 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR M_NA #
         #######################################
 
-        self.kappa_FoM = 0.2141 * 2/3  # TODO: 28.32 * 2? Trop grand!
-        # self.kappa_FoM = 0.2141 * 2 / 3 * 1e-2
+        TotalMaxActivRateM = 0.2141 * 1e-3
+        # TODO: 22-09-13_..._03: TotalMaxActivRateM * 1e-2 & kappa_PMhat * 1e-2. Mieux.
+        #  22-09-13_..._04: TotalMaxActivRateM * 1e-3 & kappa_PMhat * 1e-3. Bien.
+
+        self.kappa_FoM = TotalMaxActivRateM * 2 / 3  # approx 0.1427  # TODO: 28.32 * 2? Trop grand!
+        # self.kappa_FoM = TotalMaxActivRateM * 2 / 3 * 1e-2
         # TODO: *1e-2 yark ... 22-09-09_..._09 où dim aussi kappa_ABooM.
         #  22-09-12_..._02: kappa_FoM * 1e-1 : Pas d'amélioration.
         #  22-09-12_..._03: kappa_FoM * 1e-2 : Pas d'amélioration. Ralentis création M_pro, mais pas d'effet sur M_anti.
@@ -322,7 +337,7 @@ class Parameters():
         """Concentration of extracellular NFTs at which the rate of activation of microglia by F_o 
         is half-maximal (g/mL)."""
 
-        self.kappa_ABooM = 0.2141 * 1/3  # TODO: 28.32 ? Trop grand!
+        self.kappa_ABooM = TotalMaxActivRateM * 1 / 3  # approx 0.07137  # TODO: 28.32 ? Trop grand!
         # TODO: *1e-2. yark, 22-09-09_..._09 où dim aussi kappa_FoM.
         """Activation rate of microglia by extracellular amyloid-beta42 oligomer (/day). """
 
@@ -369,13 +384,17 @@ class Parameters():
         signaling (/day)."""
 
         self.K_TaM = 2.24e-12
+        # self.K_TaM = 2.24e-12 * 1e2
+        # TODO: Test * 1e2: 22-09-13_..._01. Pas amélioration des pics.
         """Concentration of TNF-alpha for which the conversion of Manti to Mpro is half maximal (g/mL)."""
 
         #############################################################
         # CONSTANTS FOR THE EQUATION FOR hat{M}_pro AND hat{M}_anti #
         #############################################################
 
-        self.kappa_PMhatpro = 0.33
+        self.kappa_PMhat = 0.33 * 1e-3
+        # TODO: 22-09-13_..._03: TotalMaxActivRateM * 1e-2 & kappa_PMhat * 1e-2. Mieux.
+        #  22-09-13_..._04: TotalMaxActivRateM * 1e-3 & kappa_PMhat * 1e-3. Bien.
         """Maximal importation rate of macrophage in the brain under MCP-1 signaling (/day)."""
 
         self.K_P = 5.00e-10
@@ -400,6 +419,7 @@ class Parameters():
         signaling (/day)."""
 
         self.K_TaMhat = self.K_TaM
+        # Test * 1e2: 22-09-13_..._01 (car test cette augmentation sur K_TaM). Pas amélioration des pics.
         """Concentration of TNF-alpha for which the conversion of hat{M}_anti to hat{M}_pro is half maximal (g/mL)."""
 
         self.d_Mhatpro = 7.67e-4
@@ -412,12 +432,21 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR T_beta #
         #########################################
 
-        kappa_MhatantiTb_min = 2 * (47e-12 / 18 * 24) / (4e6 * m_Mhat)  # approx 6.279e-9 /j
-        kappa_MhatantiTb_max = 2 * (47e-12 / 18 * 24) / (2e6 * m_Mhat)  # approx 1.256e-8 /j
+        kappa_MhatantiTb_min = 10 * (47e-12 / 18 * 24) / (4e6 * m_Mhat)  # approx 3.14e-8 /j
+        kappa_MhatantiTb_max = 10 * (47e-12 / 18 * 24) / (2e6 * m_Mhat)  # approx 6.28e-8 /j
+        # Nouveaux kappas à partir de figure 22-09-13_..._06_... .
 
-        self.kappa_MhatantiTb = kappa_MhatantiTb_min
-        # self.kappa_MhatantiTb = kappa_MhatantiTb_max * 1e2
-        # TODO: 22-09-12_..._15: self.kappa_MhatantiTb = kappa_MhatantiTb_max * 1e2.
+        # self.kappa_MhatantiTb = kappa_MhatantiTb_max
+        self.kappa_MhatantiTb = kappa_MhatantiTb_max * 1e2
+        # TODO: 22-09-12_..._15: self.kappa_MhatantiTb = kappa_MhatantiTb_max * 1e2,
+        #       où kappa_MhatantiTb_max = 2 * (47e-12 / 18 * 24) / (2e6 * m_Mhat).
+        #   22-09-13_..._06: self.kappa_MhatantiTb = kappa_MhatantiTb_max,
+        #       où kappa_MhatantiTb_max = 10 * (47e-12 / 18 * 24) / (2e6 * m_Mhat).
+        #   22-09-10_..._10: nouveau max *1e1 et kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-1.
+        #       P/r à _09, modif ordre grandeur T_b (-14 (_10) vs -15 (_09)) et petite modif hat{M}_anti.
+        #   22-09-10_..._11: nouveau max *1e2 et kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-1.
+
+
         """Production rate of TGF-beta by hat{M}_pro (/day)."""
         # TODO: In the interval kappa_MhatantiTb_min to kappa_MhatantiTb_max, à tester.
 
@@ -445,10 +474,16 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR T_alpha #
         ##########################################
 
-        self.kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat)  # approx 3.186e-6
+        # self.kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat)  # approx 3.186e-6
+        self.kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-1
+        # TODO: Test diminution prod Ta. * 1e-2, 22-09-13_..._02. Diminue max atteint par Ta, mais atténue pas pics.
+        #   22-09-13_..._08: Réessaie avec TotalMaxActivRateM * 1e-3 & kappa_PMhat * 1e-3. Bonnes différences.
+        #   22-09-13_..._09: Essaie *1e-1. Entre deux. Sais pas qu'est-ce qui est mieux.
+        #   22-09-13_..._10: *1e-1; et kappa_MhatantiTb = kappa_MhatantiTb_max *1e1.
         """Production rate of TNF-alpha by proinflammatory macrophages (hat{M}_pro) (/day)."""
 
         self.kappa_MproTa = self.kappa_MhatproTa
+        # Voir kappa_MhatproTa.
         """Production rate of TNF-alpha by proinflammatory microglia (M_pro) (/day)."""
 
         self.d_Ta = math.log(2) / (18.2 / 1440)  # approx 54.84

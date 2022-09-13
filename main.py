@@ -41,7 +41,7 @@ fig.set_size_inches(35 / 2.54, 20 / 2.54, forward=True)
 
 # Making a list for Label names in the plot
 labelname = [r'$A \beta^{i}$', r'$A \beta_{m}^{o}$', r'$A \beta_{o}^{o}$', r'$A \beta_{p}^{o}$', '$GSK 3$', r'$\tau$',
-             '$F_i$', '$F_o$', '$Neurons$', 'A', '$M$', '$M_{pro}$', '$M_{anti}$', r'$\hat{M}_{pro}$', r'$\hat{M}_{anti}$',
+             '$F_i$', '$F_o$', '$N$', 'A', '$M$', '$M_{pro}$', '$M_{anti}$', r'$\hat{M}_{pro}$', r'$\hat{M}_{anti}$',
              r'$T_{\beta}$', '$I_{10}$', r'$T_{\alpha}$', '$P$']
 
 plt.subplots_adjust(hspace=.8, wspace=.8)
@@ -84,6 +84,7 @@ for ax in axs.flat:
         # notation will be used if exp <= -1 or exp >= 1.
         ax.yaxis.set_major_formatter(formatter)
     i = i+1
+axs.flat[14].tick_params('x', labelbottom=True)
 
 # ax2 = axs[3, 4].twinx()
 # axs[3, 4].plot(sol.t / 365, sol.y[12, :], "b-")  # M_anti
@@ -110,15 +111,25 @@ if p.AP == 1:
 else:  # p.AP == 0:
     APOE = "-"
 
+number = 12
 my_path = os.path.abspath('Figures')
-FigName = "Figure_22-09-13_" + method + "_APOE" + APOE + "_" + sex + "_01_" + str(AgeEnd - AgeStart) + "y_maxstep"\
-          + maxstepstr + ".png"
+FigName = "Figure_22-09-13_" + method + "_APOE" + APOE + "_" + sex + "_" + f"{number:02}" + "_" + \
+          str(AgeEnd - AgeStart) + "y_maxstep" + maxstepstr + ".png"
+while os.path.exists(os.path.join(my_path, FigName)):
+    number = number+1
+    FigName = "Figure_22-09-13_" + method + "_APOE" + APOE + "_" + sex + "_" + f"{number:02}" + "_" + \
+              str(AgeEnd - AgeStart) + "y_maxstep" + maxstepstr + ".png"
+
 plt.savefig(os.path.join(my_path, FigName), dpi=180)
 
 """Add information to the figure."""
 FigInfos = {"max_step": str(max_step),
             "Début": "Début intégration",  # "Ignore la première demi-année."
-            "Modification(s)": ""}
+            "Modification(s)": "TotalMaxActivRateM * 1e-3 & kappa_PMhat * 1e-3. "
+                               "kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-1, diminution prod Ta. Impact aussi kappa_MproTa."
+                               "kappa_MhatantiTb = kappa_MhatantiTb_max *1e2, (nouveau max); impact aussi kappa_MantiTb. "
+                               "lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau * 1e3; aug. prod AB^i, impact également lambda_ABmo."
+                               "Cond. init. pour AB_m^o et AB_o^o avec équilibre."}
 
 im = Image.open("Figures/" + FigName)
 Infos = PngImagePlugin.PngInfo()

@@ -47,7 +47,7 @@ Est-ce que la création est trop faible p/r à dégradation par M_pro
 ..._09_50y : kappa_FoM = (0.2141 * 2/3) * 1e-2
  et ..._Zoom
           → Encore peu différence. (Semblable à _03)
-..._10 : Doublon, donc supprimé
+..._10 : Doublon, donc supprimé.
 ..._11_50y : kappa_TaManti = 4.8 * 1e-2, i.e. diminution de kappa_TaManti de 1e-2.
  et _Zoom et _1y
           → Différences p/r à _08
@@ -60,10 +60,58 @@ Est-ce que la création est trop faible p/r à dégradation par M_pro
           → Différences p/r à _08 et _11
 ..._14_50y et _1y : * 1e-2 pour kappa_TbMpro, kappa_TaManti, kappa_TbMhatpro et kappa_TaMhatanti
 
-Retour val. initiales pour ces kappas
+Retour valeurs initiales pour ces kappas
 
 ..._15_50y : kappa_MhatantiTb = kappa_MhatantiTb_max * 1e2. (Prod T_b relativement plus faible que pour T_a, donc teste
          plus près.)
           → Courbes plus "douces" en général, mais rapidement très élevées...
 
 22-09-13 :
+_01 : K_TaM = 2.24e-12 * 1e2, i.e. augmentation K_TaM. Donc, aussi sur K_TaMhat.
+  → Pas amélioration des pics.
+_02 : kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-2, i.e. diminution kappa_MhatproTa. Donc, aussi sur kappa_MproTa.
+  → Diminue max atteint par Ta, mais n'atténue pas les pics.
+_03 : TotalMaxActivRateM * 1e-2 & kappa_PMhat * 1e-2.
+  → Mieux. Augmentation moins drastique pour les variables intéressées
+_04 : TotalMaxActivRateM * 1e-3 & kappa_PMhat * 1e-3.
+  → Bien!
+_05 : TotalMaxActivRateM * 1e-2 & kappa_PMhat * 1e-2. [Tb]_0 = p.K_TbM * 1e-7 = 5.9e-18 (i.e. même diff ordre de
+      grandeur entre [Tb]_0 et K_TbM que [Ta]_0 et K_TaM).
+  → Avance en rien, atteint équilibre avant de réaugmenter.
+_06 : TotalMaxActivRateM * 1e-2 & kappa_PMhat * 1e-2. kappa_MhatantiTb = kappa_MhatantiTb_max (nouveau '2*' -> '10*'),
+      modifie aussi kappa_MantiTb.
+  → Très peu différence avec _03.
+_07 : TotalMaxActivRateM * 1e-3 & kappa_PMhat * 1e-3. kappa_MhatantiTb = kappa_MhatantiTb_max (nouveau '2*' -> '10*'),
+      modifie aussi kappa_MantiTb.
+  → Peu différence avec _04. T_beta un peu et P monte plus haut.
+
+→ Conserve TotalMaxActivRateM * 1e-3, kappa_PMhat * 1e-3, et kappa_MhatantiTb = kappa_MhatantiTb_max
+  jusqu'à indication contraire.
+
+Je crois que le problème se situe avec le TGF-beta. K_{TbM} = 5.9e-11g/mL, qui est loin d'être approché (graph: x10^{-16}).
+L'équilibre initial de l'équation pour T_b est à environ 3.77e-22. Car les taux de création (kappas) sont de l'ordre de
+e-8 et la degradation de e2. On a une dégradation beaucoup plus rapide que l'accumulation, comparativement à TNF-alpha,
+pour des concentrations de cytokine semblables. En effet, on a K_TaM ~ e-12 ; kappa_MantiTa (et hat) ~ e-6 ;
+d_Ta = 54.84 (e1). On a quelque chose de semblable à TNF-a pour l'IL-10.
+
+_08 : kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-2, diminution prod Ta. Impact aussi kappa_MproTa.
+  → Plusieurs différences avec _07. Entre autres, pics plus alongés.
+_09 : kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-1, diminution prod Ta. Impact aussi kappa_MproTa.
+  → Plusieurs différences. Entre deux. Sais pas qu'est-ce qui est mieux.
+_10 : kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-1, diminution prod Ta. Impact aussi kappa_MproTa.
+      kappa_MhatantiTb = kappa_MhatantiTb_max *1e1, (nouveau max) ; impact aussi kappa_MantiTb.
+  → P/r à _09, modif ordre grandeur T_b (-14 (_10) vs -15 (_09)) et petite modif hat{M}_anti.
+_11 : kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-1, diminution prod Ta. Impact aussi kappa_MproTa.
+      kappa_MhatantiTb = kappa_MhatantiTb_max *1e2, (nouveau max) ; impact aussi kappa_MantiTb.
+  → ++ différences. Problème avec plaques, car trop faibles.
+_12 : kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-1, diminution prod Ta. Impact aussi kappa_MproTa.
+      kappa_MhatantiTb = kappa_MhatantiTb_max *1e2, (nouveau max) ; impact aussi kappa_MantiTb.
+      lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau * 1e3 ; aug. prod AB^i, impact
+      également lambda_ABmo.
+  → Encore problème plaques. Pas mal d'impact.
+_13 : kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-1, diminution prod Ta. Impact aussi kappa_MproTa.
+      kappa_MhatantiTb = kappa_MhatantiTb_max *1e2, (nouveau max) ; impact aussi kappa_MantiTb.
+      lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau * 1e4 ; aug. prod AB^i, impact
+      également lambda_ABmo.
+      Cond. init. pour AB_m^o et AB_o^o avec équilibre.
+  → Mieux pour plaques, mais pas parfait. Pas mal d'impact.
