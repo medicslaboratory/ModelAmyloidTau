@@ -27,10 +27,12 @@ decades = int((AgeEnd - AgeStart) / 10)
 
 max_step = 0.1
 maxstepstr = str(max_step).replace('.', '')
+rtol = 1e-3  # Default value : 1e-3
+rtolstr = "{:e}".format(rtol)
 method = "BDF"
 # method = "Radau"
 # method = "LSODA"
-sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step)
+sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, rtol=rtol)
 
 """Generate the figure"""
 # fig = plt.figure()
@@ -109,23 +111,22 @@ if p.AP == 1:
 else:  # p.AP == 0:
     APOE = "-"
 
-number = 7
+number = 1
 date = "22-09-14"
 my_path = os.path.abspath('Figures')
-FigName = "Figure_" + date + "_" + method + "_APOE" + APOE + "_" + sex + "_" + f"{number:02}" + "_" + \
-          str(AgeEnd - AgeStart) + "y_maxstep" + maxstepstr + ".png"
-# TODO: Modif nom figure date puis essai et reste pareil...
+FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
+          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + ".png"
 while os.path.exists(os.path.join(my_path, FigName)):
     number = number+1
-    FigName = "Figure_" + date + "_" + method + "_APOE" + APOE + "_" + sex + "_" + f"{number:02}" + "_" + \
-              str(AgeEnd - AgeStart) + "y_maxstep" + maxstepstr + ".png"
+    FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
+              str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + ".png"
 
 plt.savefig(os.path.join(my_path, FigName), dpi=180)
 
 """Add information to the figure."""
 FigInfos = {"max_step": str(max_step),
             "Début": "Début intégration",  # "Ignore la première demi-année."
-            "Modification(s)": "Même modifs que 22-09-14_..._04, mais sans transfert anti -> pro de microglies."}
+            "Modification(s)": "Retour normal."}
 
 im = Image.open("Figures/" + FigName)
 Infos = PngImagePlugin.PngInfo()

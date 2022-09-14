@@ -20,27 +20,27 @@ def InitialConditions(AgeStart=30):
     # y0[1] = 1e-11   # Todo ou  ??
     # y0[1] = (p.lambda_ABmo * (1 + p.AP * p.delta_APm) + p.lambda_AABmo) / (p.d_ABmo(AgeStart*365) + p.kappa_ABmoABoo *
     #                                                                        (1 + p.AP * p.delta_APmo))
-    A = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo)
-    B = p.d_ABmo(AgeStart*365)
-    C = -(p.lambda_ABmo * (1 + p.AP * p.delta_APm) + p.lambda_AABmo)
-    y0[1] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
+    # A = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo)
+    # B = p.d_ABmo(AgeStart*365)
+    # C = -(p.lambda_ABmo * (1 + p.AP * p.delta_APm) + p.lambda_AABmo)
+    # y0[1] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
     # Prendre + donne nég. Avec AgeStart=30, = 4.233652303020852e-11.
     # Par expérience, pour pas avoir de différence au départ, prendre (22-09-07_..._12 vs _13):
-    # y0[1] = 4e-11
+    y0[1] = 0
 
     """AB_o^o (Amyloid-beta oligomers extracell.)"""
     # y0[2] = 5e-13  # 0
     # y0[2] = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2) / (p.d_ABoo + p.kappa_ABooABpo)
-    A = p.kappa_ABooABpo
-    B = p.d_ABoo
-    C = - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2)
-    y0[2] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
+    # A = p.kappa_ABooABpo
+    # B = p.d_ABoo
+    # C = - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2)
+    # y0[2] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
     # Prendre + donne nég. Avec AgeStart=30, = 6.791648132775663e-17.
     # Par expérience, pour pas avoir de différence au départ, prendre (22-09-07_..._12 vs _13):
-    # y0[2] = 6e-17
+    y0[2] = 0
 
     """AB_p^o (Amyloid-beta plaque extracell.)"""
-    y0[3] = 1e-18  # 1e-10
+    y0[3] = 1e-18
 
     """G (GSK3)"""
     # y0[4] = p.lambda_InsG / p.d_G  # ~= 0.16168

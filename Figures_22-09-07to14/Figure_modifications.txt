@@ -176,6 +176,7 @@ _07 : Même modifs que 22-09-14_..._04, mais sans transfert anti -> pro de micro
   cause l'augmentation de M_pro (qui fait que tout le reste s'enchaine : T_a, A, P, hat{M}_pro et _anti, et
   boucle repend).
 
-_08 :
+Essai _08, _09 et_10, durant rencontre.
+Tente retour paramètres initiaux.
 
 
