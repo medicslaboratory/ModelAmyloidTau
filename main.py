@@ -27,11 +27,11 @@ decades = int((AgeEnd - AgeStart) / 10)
 
 max_step = 0.1
 maxstepstr = str(max_step).replace('.', '')
-rtol = 1e-3  # Default value : 1e-3
+rtol = 1e-10  # Default value : 1e-3
 rtolstr = "{:e}".format(rtol)
-method = "BDF"
+# method = "BDF"
 # method = "Radau"
-# method = "LSODA"
+method = "LSODA"
 sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, rtol=rtol)
 
 """Generate the figure"""
