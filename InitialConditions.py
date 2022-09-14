@@ -109,7 +109,8 @@ def InitialConditions(AgeStart=30):
 
     """T_{alpha} (TNF-alpha)"""
     # y0[17] = 1e-12
-    y0[17] = (p.kappa_MproTa * y0[11] + p.kappa_MhatproTa * y0[13]) / p.d_Ta  # 1.1620103844701855e-19
+    y0[17] = (p.kappa_MproTa * y0[11] + p.kappa_MhatproTa * y0[13]) / p.d_Ta  # nouv kappas (Fadok98): 7.31e-21
+    # 1.1620103844701855e-19 (av)
     # Hao 2e-5
 
     """P (MCP-1)"""

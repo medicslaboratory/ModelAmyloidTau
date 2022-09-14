@@ -115,3 +115,67 @@ _13 : kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat) * 1e-1, diminution prod Ta. Imp
       également lambda_ABmo.
       Cond. init. pour AB_m^o et AB_o^o avec équilibre.
   → Mieux pour plaques, mais pas parfait. Pas mal d'impact.
+
+Résultats du jour indiquent que les paramètres à revoir seraient :
+    1. TotalMaxActivRateM et kappa_PMhat, qui sont trop grands ;
+    2. kappa_MhatproTa, donc kappa_MproTa, trop grands ;
+    3. kappa_MhatantiTb, donc kappa_MantiTb, trop petits ;
+    4. lambda_ABi, donc lambda_ABmo, trop petits.
+
+22-09-14 :
+Figure 22-09-13_..._13 bien (sauf pour plaques, est-ce que taux de dégradation par microglies trop grand ?).
+- Taux activation plus faibles :
+   - Avec ce qu'on a trouvé comme sources, il serait difficile d'expliquer une diminution de *1e-3 de TotalMaxActivRateM.
+     Ce taux est difficile à trouver dans la littérature.
+   - Avec ce qu'on a déjà, au mieux, on peut diminuer kappa_PMhat à 1/6 plutôt que 1/3, mais on est encore loin
+     de (1/3 * 1e-3).
+- Peut avoir valeur plus petite de kappa_MhatproTa (et kappa_MproTa) en utilisant la même source que pour
+kappa_MhatantiTb (et kappa_MantiTb) soit Fadok98. Cet article trouve une prod de TNF-a de 1.5ng/mL en 18h, pour
+2-4e6macro/mL stimulés par LPS. Par une démarche semblable à celle faite pour TGF-beta, on obtient un intervalle
+d'environ 1.002e-7 à 2.004e-7.
+- Explication pour augmentation des kappas de T_beta pas évidente, voir dans la littérature si trouverais pas autre
+chose, mes recherches n'ont pas été fructueuse jusqu'à maintenant.
+- Explication pour augmentation de lambda_ABi à voir...
+
+_01 : Même modifs que 22-09-13_..._13. Ajout K_P = 5.00e-10 -> 6.23e-10 (moyenne patients sains -> moyenne patients
+      malades).
+  → Pas grandes différences, mais bien. Conserve ça.
+
+Un des problèmes principaux est la création très rapide de F_o... Comment arranger ça ?
+
+_02 : Même modifs que 22-09-14_..._01. Ajout kappa_MhatantiI10 = 660e-12 / (2e5 * m_Mhat) ; approx 6.12e-5 ->  6.613e-7.
+      Modifie aussi kappa_MantiI10 et la cond init de l'IL10.
+  → Avec max_step=0.1, plusieurs pics. Pas bcp mieux avec max_step=0.05. Étrange entre 38 et 39 ans. Si augmente
+  max_step à 0.001 semble régler problème entre 38 et 39 ans. Tente ensuite ce max_step sur 30 à 80 ans ; beaucoup trop
+  long à rouler, interrompue en cours. Si prend 0.05 et Radeau, pas mal.
+  → IL-10 plus faible, donc reste sous K_I10, comme c'est le cas pour T_a, mais deux ordres de grandeur plus petit
+  (vs 1 pour T_a).
+
+_03 : Comme _02, mais retour à kappa_MhatantiTb = kappa_MhatantiTb_max (impact aussi kappa_MantiTb).
+  → Ramène les pics de départ...
+
+_04 : Même modifs que 22-09-14_..._02, mais kappa_MhatproTa = (1.5e-9 / 18 * 24) / (2e6 * m_Mhat) ; le max de Fadok98.
+  → Pour un même max_step, mieux que _02. Différence entre max_step=0.1 et 0.05 petites, seulement pour pic de plaques
+  plus bas et pic F_o moins drastique.
+
+_05 : Même modifs que 22-09-14_..._04, mais retire terme activation des microglies par oligomères d'AB (de M_activ).
+      But : Voir si l'activation rapide des microglies, pricipalement pro-inflammatoires, est due à F_o ou à AB_o^o,
+      ou autre.
+  → (Compare avec _04). Activation rapide des microlgies principalement due à F_o ; les oligo contribue, mais ne cause
+  pas l'augmentation rapide
+
+_06 : ême modifs que 22-09-14_..._04, mais retire terme activation des microglies par F_o (de M_activ).
+      But : Voir si l'activation rapide des microglies, pricipalement pro-inflammatoires, est due à F_o ou à AB_o^o,
+      ou autre (complète le test de la figure _05).
+  → (Compare avec _04). Tout de même une activation rapide au début, mais conserve l'exponentielle au début.
+
+_07 : Même modifs que 22-09-14_..._04, mais sans transfert anti -> pro de microglies.
+      But : Voir si l'activation rapide des microglies, pricipalement pro-inflammatoires, est due à F_o ou à AB_o^o,
+      ou autre (complète le test de la figure _05 et _06).
+  → (Compare avec _04). Pic pour M_pro, mais plus d'augmentation. Ce qui signifie que c'est le passage anti -> pro qui
+  cause l'augmentation de M_pro (qui fait que tout le reste s'enchaine : T_a, A, P, hat{M}_pro et _anti, et
+  boucle repend).
+
+_08 :
+
+

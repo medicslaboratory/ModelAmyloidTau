@@ -16,7 +16,7 @@ def ODEsystem(t, y):
     :param y:
         y[0]   AB^i (Amyloid-beta monomer inside the neurons)
         y[1]   Amyloid-beta monomer outside the neurons
-        y[2]   Amyloid-beta oligomers outside
+        y[2]   Amyloid-beta oligomer outside
         y[3]   Amyloid-beta plaque outside the neurons
         y[4]   GSK-3
         y[5]   tau proteins
@@ -43,7 +43,7 @@ def ODEsystem(t, y):
     #           - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
     # dydt[8] = -p.d_FiN * (1 / (1 + np.exp(- p.n * (y[6] - p.K_Fi) / p.K_Fi))) * y[8] \
     #           - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
-    # TODO: Division ("/ p.K_Fi") dans sigmoïde utile? Retiré ok?
+    # TODO: Division ("/ p.K_Fi") dans sigmoïde utile? Retiré, ok?
     dydt[8] = -p.d_FiN * (1 / (1 + np.exp(- p.n * (y[6] - p.K_Fi)))) * y[8] \
               - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
 
@@ -94,8 +94,9 @@ def ODEsystem(t, y):
     #            + p.kappa_ABooM * (y[2] / (y[2] + p.K_ABooM)) * (p.M_max - y[10]) - p.d_M * y[10]
 
     M_activ = p.kappa_FoM * (y[7] / (y[7] + p.K_Fo)) * y[10] + p.kappa_ABooM * (y[2] / (y[2] + p.K_ABooM)) * y[10]
+    # 22-09-14_..._05 : Sans terme pour AB_o^o ; 22-09-14_..._06 : Sans terme pour F_o.
 
-    # Not activated microglia (M_NA)
+    # Resting microglia (not activated) (M_NA)
     dydt[10] = p.d_Mpro * y[11] + p.d_Manti * y[12] - M_activ
 
     epsilon_Ta = y[17] / (y[17] + p.K_TaAct)
@@ -104,7 +105,12 @@ def ODEsystem(t, y):
     # Proinflammatory microglia (M_pro)
     dydt[11] = ((p.beta * epsilon_Ta) / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ \
                - p.kappa_TbMpro * (y[15] / (y[15] + p.K_TbM)) * y[11] \
-               + p.kappa_TaManti * (y[17] / (y[17] + p.K_TaM)) * y[12] - p.d_Mpro * y[11]
+               + p.kappa_TaManti * (y[17] / (y[17] + p.K_TaM)) * y[12] \
+               - p.d_Mpro * y[11]
+    # 22-09-14_..._07 : Sans transfert anti -> pro
+    # dydt[11] = ((p.beta * epsilon_Ta) / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ \
+    #            - p.kappa_TbMpro * (y[15] / (y[15] + p.K_TbM)) * y[11] \
+    #            - p.d_Mpro * y[11]
 
     # Anti-inflammatory microglia (M_anti)
     # Sans terme de création : 22-09-09_..._04. Tout de même saut en M_anti, hat{M}_anti, T_b et I_10, donc
@@ -112,8 +118,10 @@ def ODEsystem(t, y):
     dydt[12] = (epsilon_I10 / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ \
                + p.kappa_TbMpro * (y[15] / (y[15] + p.K_TbM)) * y[11] \
                - p.kappa_TaManti * (y[17] / (y[17] + p.K_TaM)) * y[12] - p.d_Manti * y[12]
-    # dydt[12] = p.kappa_TbMpro * (y[15] / (y[15] + p.K_TbM)) * y[11] \
-    #            - p.kappa_TaManti * (y[17] / (y[17] + p.K_TaM)) * y[12] - p.d_Manti * y[12]
+    # 22-09-14_..._07 : Sans transfert anti -> pro
+    # dydt[12] = (epsilon_I10 / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ \
+    #             + p.kappa_TbMpro * (y[15] / (y[15] + p.K_TbM)) * y[11] \
+    #             - p.d_Manti * y[12]
 
     # Proinflammatory macrophages (hat{M}_pro)
     dydt[13] = p.kappa_PMhat * (y[18] / (y[18] + p.K_P)) * (p.Mhatmax - (y[13] + y[14])) * \
