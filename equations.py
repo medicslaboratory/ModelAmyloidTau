@@ -46,6 +46,7 @@ def ODEsystem(t, y):
     # TODO: Division ("/ p.K_Fi") dans sigmoïde utile? Retiré, ok?
     dydt[8] = -p.d_FiN * (1 / (1 + np.exp(- p.n * (y[6] - p.K_Fi)))) * y[8] \
               - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
+    # dydt[8] = - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
 
     # Amyloid-beta monomer inside the neurons (AB^i)
     dydt[0] = p.lambda_ABi * (1 + p.AP * p.delta_APi) * (y[8] / p.N_0) - p.d_ABi * y[0] - (y[0] / y[8]) * abs(dydt[8])
@@ -60,7 +61,7 @@ def ODEsystem(t, y):
               - p.d_ABoo * y[2]
 
     # Amyloid-beta plaque outside the neurons (AB_p^o)
-    # Deuxième terme problématique pour les plaques (22-09-08_..._14 vs _15 ; 15 retire le terme), mais règle pas les
+    # Deuxième terme problématique pour les plaques (22-09-08_..._14 vs _15 ; 15 retire le terme), mais ne règle pas les
     # autres. Donc, vrai problème ailleurs.
     dydt[3] = p.kappa_ABooABpo * (y[2] ** 2) - ((p.d_MantiABpo * y[12] + p.d_hatMantiABpo * y[14])
                                                 * (1 + p.AP * p.delta_APdp) * (y[3] / (y[3] + p.K_ABpo)))
@@ -70,19 +71,22 @@ def ODEsystem(t, y):
     # TODO: À approuver: Augmentation de l'activité de GSK3 quand la concentration d'insuline diminue
     #  (Jolivat08; DOI: 10.1002/jnr.21787), donc inverse division.
     #  Fait que augmentation de l'activité de la GSK3 (22-09-08_..._08 vs _09). Bien!
+    # dydt[4] = p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) - p.d_G * y[4]
     dydt[4] = p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) - p.d_G * y[4]
+    # Ajout - (y[4] / y[8]) * abs(dydt[8]), pas impact.
 
-    # tau proteins (tau)
+    # tau proteins (tau)  * y[8]/p.N_0
     dydt[5] = p.lambda_tau * (y[8] / p.N_0) + p.lambda_Gtau * (y[4] / p.G_0) \
               - p.kappa_tauFi * (y[5] ** 2) * (y[8] / p.N_0) - (y[5] / y[8]) * abs(dydt[8]) - p.d_tau * y[5]
+    # dydt[5] = p.lambda_tau * (y[8] / p.N_0) + p.lambda_Gtau * (y[4] / p.G_0) \
+    #           - p.kappa_tauFi * (y[5] ** 2) - (y[5] / y[8]) * abs(dydt[8]) - p.d_tau * y[5]
 
     # NFT inside the neurons (F_i)
     dydt[6] = p.kappa_tauFi * (y[5] ** 2) * (y[8] / p.N_0) - (y[6] / y[8]) * abs(dydt[8]) - p.d_Fi * y[6]
+    # dydt[6] = p.kappa_tauFi * (y[5] ** 2) - (y[6] / y[8]) * abs(dydt[8]) - p.d_Fi * y[6]
 
     # NFT outside the neurons (F_o)
-    # TODO: Ajout "* F_o" au terme de dégradation par microglies, sinon bizarre (2022-09-07_..._01 vs _02).
-    #  Same pour quand réessayé (22-09-09_..._12).
-    dydt[7] = (y[6] / y[8]) * abs(dydt[8]) - p.lambda_MFo * (y[12] / (y[12] + p.K_Manti)) * y[7] - p.d_Fo * y[7]
+    dydt[7] = (y[6] / y[8]) * abs(dydt[8]) - p.kappa_MFo * (y[12] / (y[12] + p.K_Manti)) * y[7] - p.d_Fo * y[7]
 
     # Astrocytes (A)
     dydt[9] = (p.kappa_ABpoA * y[3] + p.kappa_TaA * y[17]) * (p.A_max - y[9]) - p.d_A * y[9]

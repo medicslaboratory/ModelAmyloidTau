@@ -84,16 +84,18 @@ def InitialConditions(AgeStart=30):
     y0[11] = 1e-12  # y0[10] * (p.beta / (p.beta + 1))
 
     """M_anti (Anti-inflammatory microglia)"""
-    y0[12] = 1e-12  # y0[10] * (1 / (p.beta + 1))
+    # y0[12] = 1e-12  # y0[10] * (1 / (p.beta + 1))
     # Changement 1e-12 pour 1e-5 (fig 22-09-09_..._03 vs _01) pas vrm amélioration
 
     """hat{M}_pro (Proinflammatory macrophages)"""
     # y0[13] = p.Mprohateq/1.5  # 0
     y0[13] = 1e-12
+    # y0[13] = p.Mhatmax/2
 
     """hat{M}_anti (Anti-inflammatory macrophages)"""
     # y0[14] = 1e-9  # ou (p.kappa_TB * y0[15])/p.d_Mantihat, si y0[15] defini avant # Hao: 0
     y0[14] = 1e-12
+    # y0[14] = p.Mhatmax/3
 
     # Changement 1e-12 pour 1e-5 (fig 22-09-09_..._03 vs _01) pas vrm amélioration
 

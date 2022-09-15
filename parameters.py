@@ -96,6 +96,7 @@ class Parameters():
         ##########################################
 
         self.d_FiN = 1/(2.51 * 365)  # = 1.0915e-3
+        # self.d_FiN = 1 / (2.51 * 365) * 1e-2
         """Maximal death rate of neurons induced by F_i (/day)."""
 
         self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4
@@ -106,7 +107,8 @@ class Parameters():
         """Sigmoid function coefficient (unitless)."""
         # TODO: À déterminer avec le modèle.
 
-        self.d_TaN = (1 / 2) * self.d_FiN
+        self.d_TaN = (1 / 2) * 1/(2.51 * 365)
+        # self.d_TaN = (1/2) * self.d_FiN
         """Maximal death rate of neurons induced by T_alpha (TNF-alpha) (/day)."""
 
         self.K_Ta = 4.48e-12
@@ -120,7 +122,7 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR AB^i #
         #######################################
 
-        self.lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau  # env. = 1.3681e-10
+        self.lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau  # approx. = 1.3681e-10
         """Creation rate of amyloid-beta42 inside neuron from APP (g/mL/day)."""
 
         self.delta_APi = (8373e-9 - 2178e-9) / (5631e-9 - 783e-9) - 1  # approx. 0.2778
@@ -198,12 +200,27 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR GSK-3 #
         ########################################
 
+        self.d_G = math.log(2) / (41 / 24)  # approx 0.4057
+        # TODO: Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
+        #    d_G = lambda_InsG / G_0 . Résultat "Figure_22-09-08_solve_ivp_Radau_5y_APOE+_F_10.png" Pas beau :(
+        #    Okay avec BDF, donne même chose que "Figure_22-09-08_solve_ivp_BDF_5y_APOE+_F_11.png", où modif faite
+        #    sur lambda_InsG.
+        # self.d_G = self.lambda_InsG / (1104e-12 * 47000 * self.rho_cerveau)
+        """Degradation rate of GSK-3 (/day)."""
+
+        if self.S == 0:  # woman
+            self.G_0 = 1104e-12 * 47000 * self.rho_cerveau  # approx 5.3445e-05
+            """Normal concentration of GSK-3 at a normal insulin concentration (g/mL)."""
+        elif self.S == 1:  # men
+            self.G_0 = 310e-12 * 47000 * self.rho_cerveau  # = 1.50071e-05
+            """Normal concentration of GSK-3 at a normal insulin concentration (g/mL)."""
+
         # self.lambda_InsG = 0.18e-6 * 47000 * 1440 * 1.077 * 0.005  # approx 0.065602
         # TODO: Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
         #    lambda_InsG = d_G * G_0 . Résultat "Figure_22-09-08_solve_ivp_Radau_1y_APOE+_F_04.png" Pas beau :(
         #    Okay avec BDF. Voir "Figure_22-09-08_solve_ivp_BDF_5y_APOE+_F_11.png" et suivantes
         #    À confirmer et mettre correctement si accepté.
-        self.lambda_InsG = (math.log(2) / (41 / 24)) * (1104e-12 * 47000 * self.rho_cerveau)  # ~ 2.1685e-05
+        self.lambda_InsG = self.d_G * self.G_0  # ~ 2.1685e-05
         """Creation rate of GSK-3 induced by the insulin (g/mL/day)"""
 
         # self.Ins = fct
@@ -219,14 +236,6 @@ class Parameters():
             """Normal concentration of insulin, sex dependent (g/mL). 
             Correspond to the brain concentration at 30 years old."""
 
-        self.d_G = math.log(2) / (41 / 24)  # approx 0.4057
-        # TODO: Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
-        #    d_G = lambda_InsG / G_0 . Résultat "Figure_22-09-08_solve_ivp_Radau_5y_APOE+_F_10.png" Pas beau :(
-        #    Okay avec BDF, donne même chose que "Figure_22-09-08_solve_ivp_BDF_5y_APOE+_F_11.png", où modif faite
-        #    sur lambda_InsG.
-        # self.d_G = self.lambda_InsG / (1104e-12 * 47000 * self.rho_cerveau)
-        """Degradation rate of GSK-3 (/day)."""
-
         ######################################
         # CONSTANTS FOR THE EQUATION FOR tau #
         ######################################
@@ -237,12 +246,7 @@ class Parameters():
         self.lambda_Gtau = ((20 / 21) - (20 / 57)) * 1e-6 / 0.5 / 1000 / 1000 * 72500  # approx 8.72e-8
         """Creation rate of tau by GSK3 (g/mL/day)"""
 
-        if self.S == 0:  # woman
-            self.G_0 = 1104e-12 * 47000 * self.rho_cerveau  # approx 5.3445e-05
-            """Normal concentration of GSK-3 at a normal insulin concentration (g/mL)."""
-        elif self.S == 1:  # men
-            self.G_0 = 310e-12 * 47000 * self.rho_cerveau  # = 1.50071e-05
-            """Normal concentration of GSK-3 at a normal insulin concentration (g/mL)."""
+        # G_0, see GSK-3 section.
 
         self.kappa_tauFi = (100 / 3) * 1e-6 / 19344 * 86400 * 1000  # approx 0.1489
         """Conversion rate of tau in NFT (/day)."""
@@ -261,14 +265,8 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR F_o #
         ######################################
 
-        # self.lambda_MFo = 0.8 * 1e-6 / 2  # = 4e-7
-        self.lambda_MFo = 0.4
-        #  À confirmer. Ajout "* F_o" au terme de dégradation par microglies, sinon bizarre
-        #  (2022-09-07_..._01 vs _02). Same pour quand réessayé (22-09-09_..._12)
-        #  Unité ici en /day et devrait alors être un kappa.
-        #  Nicolas: Ok.
-        #  TODO: Mettre dans Latex
-        """Maximal rate for the degradation of extracellular NFTs by anti-inflammatory microglia (g/mL/day)."""
+        self.kappa_MFo = 0.4
+        """Maximal rate for the degradation of extracellular NFTs by anti-inflammatory microglia (/day)."""
 
         if self.S == 0:  # woman
             self.K_Manti = (1 / 4) * 3.811e-2  # = 0.0095275
@@ -427,6 +425,7 @@ class Parameters():
         self.kappa_MhatproTa = (1.5e-9 / 18 * 24) / (2e6 * m_Mhat)  # max Fadok98 : approx 2.004e-7
         # self.kappa_MhatproTa = (1.5e-9 / 18 * 24) / (4e6 * m_Mhat)  # min Fadok9: approx 1.002e-7
         # TODO: Modif Latex selon ce qu'on conserve.
+        #   Choix de ce qu'on conserve selon test modèle.
         """Production rate of TNF-alpha by proinflammatory macrophages (hat{M}_pro) (/day)."""
 
         self.kappa_MproTa = self.kappa_MhatproTa

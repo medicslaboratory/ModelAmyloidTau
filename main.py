@@ -24,14 +24,13 @@ y0 = InitialConditions(AgeStart)
 AgeEnd = 80
 decades = int((AgeEnd - AgeStart) / 10)
 
-
 max_step = 0.1
 maxstepstr = str(max_step).replace('.', '')
 rtol = 1e-10  # Default value : 1e-3
-rtolstr = "{:e}".format(rtol)
-# method = "BDF"
+rtolstr = "{:.0e}".format(rtol)
+method = "BDF"
 # method = "Radau"
-method = "LSODA"
+# method = "LSODA"
 sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, rtol=rtol)
 
 """Generate the figure"""
@@ -68,12 +67,11 @@ plt.subplots_adjust(hspace=.8, wspace=.8)
 # axs.tolist()
 # axs = [item for sublist in axs for item in sublist]
 
-axs[3, 4].remove()
-
 i = 0
 for ax in axs.flat:
     if i < 19:
-        ax.plot(sol.t / 365, sol.y[i, :])
+        ax.plot(sol.t / 365, sol.y[i, :])  # , '.-', ms=2
+        ax.grid()
         if i >= 14:
             ax.set_xlabel('Age (years)')
         ax.set_ylabel(labelname[i])
@@ -86,6 +84,19 @@ for ax in axs.flat:
     i = i+1
 axs.flat[14].tick_params('x', labelbottom=True)
 
+axs[3, 4].remove()
+
+# ax = axs[3, 4]
+# dABpodt = p.kappa_ABooABpo * (sol.y[2, :] ** 2) - ((p.d_MantiABpo * sol.y[12, :] + p.d_hatMantiABpo * sol.y[14, :])
+#                                                    * (1 + p.AP * p.delta_APdp) * (sol.y[3, :] / (sol.y[3, :]
+#                                                                                                  + p.K_ABpo)))
+# ax.plot(sol.t / 365, dABpodt)  # , '.-', ms=2
+# dNdtFi = - p.d_FiN * (1 / (1 + np.exp(- p.n * (sol.y[6, :] - p.K_Fi)))) * sol.y[8, :]
+# ax.plot(sol.t / 365, dNdtFi)  # , '.-', ms=2
+# ax.grid()
+# ax.set_xlabel('Age (years)')
+# # ax.set_ylabel("dABpo/dt")
+# ax.set_ylabel("dN/dt du à F_i")
 # ax2 = axs[3, 4].twinx()
 # axs[3, 4].plot(sol.t / 365, sol.y[12, :], "b-")  # M_anti
 # axs[3, 4].set_ylabel("Manti", color='b')
@@ -111,11 +122,11 @@ if p.AP == 1:
 else:  # p.AP == 0:
     APOE = "-"
 
-number = 1
-date = "22-09-14"
+number = 8
+date = "22-09-15"
 my_path = os.path.abspath('Figures')
 FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
-          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + ".png"
+          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + "_DegGAvecN.png"
 while os.path.exists(os.path.join(my_path, FigName)):
     number = number+1
     FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
@@ -126,7 +137,7 @@ plt.savefig(os.path.join(my_path, FigName), dpi=180)
 """Add information to the figure."""
 FigInfos = {"max_step": str(max_step),
             "Début": "Début intégration",  # "Ignore la première demi-année."
-            "Modification(s)": "Retour normal."}
+            "Modification(s)": "Ajout terme '- (y[4] / y[8]) * abs(dydt[8])' à GSK-3."}
 
 im = Image.open("Figures/" + FigName)
 Infos = PngImagePlugin.PngInfo()
