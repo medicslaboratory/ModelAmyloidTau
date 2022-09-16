@@ -24,7 +24,7 @@ y0 = InitialConditions(AgeStart)
 AgeEnd = 80
 decades = int((AgeEnd - AgeStart) / 10)
 
-max_step = 0.1
+max_step = 0.01
 maxstepstr = str(max_step).replace('.', '')
 rtol = 1e-10  # Default value : 1e-3
 rtolstr = "{:.0e}".format(rtol)
@@ -122,11 +122,11 @@ if p.AP == 1:
 else:  # p.AP == 0:
     APOE = "-"
 
-number = 8
-date = "22-09-15"
+number = 5
+date = "22-09-16"
 my_path = os.path.abspath('Figures')
 FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
-          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + "_DegGAvecN.png"
+          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + ".png"
 while os.path.exists(os.path.join(my_path, FigName)):
     number = number+1
     FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
@@ -137,7 +137,7 @@ plt.savefig(os.path.join(my_path, FigName), dpi=180)
 """Add information to the figure."""
 FigInfos = {"max_step": str(max_step),
             "Début": "Début intégration",  # "Ignore la première demi-année."
-            "Modification(s)": "Ajout terme '- (y[4] / y[8]) * abs(dydt[8])' à GSK-3."}
+            "Modification(s)": ""}
 
 im = Image.open("Figures/" + FigName)
 Infos = PngImagePlugin.PngInfo()

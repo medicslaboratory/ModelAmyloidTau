@@ -71,13 +71,18 @@ def ODEsystem(t, y):
     # TODO: À approuver: Augmentation de l'activité de GSK3 quand la concentration d'insuline diminue
     #  (Jolivat08; DOI: 10.1002/jnr.21787), donc inverse division.
     #  Fait que augmentation de l'activité de la GSK3 (22-09-08_..._08 vs _09). Bien!
-    # dydt[4] = p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) - p.d_G * y[4]
+    #  À confirmer, déjà ajusté dans Latex.
     dydt[4] = p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) - p.d_G * y[4]
-    # Ajout - (y[4] / y[8]) * abs(dydt[8]), pas impact.
+    # # Ajout - (y[4] / y[8]) * abs(dydt[8]), pas impact.
+    # dydt[4] = p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) - p.d_G * y[4] - (y[4] / y[8]) * abs(dydt[8])
 
-    # tau proteins (tau)  * y[8]/p.N_0
+    # tau proteins (tau)
     dydt[5] = p.lambda_tau * (y[8] / p.N_0) + p.lambda_Gtau * (y[4] / p.G_0) \
               - p.kappa_tauFi * (y[5] ** 2) * (y[8] / p.N_0) - (y[5] / y[8]) * abs(dydt[8]) - p.d_tau * y[5]
+    # # Ajout "* (y[8] / p.N_0)" au 2e terme.
+    # dydt[5] = p.lambda_tau * (y[8] / p.N_0) + p.lambda_Gtau * (y[4] / p.G_0) * (y[8] / p.N_0)\
+    #           - p.kappa_tauFi * (y[5] ** 2) * (y[8] / p.N_0) - (y[5] / y[8]) * abs(dydt[8]) - p.d_tau * y[5]
+    # # Retire "* (y[8] / p.N_0)" au 3e terme.
     # dydt[5] = p.lambda_tau * (y[8] / p.N_0) + p.lambda_Gtau * (y[4] / p.G_0) \
     #           - p.kappa_tauFi * (y[5] ** 2) - (y[5] / y[8]) * abs(dydt[8]) - p.d_tau * y[5]
 

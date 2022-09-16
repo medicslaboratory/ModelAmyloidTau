@@ -200,8 +200,21 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR GSK-3 #
         ########################################
 
+        # self.Ins = fct
+        # """Concentration of insulin (g/mL)"""
+        # A function of age. See beginning.
+
+        if self.S == 0:  # woman
+            self.Ins_0 = 3.006e-11  # 0.1 * (-4.151e-15 * (365 * 30) + 3.460e-10) = 3.0054655e-11
+            """Normal concentration of insulin, sex dependent (g/mL). 
+            Correspond to the brain concentration at 30 years old."""
+        elif self.S == 1:  # men
+            self.Ins_0 = 3.296e-11  # 0.1 * (-4.257e-15 * (365 * 30) + 3.763e-10) = 3.2968585e-11
+            """Normal concentration of insulin, sex dependent (g/mL). 
+            Correspond to the brain concentration at 30 years old."""
+
         self.d_G = math.log(2) / (41 / 24)  # approx 0.4057
-        # TODO: Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
+        # Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
         #    d_G = lambda_InsG / G_0 . Résultat "Figure_22-09-08_solve_ivp_Radau_5y_APOE+_F_10.png" Pas beau :(
         #    Okay avec BDF, donne même chose que "Figure_22-09-08_solve_ivp_BDF_5y_APOE+_F_11.png", où modif faite
         #    sur lambda_InsG.
@@ -219,22 +232,9 @@ class Parameters():
         # TODO: Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
         #    lambda_InsG = d_G * G_0 . Résultat "Figure_22-09-08_solve_ivp_Radau_1y_APOE+_F_04.png" Pas beau :(
         #    Okay avec BDF. Voir "Figure_22-09-08_solve_ivp_BDF_5y_APOE+_F_11.png" et suivantes
-        #    À confirmer et mettre correctement si accepté.
-        self.lambda_InsG = self.d_G * self.G_0  # ~ 2.1685e-05
+        #    À confirmer, déjà ajusté dans Latex.
+        self.lambda_InsG = self.d_G * self.G_0  # F: ~ 2.1685e-05 ; M: ~ 6.0891e-06
         """Creation rate of GSK-3 induced by the insulin (g/mL/day)"""
-
-        # self.Ins = fct
-        # """Concentration of insulin (g/mL)"""
-        # A function of age. See beginning.
-
-        if self.S == 0:  # woman
-            self.Ins_0 = 3.006e-11  # 0.1 * (-4.151e-15 * (365 * 30) + 3.460e-10) = 3.0054655e-11
-            """Normal concentration of insulin, sex dependent (g/mL). 
-            Correspond to the brain concentration at 30 years old."""
-        elif self.S == 1:  # men
-            self.Ins_0 = 3.296e-11  # 0.1 * (-4.257e-15 * (365 * 30) + 3.763e-10) = 3.2968585e-11
-            """Normal concentration of insulin, sex dependent (g/mL). 
-            Correspond to the brain concentration at 30 years old."""
 
         ######################################
         # CONSTANTS FOR THE EQUATION FOR tau #
@@ -302,14 +302,16 @@ class Parameters():
 
         TotalMaxActivRateM = 0.2141
 
-        self.kappa_FoM = TotalMaxActivRateM * 2 / 3  # approx 0.1427  # TODO: 28.32 * 2? Trop grand!
+        self.kappa_FoM = TotalMaxActivRateM * 2 / 3  # approx 0.1427
+        # TODO: 28.32 * 2? Trop grand! Latex pour autre, changer si change idée.
         """Activation rate of microglia by F_o (NFT) (/day)."""
 
         self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000  # approx 1.3243e-12
         """Concentration of extracellular NFTs at which the rate of activation of microglia by F_o 
         is half-maximal (g/mL)."""
 
-        self.kappa_ABooM = TotalMaxActivRateM * 1 / 3  # approx 0.07137  # TODO: 28.32 ? Trop grand!
+        self.kappa_ABooM = TotalMaxActivRateM * 1 / 3  # approx 0.07137
+        # TODO: 28.32 ? Trop grand! Latex pour autre, changer si change idée.
         """Activation rate of microglia by extracellular amyloid-beta42 oligomer (/day). """
 
         self.K_ABooM = 0.060 / 527.4 / 1000  # approx 1.1377e-7
@@ -424,7 +426,7 @@ class Parameters():
         # self.kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat)  # approx 3.186e-6  # Value from Hallsworth94
         self.kappa_MhatproTa = (1.5e-9 / 18 * 24) / (2e6 * m_Mhat)  # max Fadok98 : approx 2.004e-7
         # self.kappa_MhatproTa = (1.5e-9 / 18 * 24) / (4e6 * m_Mhat)  # min Fadok9: approx 1.002e-7
-        # TODO: Modif Latex selon ce qu'on conserve.
+        # TODO: Modif Latex selon ce qu'on conserve (les deux options y sont).
         #   Choix de ce qu'on conserve selon test modèle.
         """Production rate of TNF-alpha by proinflammatory macrophages (hat{M}_pro) (/day)."""
 

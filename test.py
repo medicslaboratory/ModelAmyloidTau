@@ -1,3 +1,6 @@
+#
+# Ignorer ce fichier, pour tests. Pas utile dans le modèle.
+#
 
 import numpy as np
 import math
