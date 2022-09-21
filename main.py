@@ -1,27 +1,24 @@
 # Date : 17 January 2022
-# Autor : Éléonore Chamberland
+# Author : Éléonore Chamberland
 
 import numpy as np
-
 import matplotlib.pyplot as plt
 from matplotlib import ticker
 import os
-
 from scipy.integrate import solve_ivp
-
 from PIL import Image
 from PIL import PngImagePlugin
-
 import equations as eqns
 from InitialConditions import InitialConditions
 import parameters as param
+
 p = param.Parameters()
 
 AgeStart = 30
 
 y0 = InitialConditions(AgeStart)
 
-AgeEnd = 31
+AgeEnd = 80
 decades = int((AgeEnd - AgeStart) / 10)
 
 max_step = 0.1
@@ -42,10 +39,13 @@ labelname = [r'$A \beta^{i}$', r'$A \beta_{m}^{o}$', r'$A \beta_{o}^{o}$', r'$A 
              '$F_i$', '$F_o$', '$N$', '$A$', '$M_{NA}$', '$M_{pro}$', '$M_{anti}$', r'$\hat{M}_{pro}$', r'$\hat{M}_{anti}$',
              r'$T_{\beta}$', '$I_{10}$', r'$T_{\alpha}$', '$P$']
 
+k = np.argmax(sol.t >= ((AgeStart+0.5)*365))  # First indice to skip the first half year.
+
 i = 0
 for ax in axs.flat:
     if i < 19:
-        ax.plot(sol.t / 365, sol.y[i, :])  # , '.-', ms=2
+        # ax.plot(sol.t[k:] / 365, sol.y[i, k:])  # , '.-', ms=2
+        ax.plot(sol.t / 365, sol.y[i, :])
         ax.grid()
         if i >= 14:
             ax.set_xlabel('Age (years)')
@@ -83,7 +83,7 @@ plt.tight_layout()
 
 """Write the initial values used"""
 plt.subplots_adjust(bottom=0.16)
-icNameValue = [str(labelname[i]) + "= " + "{:.2e}".format(y0[i]) for i in np.arange(19)]
+icNameValue = [str(labelname[i]) + " = " + "{:.2e}".format(y0[i]) for i in np.arange(19)]
 initcond = "Initial conditions used (in g/mL) : \n" + ", ".join(icNameValue[:10]) + ", \n" + ", ".join(icNameValue[10:])
 plt.text(0.03, 0.08, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf().transFigure)  # , wrap=True
 
@@ -113,11 +113,11 @@ if p.AP == 1:
 else:  # p.AP == 0:
     APOE = "-"
 
-number = 1
-date = "22-09-21"
+number = 6
+date = "22-09-22"
 my_path = os.path.abspath('Figures')
 FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
-          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + "test.png"
+          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + "_d_TaN=001on365ETprodGmultNsurN0ETd_FiN*1e-2ET2*transfos.png"
 while os.path.exists(os.path.join(my_path, FigName)):
     number = number+1
     FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
@@ -128,7 +128,7 @@ plt.savefig(os.path.join(my_path, FigName), dpi=180)
 """Add information to the figure."""
 FigInfos = {"max_step": str(max_step),
             "Début": "Début intégration",  # "Ignore la première demi-année."
-            "Modification(s)": "Normal."}
+            "Modification(s)": "d_TaN = 0.01/365. p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) * (y[8]/p.N_0). d_FiN = 1 / (2.51 * 365) * 1e-2. transfo aggrédation *2."}
 
 im = Image.open("Figures/" + FigName)
 Infos = PngImagePlugin.PngInfo()
@@ -141,10 +141,17 @@ im.save("Figures/" + FigName, "png", pnginfo=Infos)
 # im = Image.open("Figures/" + FigName)
 # print(im.info)
 
-# ## To access the infos by typing the following in the console :
+# # To access the infos by typing the following in the console :
 # from PIL import Image
 # im = Image.open("Path of the figure")  # "Path of the figure" is, for example, "Figures/Figure_22-09-08_..._01.png".
 # im.info
+
+# fig, axs = plt.subplots(1, 2)
+# dNdtFi = - p.d_FiN * (1 / (1 + np.exp(- p.n * (sol.y[6, :] - p.K_Fi)))) * sol.y[8, :]
+# dNdtTa = - p.d_TaN * (sol.y[17, :] / (sol.y[17, :] + p.K_Ta)) * (1 / (1 + (sol.y[16, :] / p.K_I10))) * sol.y[8, :]
+#
+# axs[0].plot(sol.t / 365, dNdtFi)
+# axs[1].plot(sol.t / 365, dNdtTa)
 
 plt.show()
 

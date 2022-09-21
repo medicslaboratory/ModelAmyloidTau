@@ -95,8 +95,8 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR NEURONS #
         ##########################################
 
-        self.d_FiN = 1/(2.51 * 365)  # = 1.0915e-3
-        # self.d_FiN = 1 / (2.51 * 365) * 1e-2
+        # self.d_FiN = 1/(2.51 * 365)  # = 1.0915e-3
+        self.d_FiN = 1 / (2.51 * 365) * 1e-2
         """Maximal death rate of neurons induced by F_i (/day)."""
 
         self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4
@@ -107,8 +107,9 @@ class Parameters():
         """Sigmoid function coefficient (unitless)."""
         # TODO: À déterminer avec le modèle.
 
-        self.d_TaN = (1 / 2) * 1/(2.51 * 365)
+        self.d_TaN = 0.01 / 365  # (1 / 2) * 1/(2.51 * 365)
         # self.d_TaN = (1/2) * self.d_FiN
+        # TODO: Peut-être changer
         """Maximal death rate of neurons induced by T_alpha (TNF-alpha) (/day)."""
 
         self.K_Ta = 4.48e-12
