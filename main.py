@@ -21,10 +21,10 @@ AgeStart = 30
 
 y0 = InitialConditions(AgeStart)
 
-AgeEnd = 80
+AgeEnd = 31
 decades = int((AgeEnd - AgeStart) / 10)
 
-max_step = 0.01
+max_step = 0.1
 maxstepstr = str(max_step).replace('.', '')
 rtol = 1e-10  # Default value : 1e-3
 rtolstr = "{:.0e}".format(rtol)
@@ -106,10 +106,10 @@ axs[3, 4].remove()
 plt.tight_layout()
 
 # Write the initial values used
-plt.subplots_adjust(bottom=0.2)
+plt.subplots_adjust(bottom=0.16)
 icNameValue = [str(labelname[i]) + "= " + "{:.2e}".format(y0[i]) for i in np.arange(19)]
-initcond = "Initial conditions used (in g/mL) : \n" + ", ".join(icNameValue)
-plt.text(0.1, 0.11, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf().transFigure, wrap=True)
+initcond = "Initial conditions used (in g/mL) : \n" + ", ".join(icNameValue[:10]) + ", \n" + ", ".join(icNameValue[10:])
+plt.text(0.03, 0.08, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf().transFigure)  # , wrap=True
 
 # Save the plot as a .png file
 if p.S == 0:
@@ -122,11 +122,11 @@ if p.AP == 1:
 else:  # p.AP == 0:
     APOE = "-"
 
-number = 5
-date = "22-09-16"
+number = 1
+date = "22-09-21"
 my_path = os.path.abspath('Figures')
 FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
-          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + ".png"
+          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + "test.png"
 while os.path.exists(os.path.join(my_path, FigName)):
     number = number+1
     FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
@@ -137,7 +137,7 @@ plt.savefig(os.path.join(my_path, FigName), dpi=180)
 """Add information to the figure."""
 FigInfos = {"max_step": str(max_step),
             "Début": "Début intégration",  # "Ignore la première demi-année."
-            "Modification(s)": ""}
+            "Modification(s)": "Normal."}
 
 im = Image.open("Figures/" + FigName)
 Infos = PngImagePlugin.PngInfo()
