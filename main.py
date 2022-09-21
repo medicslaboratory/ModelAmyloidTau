@@ -34,38 +34,13 @@ method = "BDF"
 sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, rtol=rtol)
 
 """Generate the figure"""
-# fig = plt.figure()
-fig, axs = plt.subplots(nrows=4, ncols=5, sharex="all")
+fig, axs = plt.subplots(nrows=4, ncols=5, sharex="all")  # If no text under the figure, add: layout="constrained"
 fig.set_size_inches(35 / 2.54, 20 / 2.54, forward=True)
 
 # Making a list for Label names in the plot
 labelname = [r'$A \beta^{i}$', r'$A \beta_{m}^{o}$', r'$A \beta_{o}^{o}$', r'$A \beta_{p}^{o}$', '$GSK 3$', r'$\tau$',
-             '$F_i$', '$F_o$', '$N$', 'A', '$M$', '$M_{pro}$', '$M_{anti}$', r'$\hat{M}_{pro}$', r'$\hat{M}_{anti}$',
+             '$F_i$', '$F_o$', '$N$', '$A$', '$M_{NA}$', '$M_{pro}$', '$M_{anti}$', r'$\hat{M}_{pro}$', r'$\hat{M}_{anti}$',
              r'$T_{\beta}$', '$I_{10}$', r'$T_{\alpha}$', '$P$']
-
-plt.subplots_adjust(hspace=.8, wspace=.8)
-
-# for i in range(0, 19):
-#     ax = fig.add_subplot(4, 5, i + 1)
-#
-#     ax.plot(sol.t / 365, sol.y[i, :])
-#     if decades > 5:
-#         indentxaxis = int(decades / 2)
-#     elif decades < 1:
-#         indentxaxis = AgeEnd - AgeStart
-#     else:
-#         indentxaxis = decades
-#     ax.set_xticks(np.linspace(AgeStart, AgeEnd, indentxaxis + 1))
-#     ax.set(xlabel='Age (years)', ylabel=labelname[i])
-#     formatter = ticker.ScalarFormatter(useMathText=True)
-#     formatter.set_scientific(True)
-#     formatter.set_powerlimits((-1, 1))
-#     # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-#     # notation will be used if exp <= -1 or exp >= 1.
-#     ax.yaxis.set_major_formatter(formatter)
-
-# axs.tolist()
-# axs = [item for sublist in axs for item in sublist]
 
 i = 0
 for ax in axs.flat:
@@ -103,15 +78,31 @@ axs[3, 4].remove()
 # ax2.plot(sol.t / 365, sol.y[16, :], "g-")  # I_10
 # ax2.set_ylabel("I10", color='g')
 
+plt.subplots_adjust(hspace=.8, wspace=.8)
 plt.tight_layout()
 
-# Write the initial values used
+"""Write the initial values used"""
 plt.subplots_adjust(bottom=0.16)
 icNameValue = [str(labelname[i]) + "= " + "{:.2e}".format(y0[i]) for i in np.arange(19)]
 initcond = "Initial conditions used (in g/mL) : \n" + ", ".join(icNameValue[:10]) + ", \n" + ", ".join(icNameValue[10:])
 plt.text(0.03, 0.08, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf().transFigure)  # , wrap=True
 
-# Save the plot as a .png file
+"""Write the full name of the variables"""
+# plt.subplots_adjust(bottom=0.16)
+# VariablesDef = r'$A \beta^{i}$: Intracellular beta-amyloid monomer; ' \
+#                r'$A \beta_{m}^{o}$: Extracellular beta-amyloid monomer; ' \
+#                r'$A \beta_{o}^{o}$: Extracellular beta-amyloid oligomer; ' \
+#                r'$A \beta_{p}^{o}$: Extracellular beta-amyloid plaques; ' \
+#                r'$GSK 3$: Glycogen synthase kinase-3; ' + '\n' + r'$\tau$: Hyperphosphorylated tau protein; ' \
+#                r'$F_i$: Intracellular NFTs; $F_o$: Extracellular NFTs; ' \
+#                r'$N$: Neurons; $A$: Astrocytes; $M_{NA}$: Resting microglia; ' \
+#                r'$M_{pro}$ Proinflammatory microglia; $M_{anti}$: Anti-inflammatory microglia; ' + '\n' + \
+#                r'$\hat{M}_{pro}$: Proinflammatory macrophages; ' \
+#                r'$\hat{M}_{anti}$: Anti-inflammatory macrophages; $T_{\beta}$: TGF-$\beta$; ' \
+#                r'$I_{10}$: Interleukin-10; $T_{\alpha}$: TNF-$\alpha$; $P$: MCP-1.'
+# plt.text(0.03, 0.08, VariablesDef, fontsize=9, ha='left', va='top', transform=plt.gcf().transFigure)
+
+"""Save the plot as a .png file"""
 if p.S == 0:
     sex = "F"
 else:  # p.S == 1:
