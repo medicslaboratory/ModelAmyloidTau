@@ -93,6 +93,16 @@ axs[3, 4].remove()
 # formatter3.set_scientific(True)
 # formatter3.set_powerlimits((-1, 1))
 # ax3.yaxis.set_major_formatter(formatter3)
+#
+# """Add the plot of F_i/N in the graph for F_i"""
+# axs[1, 1].set_ylabel(labelname[6], color='b')
+# ax4 = axs[1, 1].twinx()
+# ax4.plot(sol.t / 365, sol.y[6, :] / sol.y[8, :], "g-")  # tau/N
+# ax4.set_ylabel(r"$F_i/N$", color='g')
+# formatter4 = ticker.ScalarFormatter(useMathText=True)
+# formatter4.set_scientific(True)
+# formatter4.set_powerlimits((-1, 1))
+# ax4.yaxis.set_major_formatter(formatter4)
 
 """Pour afficher un graph à la dernière position 
 (doit retirer le 'axs[3, 4].remove()' et 'axs.flat[14].tick_params('x', labelbottom=True)' plus haut)."""
@@ -191,31 +201,6 @@ im.save("Figures/" + FigName, "png", pnginfo=Infos)
 # axs[0].plot(sol.t / 365, dNdtFi)
 # axs[1].plot(sol.t / 365, dNdtTa)
 
-# fig2, axs = plt.subplots(1, 3, sharex="all", layout="constrained")
-# ax1, ax2, ax3 = axs.flat
-# ABiperN = sol.y[0, :] / sol.y[8, :]
-# GperN = sol.y[4, :] / sol.y[8, :]
-# tauperN = sol.y[5, :] / sol.y[8, :]
-# ax1.plot(sol.t / 365, ABiperN)
-# ax1.set_ylabel(r"$A\beta^i/N$")
-# ax1.set_xlabel("Age (years)")
-#
-# ax2.plot(sol.t / 365, GperN)
-# ax2.set_ylabel(r"$GSK3/N$")
-# ax2.set_xlabel("Age (years)")
-#
-# ax3.plot(sol.t / 365, tauperN)
-# ax3.set_ylabel(r"$\tau/N$")
-# ax3.set_xlabel("Age (years)")
-#
-# # formatter = ticker.ScalarFormatter(useMathText=True)
-# # formatter.set_scientific(True)
-# # formatter.set_powerlimits((-1, 1))
-# # # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-# # # notation will be used if exp <= -1 or exp >= 1.
-# # ax1.yaxis.set_major_formatter(formatter)
-# # ax2.yaxis.set_major_formatter(formatter)
-# # ax3.yaxis.set_major_formatter(formatter)
 
 plt.show()
 
