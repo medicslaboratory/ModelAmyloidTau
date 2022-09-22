@@ -45,7 +45,7 @@ def ODEsystem(t, y):
     #           - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
     dydt[8] = -p.d_FiN * (1 / (1 + np.exp(- p.n * (y[6] - p.K_Fi) / p.K_Fi))) * y[8] \
               - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
-    # TODO: Division ("/ p.K_Fi") dans sigmoïde utile? Retiré, ok?
+    # Division ("/ p.K_Fi") dans sigmoïde utile? Retiré, ok? NON!
     # dydt[8] = -p.d_FiN * (1 / (1 + np.exp(- p.n * (y[6] - p.K_Fi)))) * y[8] \
     #           - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
     # dydt[8] = - p.d_TaN * (y[17] / (y[17] + p.K_Ta)) * (1 / (1 + (y[16] / p.K_I10))) * y[8]
@@ -54,13 +54,11 @@ def ODEsystem(t, y):
     dydt[0] = p.lambda_ABi * (1 + p.AP * p.delta_APi) * (y[8] / p.N_0) - p.d_ABi * y[0] - (y[0] / y[8]) * abs(dydt[8])
 
     # Amyloid-beta monomer outside the neurons (AB_m^o)
-    # TODO: Ajout "2*" dans latex
     dydt[1] = (y[0] / y[8]) * abs(dydt[8]) + p.lambda_ABmo * (1 + p.AP * p.delta_APm) * (y[8] / p.N_0) \
               + p.lambda_AABmo * (y[9] / p.A_0) - 2 * p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y[1] ** 2) \
               - p.d_ABmo(t) * y[1]
 
     # Amyloid-beta oligomers outside (AB_o^o)
-    # TODO: Ajout "2*" dans latex
     dydt[2] = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y[1] ** 2) - 2 * p.kappa_ABooABpo * (y[2] ** 2) \
               - p.d_ABoo * y[2]
 
@@ -76,13 +74,12 @@ def ODEsystem(t, y):
     #  (Jolivat08; DOI: 10.1002/jnr.21787), donc inverse division.
     #  Fait que augmentation de l'activité de la GSK3 (22-09-08_..._08 vs _09). Bien!
     #  À confirmer, déjà ajusté dans Latex.
-    # TODO: Ajouter le "* (y[8]/p.N_0)" dans Latex.
-    dydt[4] = p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) * (y[8]/p.N_0) - p.d_G * y[4]
+    # Ajout du "* (y[8]/p.N_0)" et "- (y[4] / y[8]) * abs(dydt[8])" - OK.
+    dydt[4] = p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) * (y[8] / p.N_0) - p.d_G * y[4] - (y[4] / y[8]) * abs(dydt[8])
     # # Ajout - (y[4] / y[8]) * abs(dydt[8]), pas impact.
     # dydt[4] = p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) - p.d_G * y[4] - (y[4] / y[8]) * abs(dydt[8])
 
     # tau proteins (tau)
-    # TODO: Ajout "2*" dans latex
     dydt[5] = p.lambda_tau * (y[8] / p.N_0) + p.lambda_Gtau * (y[4] / p.G_0) \
               - 2 * p.kappa_tauFi * (y[5] ** 2) * (y[8] / p.N_0) - (y[5] / y[8]) * abs(dydt[8]) - p.d_tau * y[5]
     # # Ajout "* (y[8] / p.N_0)" au 2e terme.

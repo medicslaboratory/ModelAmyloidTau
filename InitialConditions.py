@@ -56,6 +56,7 @@ def InitialConditions(AgeStart=30):
     # C = -(p.lambda_tau + p.lambda_Gtau)
     # y0[5] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
     # Prendre "+" donne nég. Donc, prend "-" et donne ~ 6.4947e-07.
+    # Si prend lambda_Gtau * 1e-2 => ~6.6886e-09
     y0[5] = 1e-10
 
     """F_i (NFT inside the neurons)"""

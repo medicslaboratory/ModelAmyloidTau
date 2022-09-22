@@ -95,8 +95,8 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR NEURONS #
         ##########################################
 
-        # self.d_FiN = 1/(2.51 * 365)  # = 1.0915e-3
-        self.d_FiN = 1 / (2.51 * 365) * 1e-2
+        self.d_FiN = 1/(2.51 * 365)  # = 1.0915e-3
+        # self.d_FiN = 1 / (2.51 * 365) * 1e-2
         """Maximal death rate of neurons induced by F_i (/day)."""
 
         self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4
@@ -245,6 +245,9 @@ class Parameters():
         """Phosphorylation rate of tau in health by other mechanism than GSK-3 (g/ml/day)."""
 
         self.lambda_Gtau = ((20 / 21) - (20 / 57)) * 1e-6 / 0.5 / 1000 / 1000 * 72500  # approx 8.72e-8
+        # self.lambda_Gtau = (((20 / 21) - (20 / 57)) * 1e-6 / 0.5 / 1000 / 1000 * 72500) * 1e-2  # approx 8.72e-8
+        # Pourrait voir le *1e-2 comme différence de GSK-3 entre neurones sains et infecté de 1/1e5 plutôt que 1/1e3.
+        # 22-09-22 : Fait varier pas mal, mais pas les neurones.
         """Creation rate of tau by GSK3 (g/mL/day)"""
 
         # G_0, see GSK-3 section.

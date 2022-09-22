@@ -18,7 +18,7 @@ AgeStart = 30
 
 y0 = InitialConditions(AgeStart)
 
-AgeEnd = 80
+AgeEnd = 40
 decades = int((AgeEnd - AgeStart) / 10)
 
 max_step = 0.1
@@ -44,8 +44,10 @@ k = np.argmax(sol.t >= ((AgeStart+0.5)*365))  # First indice to skip the first h
 i = 0
 for ax in axs.flat:
     if i < 19:
-        # ax.plot(sol.t[k:] / 365, sol.y[i, k:])  # , '.-', ms=2
-        ax.plot(sol.t / 365, sol.y[i, :])
+        # # """Plot tout."""
+        ax.plot(sol.t / 365, sol.y[i, :])  # , '.-', ms=2
+        # # """Plot sans la première demie année."""
+        # ax.plot(sol.t[k:] / 365, sol.y[i, k:])
         ax.grid()
         if i >= 14:
             ax.set_xlabel('Age (years)')
@@ -61,6 +63,39 @@ axs.flat[14].tick_params('x', labelbottom=True)
 
 axs[3, 4].remove()
 
+"""Pour afficher certains les graphs de concentration intraneuronale."""
+# """Add the plot of ABi/N in the graph for ABi"""
+# axs[0, 0].set_ylabel(labelname[0], color='b')
+# ax1 = axs[0, 0].twinx()
+# ax1.plot(sol.t / 365, sol.y[0, :]/sol.y[8, :], "g-")  # ABi/N
+# ax1.set_ylabel(r"$A \beta^{i} / N$", color='g')
+# formatter1 = ticker.ScalarFormatter(useMathText=True)
+# formatter1.set_scientific(True)
+# formatter1.set_powerlimits((-1, 1))
+# ax1.yaxis.set_major_formatter(formatter1)
+#
+# """Add the plot of GSK3/N in the graph for GSK3"""
+# axs[0, 4].set_ylabel(labelname[4], color='b')
+# ax2 = axs[0, 4].twinx()
+# ax2.plot(sol.t / 365, sol.y[4, :] / sol.y[8, :], "g-")  # G/N
+# ax2.set_ylabel(r"$GSK3/N$", color='g')
+# formatter2 = ticker.ScalarFormatter(useMathText=True)
+# formatter2.set_scientific(True)
+# formatter2.set_powerlimits((-1, 1))
+# ax2.yaxis.set_major_formatter(formatter2)
+#
+# """Add the plot of tau/N in the graph for tau"""
+# axs[1, 0].set_ylabel(labelname[5], color='b')
+# ax3 = axs[1, 0].twinx()
+# ax3.plot(sol.t / 365, sol.y[5, :] / sol.y[8, :], "g-")  # tau/N
+# ax3.set_ylabel(r"$\tau/N$", color='g')
+# formatter3 = ticker.ScalarFormatter(useMathText=True)
+# formatter3.set_scientific(True)
+# formatter3.set_powerlimits((-1, 1))
+# ax3.yaxis.set_major_formatter(formatter3)
+
+"""Pour afficher un graph à la dernière position 
+(doit retirer le 'axs[3, 4].remove()' et 'axs.flat[14].tick_params('x', labelbottom=True)' plus haut)."""
 # ax = axs[3, 4]
 # dABpodt = p.kappa_ABooABpo * (sol.y[2, :] ** 2) - ((p.d_MantiABpo * sol.y[12, :] + p.d_hatMantiABpo * sol.y[14, :])
 #                                                    * (1 + p.AP * p.delta_APdp) * (sol.y[3, :] / (sol.y[3, :]
@@ -78,8 +113,10 @@ axs[3, 4].remove()
 # ax2.plot(sol.t / 365, sol.y[16, :], "g-")  # I_10
 # ax2.set_ylabel("I10", color='g')
 
-plt.subplots_adjust(hspace=.8, wspace=.8)
+plt.subplots_adjust(hspace=.2, wspace=.2)
 plt.tight_layout()
+
+# plt.tight_layout(rect=(0, 0.1, 1, 1))
 
 """Write the initial values used"""
 plt.subplots_adjust(bottom=0.16)
@@ -113,11 +150,12 @@ if p.AP == 1:
 else:  # p.AP == 0:
     APOE = "-"
 
-number = 6
+number = 5
 date = "22-09-22"
 my_path = os.path.abspath('Figures')
 FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
-          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + "_d_TaN=001on365ETprodGmultNsurN0ETd_FiN*1e-2ET2*transfos.png"
+          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + "_.png"
+# d_TaN=001on365ETprodGmultNsurN0ET2*transfosETDegGavecN
 while os.path.exists(os.path.join(my_path, FigName)):
     number = number+1
     FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
@@ -128,7 +166,7 @@ plt.savefig(os.path.join(my_path, FigName), dpi=180)
 """Add information to the figure."""
 FigInfos = {"max_step": str(max_step),
             "Début": "Début intégration",  # "Ignore la première demi-année."
-            "Modification(s)": "d_TaN = 0.01/365. p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) * (y[8]/p.N_0). d_FiN = 1 / (2.51 * 365) * 1e-2. transfo aggrédation *2."}
+            "Modification(s)": "d_TaN = 0.01/365. p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) * (y[8]/p.N_0). transfo aggrédation *2. Ajout '- (y[4] / y[8]) * abs(dydt[8])' à eqn GSK3."}
 
 im = Image.open("Figures/" + FigName)
 Infos = PngImagePlugin.PngInfo()
@@ -152,6 +190,32 @@ im.save("Figures/" + FigName, "png", pnginfo=Infos)
 #
 # axs[0].plot(sol.t / 365, dNdtFi)
 # axs[1].plot(sol.t / 365, dNdtTa)
+
+# fig2, axs = plt.subplots(1, 3, sharex="all", layout="constrained")
+# ax1, ax2, ax3 = axs.flat
+# ABiperN = sol.y[0, :] / sol.y[8, :]
+# GperN = sol.y[4, :] / sol.y[8, :]
+# tauperN = sol.y[5, :] / sol.y[8, :]
+# ax1.plot(sol.t / 365, ABiperN)
+# ax1.set_ylabel(r"$A\beta^i/N$")
+# ax1.set_xlabel("Age (years)")
+#
+# ax2.plot(sol.t / 365, GperN)
+# ax2.set_ylabel(r"$GSK3/N$")
+# ax2.set_xlabel("Age (years)")
+#
+# ax3.plot(sol.t / 365, tauperN)
+# ax3.set_ylabel(r"$\tau/N$")
+# ax3.set_xlabel("Age (years)")
+#
+# # formatter = ticker.ScalarFormatter(useMathText=True)
+# # formatter.set_scientific(True)
+# # formatter.set_powerlimits((-1, 1))
+# # # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
+# # # notation will be used if exp <= -1 or exp >= 1.
+# # ax1.yaxis.set_major_formatter(formatter)
+# # ax2.yaxis.set_major_formatter(formatter)
+# # ax3.yaxis.set_major_formatter(formatter)
 
 plt.show()
 
