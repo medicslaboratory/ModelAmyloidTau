@@ -96,19 +96,25 @@ class Parameters():
         ##########################################
 
         self.d_FiN = 1/(2.51 * 365)  # = 1.0915e-3
-        # self.d_FiN = 1 / (2.51 * 365) * 1e-2
+        # self.d_FiN = 1 / (2.51 * 365) * 1e-1
         """Maximal death rate of neurons induced by F_i (/day)."""
 
         self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4
+        # self.K_Fi = 3.708e-10
+        # TODO: Perte linéaire, car soit K est trop grand, soit F_i n'est pas assez haut. Pour avoir e-4 ou -5,
+        #  il faudrait que tau soit e-2 (à cause du carré), ce qui est très grand...
         """Concentration of intracellular NFTs (F_i) for which the death rate of neuron induced by F_i is 
         half-maximal (g/mL)."""
 
-        self.n = 2
+        # self.n = 2
+        self.n = 10  # Ralentis beaucoup la perte neuronale
         """Sigmoid function coefficient (unitless)."""
         # TODO: À déterminer avec le modèle.
 
-        self.d_TaN = 0.01 / 365  # (1 / 2) * 1/(2.51 * 365)
-        # self.d_TaN = (1/2) * self.d_FiN
+        # self.d_TaN = (1/2) * self.d_FiN  # = (1 / 2) * 1/(2.51 * 365)  # approx 5.4576e-4
+        # self.d_TaN = 0.01 / 365  # approx 2.7397e-5
+        self.d_TaN = 7e-5 / 365  # approx 1.9178e-7  # Données de Potvin. Voir mémoire.
+        # Plutôt peu de différence avec 0.01/365 (22-09-22_01 vs 22-09-23_05)
         # TODO: Peut-être changer
         """Maximal death rate of neurons induced by T_alpha (TNF-alpha) (/day)."""
 
@@ -253,7 +259,7 @@ class Parameters():
         # G_0, see GSK-3 section.
 
         self.kappa_tauFi = (100 / 3) * 1e-6 / 19344 * 86400 * 1000  # approx 0.1489
-        """Conversion rate of tau in NFT (/day)."""
+        """Conversion rate of tau in NFT (mL/g/j)."""
 
         self.d_tau = math.log(2) / 5.16  # approx 0.1343
         """Degradation and un-hyperphosphorylation rate of intracellular tau proteins (/day)."""
@@ -333,9 +339,13 @@ class Parameters():
         ###################################################
 
         self.beta = 1
-        """Proinflammatory / anti-inflammatory environnemental ratio (M_pro/M_anti ratio)"""
+        # self.beta = 10  # Plus pro- que anti-.
+        # self.beta = 1e-1  # Plus anti- que pro-.
+        """Proinflammatory / anti-inflammatory environnemental ratio (M_pro/M_anti ratio), unitless. 
+        If beta>1, favors proinflammatory polarization; if beta<1, favors anti-inflammatory polarization."""
 
         self.K_TaAct = 2.24e-12  # = self.K_TaM (def after)
+        # TODO: même genre de pattern avec 2.24e-10, va quand meme au dessus (22-09-23_15).
         """Half-saturation constant of TNF-alpha for the activation of microglia to a proinflammatory 
         polarization (g/mL)."""
 
@@ -344,6 +354,7 @@ class Parameters():
         polarization (g/mL)."""
 
         self.kappa_TbMpro = 4.8
+        # * 1e1 ou * 1e2 pas ça le bug (figures 22-09-23_14_...).
         """Maximal conversion rate of proinflammatory microglia to anti-inflammatory under TGF-beta signaling (/day)."""
 
         self.K_TbM = 5.9e-11
@@ -353,7 +364,8 @@ class Parameters():
         """Maximal conversion rate of anti-inflammatory microglia to proinflammatory under TNF-alpha 
         signaling (/day)."""
 
-        self.K_TaM = 2.24e-12
+        # self.K_TaM = 2.24e-12
+        self.K_TaM = self.K_TaAct
         """Concentration of TNF-alpha for which the conversion of Manti to Mpro is half maximal (g/mL)."""
 
         #############################################################
@@ -414,6 +426,7 @@ class Parameters():
 
         # self.kappa_MhatantiI10 = 47 * (52e-9 / 2) / (4e6 * m_Mhat)  # approx 6.12e-5  # Value from DeWaalMalefyt91
         self.kappa_MhatantiI10 = 660e-12 / (2e5 * m_Mhat)  # approx 6.613e-7 # Value from Mia14 (agreement with Fadok98)
+        # TODO: Choisir quelle valeur on conserve. Les deux méthodes sont dans Latex. La première est "commentée".
         """Production rate of IL-10 by anti-inflammatory macrophages (hat{M}_anti) (/day)."""
 
         self.kappa_MantiI10 = self.kappa_MhatantiI10

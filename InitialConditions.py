@@ -51,17 +51,17 @@ def InitialConditions(AgeStart=30):
     # y0[5] = 6e-7
     # (p.lambda_tau + p.lambda_Gtau * (y0[4] / p.G_0))/p.d_tau => avant fig _39
     # = 2.57e-5    # Hao: Concentration of tau proteins is, in health, 137 pg/ml and, in AD, 490 pg/ml
-    # A = p.kappa_tauFi
-    # B = p.d_tau
-    # C = -(p.lambda_tau + p.lambda_Gtau)
-    # y0[5] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
+    A = p.kappa_tauFi
+    B = p.d_tau
+    C = -(p.lambda_tau + p.lambda_Gtau)
+    y0[5] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
     # Prendre "+" donne nég. Donc, prend "-" et donne ~ 6.4947e-07.
     # Si prend lambda_Gtau * 1e-2 => ~6.6886e-09
-    y0[5] = 1e-10
+    # y0[5] = 1e-10
 
     """F_i (NFT inside the neurons)"""
-    # y0[6] = p.kappa_tauFi * (y0[5] ** 2) / p.d_Fi
-    y0[6] = 0
+    y0[6] = p.kappa_tauFi * (y0[5] ** 2) / p.d_Fi
+    # y0[6] = 0
 
     """F_o (NFT outside the neurons)"""
     y0[7] = 0

@@ -18,7 +18,7 @@ AgeStart = 30
 
 y0 = InitialConditions(AgeStart)
 
-AgeEnd = 40
+AgeEnd = 80
 decades = int((AgeEnd - AgeStart) / 10)
 
 max_step = 0.1
@@ -126,6 +126,8 @@ axs[3, 4].remove()
 plt.subplots_adjust(hspace=.2, wspace=.2)
 plt.tight_layout()
 
+# """Peut-être utiliser cela plutôt que les deux lignes précédentes si overlap. Ne l'utilise pas de base, car produit
+# des graphs plus petits (plus distancés)."""
 # plt.tight_layout(rect=(0, 0.1, 1, 1))
 
 """Write the initial values used"""
@@ -160,11 +162,12 @@ if p.AP == 1:
 else:  # p.AP == 0:
     APOE = "-"
 
-number = 5
-date = "22-09-22"
+# # Repartir avec _11 de la dernière journée (setting actuels ainsi).
+number = 1
+date = "22-09-23"
 my_path = os.path.abspath('Figures')
 FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
-          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + "_.png"
+          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + "_d_TaN=7e-5on365ETn=10ETF_i0ettau0quilibre.png"
 # d_TaN=001on365ETprodGmultNsurN0ET2*transfosETDegGavecN
 while os.path.exists(os.path.join(my_path, FigName)):
     number = number+1
@@ -176,7 +179,9 @@ plt.savefig(os.path.join(my_path, FigName), dpi=180)
 """Add information to the figure."""
 FigInfos = {"max_step": str(max_step),
             "Début": "Début intégration",  # "Ignore la première demi-année."
-            "Modification(s)": "d_TaN = 0.01/365. p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) * (y[8]/p.N_0). transfo aggrédation *2. Ajout '- (y[4] / y[8]) * abs(dydt[8])' à eqn GSK3."}
+            "Modification(s)": "d_TaN = 7e-5 / 365. p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) * (y[8]/p.N_0). "
+                               "transfo aggrédation *2. Ajout '- (y[4] / y[8]) * abs(dydt[8])' à eqn GSK3."
+                               "n = 10. [F_i]_0 = y0[6] = équilibre, et tau aussi."}
 
 im = Image.open("Figures/" + FigName)
 Infos = PngImagePlugin.PngInfo()
@@ -194,12 +199,49 @@ im.save("Figures/" + FigName, "png", pnginfo=Infos)
 # im = Image.open("Path of the figure")  # "Path of the figure" is, for example, "Figures/Figure_22-09-08_..._01.png".
 # im.info
 
-# fig, axs = plt.subplots(1, 2)
+"""Trace les graphs des pertes neuronales par chaque cause (F_i et TNFa) dans une figure indépendante."""
 # dNdtFi = - p.d_FiN * (1 / (1 + np.exp(- p.n * (sol.y[6, :] - p.K_Fi)))) * sol.y[8, :]
 # dNdtTa = - p.d_TaN * (sol.y[17, :] / (sol.y[17, :] + p.K_Ta)) * (1 / (1 + (sol.y[16, :] / p.K_I10))) * sol.y[8, :]
 #
-# axs[0].plot(sol.t / 365, dNdtFi)
-# axs[1].plot(sol.t / 365, dNdtTa)
+# # # Pour un graph.
+# fig, ax1 = plt.subplots(1, 1)
+# # # Un graph : Deux axes x.
+# ax1.plot(sol.t / 365, dNdtFi, "b-")  # loss by F_i
+# ax1.set_ylabel(r"$dN/dt$ par $F_i$", color="b")
+# formatter = ticker.ScalarFormatter(useMathText=True)
+# formatter.set_scientific(True)
+# formatter.set_powerlimits((-1, 1))
+# # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
+# # notation will be used if exp <= -1 or exp >= 1.
+# ax1.yaxis.set_major_formatter(formatter)
+# ax2 = ax1.twinx()
+# ax2.plot(sol.t / 365, dNdtTa, "g-")  # loss by TNFa
+# ax2.set_ylabel(r"$dN/dt$ par $T_\alpha$", color='g')
+# formatter = ticker.ScalarFormatter(useMathText=True)
+# formatter.set_scientific(True)
+# formatter.set_powerlimits((-1, 1))
+# # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
+# # notation will be used if exp <= -1 or exp >= 1.
+# ax2.yaxis.set_major_formatter(formatter)
+# ax1.set_xlabel("Age (years)")
+# ax1.grid()
+#
+# # # Un graph : Une axe x. Recommande moins.
+# # ax1.plot(sol.t / 365, dNdtFi, "b-", label=r"Par $F_i$")  # loss by F_i
+# # ax1.plot(sol.t / 365, dNdtTa, "g-", label=r"Par $T_\alpha$")  # loss by TNFa
+# # ax1.legend()
+# # ax1.set_ylabel(r"$dN/dt$ par facteur")
+# # ax1.set_xlabel("Age (years)")
+# # ax1.grid()
+#
+# # # Pour deux graphs distincts
+# # fig, axs = plt.subplots(1, 2)
+# # axs[0].plot(sol.t / 365, dNdtFi)
+# # axs[0].set_ylabel(r"$dN/dt$ par $F_i$")
+# # axs[1].plot(sol.t / 365, dNdtTa)
+# # axs[1].set_ylabel(r"$dN/dt$ par $T_i$")
+#
+#  plt.tight_layout()
 
 
 plt.show()
