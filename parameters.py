@@ -20,6 +20,9 @@ class Parameters():
         :param t: Age of the person (in days).
         :return: The degradation rate of extracellular amyloid-beta 42 monomer (/day).
         """
+        # a = ((9.4 / 24) - (3.8 / 24)) / ((80 - 30) * 365)
+        # b = (3.8 / 24) - (a * (30 * 365))
+        # halflife = a * t + b
         halflife = (7 / 547500) * t + (11 / 600)
         return math.log(2) / halflife
 
@@ -95,18 +98,19 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR NEURONS #
         ##########################################
 
-        self.d_FiN = 1/(2.51 * 365)  # = 1.0915e-3
+        self.d_FiN = 1 / (2.51 * 365)  # = 1.0915e-3
         # self.d_FiN = 1 / (2.51 * 365) * 1e-1
+        # self.d_FiN = 1 / (20 * 365)  # 20 ans temps de survie (Kril et al. 2002)
         """Maximal death rate of neurons induced by F_i (/day)."""
 
-        self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4
-        # self.K_Fi = 3.708e-10
+        # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4
+        self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-6  # ~ 3.708e-10
         # TODO: Perte linéaire, car soit K est trop grand, soit F_i n'est pas assez haut. Pour avoir e-4 ou -5,
         #  il faudrait que tau soit e-2 (à cause du carré), ce qui est très grand...
         """Concentration of intracellular NFTs (F_i) for which the death rate of neuron induced by F_i is 
         half-maximal (g/mL)."""
 
-        # self.n = 2
+        # self.n = 5
         self.n = 10  # Ralentis beaucoup la perte neuronale
         """Sigmoid function coefficient (unitless)."""
         # TODO: À déterminer avec le modèle.
@@ -211,14 +215,18 @@ class Parameters():
         # """Concentration of insulin (g/mL)"""
         # A function of age. See beginning.
 
-        if self.S == 0:  # woman
-            self.Ins_0 = 3.006e-11  # 0.1 * (-4.151e-15 * (365 * 30) + 3.460e-10) = 3.0054655e-11
-            """Normal concentration of insulin, sex dependent (g/mL). 
-            Correspond to the brain concentration at 30 years old."""
-        elif self.S == 1:  # men
-            self.Ins_0 = 3.296e-11  # 0.1 * (-4.257e-15 * (365 * 30) + 3.763e-10) = 3.2968585e-11
-            """Normal concentration of insulin, sex dependent (g/mL). 
-            Correspond to the brain concentration at 30 years old."""
+        self.Ins_0 = self.Ins((365 * 30), self.S)  # Ins_0^F = 3.0054655e-11 ; Ins_0^M = 3.2968585e-11
+        """Normal concentration of insulin, sex dependent (g/mL). 
+        Correspond to the brain concentration at 30 years old."""
+        # TODO: Supprimer ci-dessous si fonction fonctionne.
+        # if self.S == 0:  # woman
+        #     self.Ins_0 = 3.006e-11  # 0.1 * (-4.151e-15 * (365 * 30) + 3.460e-10) = 3.0054655e-11
+        #     """Normal concentration of insulin, sex dependent (g/mL).
+        #     Correspond to the brain concentration at 30 years old."""
+        # elif self.S == 1:  # men
+        #     self.Ins_0 = 3.296e-11  # 0.1 * (-4.257e-15 * (365 * 30) + 3.763e-10) = 3.2968585e-11
+        #     """Normal concentration of insulin, sex dependent (g/mL).
+        #     Correspond to the brain concentration at 30 years old."""
 
         self.d_G = math.log(2) / (41 / 24)  # approx 0.4057
         # Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
@@ -268,7 +276,7 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR F_i #
         ######################################
 
-        self.d_Fi = 1.0e-2 * self.d_tau  # approx 1.343e-3
+        self.d_Fi = 1e-2 * self.d_tau  # approx 1.343e-3
         """Degradation rate of intracellular NFT (/day)."""
 
         ######################################
@@ -298,6 +306,8 @@ class Parameters():
         """Maximal density of astrocytes (g/mL)."""
 
         self.kappa_TaA = 0.92 / 100e-9  # = 9.2e6
+        # self.kappa_TaA = 0.92 / 100e-9 * 1e-2
+        # self.kappa_TaA = 9.2 ; diminue seulement max atteint (22-09-27_01_...), same pour 22-09-29_10_... .
         """Activation rate of astrocytes by TNF-alpha (mL/g/day)."""
 
         self.kappa_ABpoA = (self.kappa_TaA * 2.24e-12) / (2 * self.K_ABpo)  # approx 3.3136
@@ -361,21 +371,33 @@ class Parameters():
         """Concentration of TGF-beta for which the conversion of Mpro to Manti is half maximal (g/mL)."""
 
         self.kappa_TaManti = 4.8
+        # Prend plus petit *1e-2 : 22-09-27_06_... et _07_...; aide, mais je crois que le vrai problème est ailleurs.
+        # Et autres figures (_10 à _ 15) : aide
+        # Touche pas, juste K_TaM suffisant... (22-09-29_11 à _13 vs _09)
         """Maximal conversion rate of anti-inflammatory microglia to proinflammatory under TNF-alpha 
         signaling (/day)."""
 
-        # self.K_TaM = 2.24e-12
-        self.K_TaM = self.K_TaAct
+        self.K_TaM = 2.24e-12 * 2e2
+        # test plus grand : 22-09-27_16_... à _18_...
+        # TODO: - Différence importante entre *1e2 et *5e2: 22-09-28_07_... vs _08_...
+        #    - Figure avec *4e2 me semble assez bien (22-09-29_03_...)!
+        #       Juste plaques bizarre, il faudrait prendre un pas de temps plus petit
+        #    - Ou avec *2e2 et kappa_MproTa = min de Fadok98 : 22-09-29_06_... .
+        # self.K_TaM = self.K_TaAct
         """Concentration of TNF-alpha for which the conversion of Manti to Mpro is half maximal (g/mL)."""
 
         #############################################################
         # CONSTANTS FOR THE EQUATION FOR hat{M}_pro AND hat{M}_anti #
         #############################################################
 
-        self.kappa_PMhat = 0.33  # * 1e-3
+        # self.kappa_PMhat = 0.33  # * 1e-3
+        # TODO: Revoir valeur, incohérence (voir mémoire)
+        self.kappa_PMhat = 0.33 * 1e-1
+        # TODO: Aide à déplacer l'augmentation vers la droite (retarder). Fig 22-09-29_08_.. (vs _06) et suivantes.
         """Maximal importation rate of macrophage in the brain under MCP-1 signaling (/day)."""
 
-        self.K_P = 6.23e-10
+        self.K_P = 6.23e-10 * 1e2
+        # TODO: *1e2 : Adoucis les courbes lors de anti -> pro, donc tout le modèle. Fig 22-09-29_14_... (vs _09)
         """Concentration of MCP-1 for which the rate of importation of macrophage is half-maximal (g/mL)."""
 
         self.Mhatmax = (830 * m_Mhat) / 2e-4  # = 0.0207085
@@ -389,11 +411,13 @@ class Parameters():
         """Concentration of TGF-beta for which the conversion of hat{M}_pro to hat{M}_anti is half maximal (g/mL)."""
 
         self.kappa_TaMhatanti = 1 / (10 / 24)  # = 2.4
+        # self.kappa_TaMhatanti = 1 / (10 / 24) * 1e-2
         """Maximal conversion rate of anti-inflammatory macrophage to proinflammatory under TNF-alpha 
         signaling (/day)."""
 
         self.K_TaMhat = self.K_TaM
         # Test * 1e2: 22-09-13_..._01 (car test cette augmentation sur K_TaM). Pas amélioration des pics.
+        # Voir K_TaM
         """Concentration of TNF-alpha for which the conversion of hat{M}_anti to hat{M}_pro is half maximal (g/mL)."""
 
         self.d_Mhatpro = 7.67e-4
@@ -426,7 +450,7 @@ class Parameters():
 
         # self.kappa_MhatantiI10 = 47 * (52e-9 / 2) / (4e6 * m_Mhat)  # approx 6.12e-5  # Value from DeWaalMalefyt91
         self.kappa_MhatantiI10 = 660e-12 / (2e5 * m_Mhat)  # approx 6.613e-7 # Value from Mia14 (agreement with Fadok98)
-        # TODO: Choisir quelle valeur on conserve. Les deux méthodes sont dans Latex. La première est "commentée".
+        # TODO: Choisir quelle valeur on conserve. Les deux méthodes sont dans Latex.
         """Production rate of IL-10 by anti-inflammatory macrophages (hat{M}_anti) (/day)."""
 
         self.kappa_MantiI10 = self.kappa_MhatantiI10
@@ -441,8 +465,8 @@ class Parameters():
         ##########################################
 
         # self.kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat)  # approx 3.186e-6  # Value from Hallsworth94
-        self.kappa_MhatproTa = (1.5e-9 / 18 * 24) / (2e6 * m_Mhat)  # max Fadok98 : approx 2.004e-7
-        # self.kappa_MhatproTa = (1.5e-9 / 18 * 24) / (4e6 * m_Mhat)  # min Fadok9: approx 1.002e-7
+        # self.kappa_MhatproTa = (1.5e-9 / 18 * 24) / (2e6 * m_Mhat)  # max Fadok98 : approx 2.004e-7
+        self.kappa_MhatproTa = (1.5e-9 / 18 * 24) / (4e6 * m_Mhat)  # min Fadok98: approx 1.002e-7
         # TODO: Modif Latex selon ce qu'on conserve (les deux options y sont).
         #   Choix de ce qu'on conserve selon test modèle.
         """Production rate of TNF-alpha by proinflammatory macrophages (hat{M}_pro) (/day)."""

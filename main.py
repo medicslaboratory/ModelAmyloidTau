@@ -59,9 +59,6 @@ for ax in axs.flat:
         # notation will be used if exp <= -1 or exp >= 1.
         ax.yaxis.set_major_formatter(formatter)
     i = i+1
-axs.flat[14].tick_params('x', labelbottom=True)
-
-axs[3, 4].remove()
 
 """Pour afficher certains les graphs de concentration intraneuronale."""
 # """Add the plot of ABi/N in the graph for ABi"""
@@ -105,23 +102,31 @@ axs[3, 4].remove()
 # ax4.yaxis.set_major_formatter(formatter4)
 
 """Pour afficher un graph à la dernière position 
-(doit retirer le 'axs[3, 4].remove()' et 'axs.flat[14].tick_params('x', labelbottom=True)' plus haut)."""
+(doit retirer le 'axs[3, 4].remove()' et 'axs.flat[14].tick_params('x', labelbottom=True)' ci-dessous)."""
+axs.flat[14].tick_params('x', labelbottom=True)
+axs[3, 4].remove()
 # ax = axs[3, 4]
-# dABpodt = p.kappa_ABooABpo * (sol.y[2, :] ** 2) - ((p.d_MantiABpo * sol.y[12, :] + p.d_hatMantiABpo * sol.y[14, :])
-#                                                    * (1 + p.AP * p.delta_APdp) * (sol.y[3, :] / (sol.y[3, :]
-#                                                                                                  + p.K_ABpo)))
-# ax.plot(sol.t / 365, dABpodt)  # , '.-', ms=2
-# dNdtFi = - p.d_FiN * (1 / (1 + np.exp(- p.n * (sol.y[6, :] - p.K_Fi)))) * sol.y[8, :]
-# ax.plot(sol.t / 365, dNdtFi)  # , '.-', ms=2
+# # # dABpodt = p.kappa_ABooABpo * (sol.y[2, :] ** 2) - ((p.d_MantiABpo * sol.y[12, :] + p.d_hatMantiABpo * sol.y[14, :])
+# # #                                                    * (1 + p.AP * p.delta_APdp) * (sol.y[3, :] / (sol.y[3, :]
+# # #                                                                                                  + p.K_ABpo)))
+# # # ax.plot(sol.t / 365, dABpodt)  # , '.-', ms=2
+# # # dNdtFi = - p.d_FiN * (1 / (1 + np.exp(- p.n * (sol.y[6, :] - p.K_Fi)))) * sol.y[8, :]
+# # # ax.plot(sol.t / 365, dNdtFi)  # , '.-', ms=2
 # ax.grid()
-# ax.set_xlabel('Age (years)')
-# # ax.set_ylabel("dABpo/dt")
-# ax.set_ylabel("dN/dt du à F_i")
+# # # ax.set_xlabel('Age (years)')
+# # # ax.set_ylabel("dABpo/dt")
+# # # ax.set_ylabel("dN/dt du à F_i")
 # ax2 = axs[3, 4].twinx()
-# axs[3, 4].plot(sol.t / 365, sol.y[12, :], "b-")  # M_anti
-# axs[3, 4].set_ylabel("Manti", color='b')
-# ax2.plot(sol.t / 365, sol.y[16, :], "g-")  # I_10
-# ax2.set_ylabel("I10", color='g')
+# # # axs[3, 4].plot(sol.t / 365, sol.y[12, :], "b-")  # M_anti
+# # # axs[3, 4].set_ylabel("Manti", color='b')
+# # # ax2.plot(sol.t / 365, sol.y[16, :], "g-")  # I_10
+# # # ax2.set_ylabel("I10", color='g')
+# axs[3, 4].plot(sol.t / 365, sol.y[11, :], "b-")  # M_pro
+# # axs[3, 4].set_ylabel("M_pro", color='b')
+# axs[3, 4].plot(sol.t / 365, sol.y[13, :], "r-")  # hat{M}_pro
+# axs[3, 4].set_ylabel("M_pro (blue); hat{M}_pro (red)")
+# ax2.plot(sol.t / 365, sol.y[17, :], "g-")  # T_alpha
+# ax2.set_ylabel("T_a", color='g')
 
 plt.subplots_adjust(hspace=.2, wspace=.2)
 plt.tight_layout()
@@ -162,17 +167,26 @@ if p.AP == 1:
 else:  # p.AP == 0:
     APOE = "-"
 
-# # Repartir avec _11 de la dernière journée (setting actuels ainsi).
-number = 1
-date = "22-09-23"
+# # Repartir avec _11 du 23 sept. (setting actuels ainsi).
+number = 14
+date = "22-09-29"
+CommentModif = "_n=10&K_TaM*1e1&K_Fi*1e-6&kappa_PMhat*1e-1&K_P*1e2"
+# &kappa_TaMhatanti*1e-2
+# "_n=10ETd_FiNe-5ETFo0=0ETK_TaM*2e2ETK_Fi*1e-6ETkappa_MproTaFadok98minETkappa_PMhat*1e-1_3"
+# ETkappaTalphaHallswoth94
+# ETAjustCondInitMantiethatMantipourTaetI10egaux
+# conserve : d_TaN=001on365ETprodGmultNsurN0ET2*transfosETDegGavecN
+# À partir de 22-09-28_5..., conserve : d_TaN=7e-5on365 et F_i0ettau0equilibre
+# À partir de 22-09-29_8..., conserve : kappa_MproTaFadok98min # (impact aussi kappa_MhatproTa)
 my_path = os.path.abspath('Figures')
 FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
-          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + "_d_TaN=7e-5on365ETn=10ETF_i0ettau0quilibre.png"
-# d_TaN=001on365ETprodGmultNsurN0ET2*transfosETDegGavecN
+          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + CommentModif + ".png"
+
 while os.path.exists(os.path.join(my_path, FigName)):
     number = number+1
     FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
-              str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + ".png"
+              str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + \
+              CommentModif + ".png"
 
 plt.savefig(os.path.join(my_path, FigName), dpi=180)
 
@@ -181,7 +195,20 @@ FigInfos = {"max_step": str(max_step),
             "Début": "Début intégration",  # "Ignore la première demi-année."
             "Modification(s)": "d_TaN = 7e-5 / 365. p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) * (y[8]/p.N_0). "
                                "transfo aggrédation *2. Ajout '- (y[4] / y[8]) * abs(dydt[8])' à eqn GSK3."
-                               "n = 10. [F_i]_0 = y0[6] = équilibre, et tau aussi."}
+                               "n = 10. [F_i]_0 = y0[6] = équilibre, et tau aussi. "
+                               # "d_FiN = 1 / (20 * 365) (Kril et al. 2002). "
+                               "d_FiN = 1 / (2.51 * 365) (original). "
+                               "[F_o]_0 = 0." 
+                               "K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-6 ~= 3.708e-10. "
+                               "K_TaM = 2.24e-12 * 2e2, impact aussi K_TaMhat."
+                               "kappa_MhatproTa = (1.5e-9 / 18 * 24) / (4e6 * m_Mhat), min value from Fadok98 (impact aussi kappa_MproTa)."
+                               # "Cond init Manti et hat{M}_anti pour que cond init Ta et I_10 soit égales."
+                               "kappa_PMhat = 0.33 * 1e-1."
+                               # "kappa_TaA = 0.92 / 100e-9 * 1e-2."
+                               # "kappa_TaManti = 4.8 * 1e-1. "
+                               # "kappa_TaMhatanti = 1 / (10 / 24) * 1e-2. "
+                               "K_P = 6.23e-10 * 1e2. "
+            }
 
 im = Image.open("Figures/" + FigName)
 Infos = PngImagePlugin.PngInfo()
@@ -243,6 +270,27 @@ im.save("Figures/" + FigName, "png", pnginfo=Infos)
 #
 #  plt.tight_layout()
 
+""" Autre"""
+fig, ax = plt.subplots(1, 1)
+M_activ = p.kappa_FoM * (sol.y[7, :] / (sol.y[7, :] + p.K_Fo)) * sol.y[10, :] + \
+          p.kappa_ABooM * (sol.y[2, :] / (sol.y[2, :] + p.K_ABooM)) * sol.y[10, :]
+epsilon_Ta = sol.y[17, :] / (sol.y[17, :] + p.K_TaAct)
+epsilon_I10 = sol.y[16, :] / (sol.y[16, :] + p.K_I10Act)
+ax.plot(sol.t / 365, ((p.beta * epsilon_Ta) / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ, "b-", label="Activ pro")
+ax.plot(sol.t / 365, (epsilon_I10 / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ, "r-", label="Activ anti")
+ax.set_ylabel("Rates")
+ax.plot(sol.t / 365, M_activ, "k", label="M_activ")
+ax.grid()
+ax.set_xlabel('Age (years)')
+# ax2 = ax.twinx()
+AntiToPro = p.kappa_TaManti * (sol.y[17, :] / (sol.y[17, :] + p.K_TaM)) * sol.y[12, :]
+ProToAnti = p.kappa_TbMpro * (sol.y[15, :] / (sol.y[15, :] + p.K_TbM)) * sol.y[11, :]
+ax.plot(sol.t / 365, AntiToPro, "g-", label="rate anti -> pro")
+ax.plot(sol.t / 365, ProToAnti, "m-", label="rate pro -> anti")
+# ax2.plot(sol.t / 365, AntiToPro, "g-", label="rate anti -> pro")
+# ax2.set_ylabel("Rate anti to pro", color='g')
+ax.legend()
+plt.tight_layout()
 
 plt.show()
 

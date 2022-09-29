@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from scipy.constants import Avogadro  # Avogadro number
 import parameters as param
 p = param.Parameters()
 
@@ -40,7 +41,8 @@ def InitialConditions(AgeStart=30):
     y0[2] = 0
 
     """AB_p^o (Amyloid-beta plaque extracell.)"""
-    y0[3] = 1e-18
+    # y0[3] = 1e-18
+    y0[3] = 1e-20
 
     """G (GSK3)"""
     # y0[4] = p.lambda_InsG / p.d_G  # ~= 0.16168
@@ -65,6 +67,9 @@ def InitialConditions(AgeStart=30):
 
     """F_o (NFT outside the neurons)"""
     y0[7] = 0
+    # y0[7] = 0.5 * ((1000 * 72500) / Avogadro) * 1000  # = 6.019454118505194e-14
+    # y0[7] = 5e-16
+    # Même méthode que pour K_Fo, même source, avait trouvé 0 ou 1 NFT chez contrôles (approx à 0.5)
 
     """N (Living neurons)"""
     y0[8] = p.N_0
@@ -86,7 +91,9 @@ def InitialConditions(AgeStart=30):
     y0[11] = 1e-12  # y0[10] * (p.beta / (p.beta + 1))
 
     """M_anti (Anti-inflammatory microglia)"""
-    # y0[12] = 1e-12  # y0[10] * (1 / (p.beta + 1))
+    y0[12] = 1e-12
+    # y0[10] * (1 / (p.beta + 1))
+    # y0[12] = y0[11] * (p.kappa_MhatproTa / p.d_Ta) / (p.kappa_MantiI10 / p.d_I10)  # pour qu'au départ I_10 et T_a soient égaux.
     # Changement 1e-12 pour 1e-5 (fig 22-09-09_..._03 vs _01) pas vrm amélioration
 
     """hat{M}_pro (Proinflammatory macrophages)"""
@@ -98,6 +105,7 @@ def InitialConditions(AgeStart=30):
     # y0[14] = 1e-9  # ou (p.kappa_TB * y0[15])/p.d_Mantihat, si y0[15] defini avant # Hao: 0
     y0[14] = 1e-12
     # y0[14] = p.Mhatmax/3
+    # y0[14] = y0[14] * (p.kappa_MhatproTa / p.d_Ta) / (p.kappa_MantiI10 / p.d_I10)  # pour qu'au départ I_10 et T_a soient égaux.
 
     # Changement 1e-12 pour 1e-5 (fig 22-09-09_..._03 vs _01) pas vrm amélioration
 
@@ -105,16 +113,19 @@ def InitialConditions(AgeStart=30):
     # y0[15] = p.K_TbM * 1e-7  # = 5.9e-18 (i.e. même diff ordre de grandeur entre [Tb]_0 et K_TbM que [Ta]_0 et K_TaM).
     #                          # Figure_22-09-13_..._05...: Modif pas utile, atteint équilibre avant de réaugmenter.
     y0[15] = (p.kappa_MantiTb * y0[12] + p.kappa_MhatantiTb * y0[14])/p.d_Tb  # = 3.774586223657386e-22
-    # 1.0e-6
+    # y0[15] = 1e-11  # aide pas
 
     """I_10 (IL-10 = Interleukin 10)"""
-    y0[16] = (p.kappa_MantiI10 * y0[12] + p.kappa_MhatantiI10 * y0[14]) / p.d_I10  # = 2.6173735792085045e-17
+    y0[16] = (p.kappa_MantiI10 * y0[12] + p.kappa_MhatantiI10 * y0[14]) / p.d_I10
+    # = 2.6173735792085045e-17 (avec DeWaalMalefyt91); = 2.8272775160026403e-19 avec Mia14
+    # y0[16] = p.K_I10Act
     # Hao : 1.0e-5
 
     """T_{alpha} (TNF-alpha)"""
-    # y0[17] = 1e-12
-    y0[17] = (p.kappa_MproTa * y0[11] + p.kappa_MhatproTa * y0[13]) / p.d_Ta  # nouv kappas (Fadok98): 7.31e-21
+    # y0[17] = 1e-12  # aide pas
+    y0[17] = (p.kappa_MproTa * y0[11] + p.kappa_MhatproTa * y0[13]) / p.d_Ta  # nouv kappas (Fadok98): ~7.31e-21
     # 1.1620103844701855e-19 (av)
+    # y0[17] = p.K_TaAct
     # Hao 2e-5
 
     """P (MCP-1)"""
