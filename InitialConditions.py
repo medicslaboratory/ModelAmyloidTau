@@ -21,28 +21,37 @@ def InitialConditions(AgeStart=30):
     # y0[1] = 1e-11   # Todo ou  ??
     # y0[1] = (p.lambda_ABmo * (1 + p.AP * p.delta_APm) + p.lambda_AABmo) / (p.d_ABmo(AgeStart*365) + p.kappa_ABmoABoo *
     #                                                                        (1 + p.AP * p.delta_APmo))
-    # A = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo)
+    # A = 2 * p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo)
     # B = p.d_ABmo(AgeStart*365)
     # C = -(p.lambda_ABmo * (1 + p.AP * p.delta_APm) + p.lambda_AABmo)
     # y0[1] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
     # Prendre + donne nég. Avec AgeStart=30, = 4.233652303020852e-11.
+    y0[1] = 4e-11
     # Par expérience, pour pas avoir de différence au départ, prendre (22-09-07_..._12 vs _13):
-    y0[1] = 0
+    # y0[1] = 0
 
     """AB_o^o (Amyloid-beta oligomers extracell.)"""
     # y0[2] = 5e-13  # 0
     # y0[2] = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2) / (p.d_ABoo + p.kappa_ABooABpo)
-    # A = p.kappa_ABooABpo
+    # A = 2 * p.kappa_ABooABpo
     # B = p.d_ABoo
     # C = - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2)
     # y0[2] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
     # Prendre + donne nég. Avec AgeStart=30, = 6.791648132775663e-17.
+    y0[2] = 6e-17
     # Par expérience, pour pas avoir de différence au départ, prendre (22-09-07_..._12 vs _13):
-    y0[2] = 0
+    # y0[2] = 0
 
     """AB_p^o (Amyloid-beta plaque extracell.)"""
     # y0[3] = 1e-18
-    y0[3] = 1e-20
+    # A = 2 * p.kappa_ABooABpo
+    # B = p.d_ABoo
+    # C = - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2)
+    # eqABoo = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
+    # F = p.kappa_ABooABpo * (eqABoo ** 2)
+    # D = (p.d_MantiABpo * 1e-12 + p.d_hatMantiABpo * 1e-12) * (1 + p.AP * p.delta_APdp)
+    # y0[3] = (F * p.K_ABpo) / (D - F)
+    y0[3] = 5e-28
 
     """G (GSK3)"""
     # y0[4] = p.lambda_InsG / p.d_G  # ~= 0.16168
@@ -66,9 +75,10 @@ def InitialConditions(AgeStart=30):
     # y0[6] = 0
 
     """F_o (NFT outside the neurons)"""
-    y0[7] = 0
+    # y0[7] = 0
     # y0[7] = 0.5 * ((1000 * 72500) / Avogadro) * 1000  # = 6.019454118505194e-14
-    # y0[7] = 5e-16
+    # y0[7] = 1e-16
+    y0[7] = 5e-17
     # Même méthode que pour K_Fo, même source, avait trouvé 0 ou 1 NFT chez contrôles (approx à 0.5)
 
     """N (Living neurons)"""
@@ -92,6 +102,7 @@ def InitialConditions(AgeStart=30):
 
     """M_anti (Anti-inflammatory microglia)"""
     y0[12] = 1e-12
+    # y0[12] = 5e-4
     # y0[10] * (1 / (p.beta + 1))
     # y0[12] = y0[11] * (p.kappa_MhatproTa / p.d_Ta) / (p.kappa_MantiI10 / p.d_I10)  # pour qu'au départ I_10 et T_a soient égaux.
     # Changement 1e-12 pour 1e-5 (fig 22-09-09_..._03 vs _01) pas vrm amélioration

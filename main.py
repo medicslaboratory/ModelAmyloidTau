@@ -21,7 +21,7 @@ y0 = InitialConditions(AgeStart)
 AgeEnd = 80
 decades = int((AgeEnd - AgeStart) / 10)
 
-max_step = 0.1
+max_step = 0.01
 maxstepstr = str(max_step).replace('.', '')
 rtol = 1e-10  # Default value : 1e-3
 rtolstr = "{:.0e}".format(rtol)
@@ -167,10 +167,9 @@ if p.AP == 1:
 else:  # p.AP == 0:
     APOE = "-"
 
-# # Repartir avec _11 du 23 sept. (setting actuels ainsi).
-number = 14
-date = "22-09-29"
-CommentModif = "_n=10&K_TaM*1e1&K_Fi*1e-6&kappa_PMhat*1e-1&K_P*1e2"
+number = 3
+date = "22-10-03"
+CommentModif = "_n=15&K_TaM*2e2&K_Fi=1.708e-10&kappa_PMhat*1e-1&K_P*1e2&Fo0=5e-17&CondInitABomodif"
 # &kappa_TaMhatanti*1e-2
 # "_n=10ETd_FiNe-5ETFo0=0ETK_TaM*2e2ETK_Fi*1e-6ETkappa_MproTaFadok98minETkappa_PMhat*1e-1_3"
 # ETkappaTalphaHallswoth94
@@ -181,7 +180,6 @@ CommentModif = "_n=10&K_TaM*1e1&K_Fi*1e-6&kappa_PMhat*1e-1&K_P*1e2"
 my_path = os.path.abspath('Figures')
 FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
           str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + CommentModif + ".png"
-
 while os.path.exists(os.path.join(my_path, FigName)):
     number = number+1
     FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
@@ -194,20 +192,27 @@ plt.savefig(os.path.join(my_path, FigName), dpi=180)
 FigInfos = {"max_step": str(max_step),
             "Début": "Début intégration",  # "Ignore la première demi-année."
             "Modification(s)": "d_TaN = 7e-5 / 365. p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) * (y[8]/p.N_0). "
-                               "transfo aggrédation *2. Ajout '- (y[4] / y[8]) * abs(dydt[8])' à eqn GSK3."
-                               "n = 10. [F_i]_0 = y0[6] = équilibre, et tau aussi. "
+                               "transfo aggrédation *2. Ajout '- (y[4] / y[8]) * abs(dydt[8])' à eqn GSK3. "
+                               "n = 15. "
+                               "[F_i]_0 = y0[6] = équilibre, et tau aussi. "
                                # "d_FiN = 1 / (20 * 365) (Kril et al. 2002). "
                                "d_FiN = 1 / (2.51 * 365) (original). "
-                               "[F_o]_0 = 0." 
-                               "K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-6 ~= 3.708e-10. "
-                               "K_TaM = 2.24e-12 * 2e2, impact aussi K_TaMhat."
-                               "kappa_MhatproTa = (1.5e-9 / 18 * 24) / (4e6 * m_Mhat), min value from Fadok98 (impact aussi kappa_MproTa)."
+                               "[F_o]_0 = 5e-17. " 
+                               # "K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-6 ~= 3.708e-10. "
+                               "K_Fi = 1.708e-10. "
+                               "K_TaM = 2.24e-12 * 2e2, impact aussi K_TaMhat. "
+                               "kappa_MhatproTa = (1.5e-9 / 18 * 24) / (4e6 * m_Mhat), min value from Fadok98 (impact aussi kappa_MproTa). "
                                # "Cond init Manti et hat{M}_anti pour que cond init Ta et I_10 soit égales."
                                "kappa_PMhat = 0.33 * 1e-1."
-                               # "kappa_TaA = 0.92 / 100e-9 * 1e-2."
+                               # "kappa_TaA = 0.92 / 100e-9 * 1e-2. "
                                # "kappa_TaManti = 4.8 * 1e-1. "
                                # "kappa_TaMhatanti = 1 / (10 / 24) * 1e-2. "
                                "K_P = 6.23e-10 * 1e2. "
+                               "[M_anti]_0 = 1e-12. "
+                               # "[AB_p^o]_0 = 1e-29. "
+                               "[AB_m^o]_0 = 4e-11, [AB_o^o]_0 = 6e-17 et [AB_p^o]_0 = 5e-28. "
+                               # "self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000 * 5. "
+                               # "K_ABooM = 0.060 / 527.4 / 1000 * 1e-5. "
             }
 
 im = Image.open("Figures/" + FigName)
@@ -280,6 +285,8 @@ ax.plot(sol.t / 365, ((p.beta * epsilon_Ta) / (p.beta * epsilon_Ta + epsilon_I10
 ax.plot(sol.t / 365, (epsilon_I10 / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ, "r-", label="Activ anti")
 ax.set_ylabel("Rates")
 ax.plot(sol.t / 365, M_activ, "k", label="M_activ")
+ax.plot(sol.t / 365, p.kappa_FoM * (sol.y[7, :] / (sol.y[7, :] + p.K_Fo)) * sol.y[10, :], label="Mactiv F_o")
+ax.plot(sol.t / 365, p.kappa_ABooM * (sol.y[2, :] / (sol.y[2, :] + p.K_ABooM)) * sol.y[10, :], label="Mactiv ABoo")
 ax.grid()
 ax.set_xlabel('Age (years)')
 # ax2 = ax.twinx()

@@ -104,14 +104,15 @@ class Parameters():
         """Maximal death rate of neurons induced by F_i (/day)."""
 
         # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4
-        self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-6  # ~ 3.708e-10
+        # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-6  # ~ 3.708e-10
         # TODO: Perte linéaire, car soit K est trop grand, soit F_i n'est pas assez haut. Pour avoir e-4 ou -5,
         #  il faudrait que tau soit e-2 (à cause du carré), ce qui est très grand...
+        self.K_Fi = 1.708e-10
         """Concentration of intracellular NFTs (F_i) for which the death rate of neuron induced by F_i is 
         half-maximal (g/mL)."""
 
-        # self.n = 5
-        self.n = 10  # Ralentis beaucoup la perte neuronale
+        self.n = 15
+        # self.n = 10  # Ralentis beaucoup la perte neuronale
         """Sigmoid function coefficient (unitless)."""
         # TODO: À déterminer avec le modèle.
 
@@ -119,7 +120,7 @@ class Parameters():
         # self.d_TaN = 0.01 / 365  # approx 2.7397e-5
         self.d_TaN = 7e-5 / 365  # approx 1.9178e-7  # Données de Potvin. Voir mémoire.
         # Plutôt peu de différence avec 0.01/365 (22-09-22_01 vs 22-09-23_05)
-        # TODO: Peut-être changer
+        # TODO: Peut-être changer. Revoir.
         """Maximal death rate of neurons induced by T_alpha (TNF-alpha) (/day)."""
 
         self.K_Ta = 4.48e-12
@@ -327,6 +328,7 @@ class Parameters():
         """Activation rate of microglia by F_o (NFT) (/day)."""
 
         self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000  # approx 1.3243e-12
+        # self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000 * 5
         """Concentration of extracellular NFTs at which the rate of activation of microglia by F_o 
         is half-maximal (g/mL)."""
 
@@ -335,6 +337,8 @@ class Parameters():
         """Activation rate of microglia by extracellular amyloid-beta42 oligomer (/day). """
 
         self.K_ABooM = 0.060 / 527.4 / 1000  # approx 1.1377e-7
+        # self.K_ABooM = 0.060 / 527.4 / 1000 * 1e-5
+        # TODO: À voir. *1e-5 : 22-09-30_10 (vs _06). Permet d'avoir une activation par les oligos.
         """Concentration of extracellular amyloid-beta42 oligomer at which the rate of activation of microglia by 
         oligomer is half-maximal (g/mL)."""
 
@@ -394,6 +398,8 @@ class Parameters():
         # TODO: Revoir valeur, incohérence (voir mémoire)
         self.kappa_PMhat = 0.33 * 1e-1
         # TODO: Aide à déplacer l'augmentation vers la droite (retarder). Fig 22-09-29_08_.. (vs _06) et suivantes.
+        # self.kappa_PMhat = 1/6  # ~ 0.1667
+        # 1/6 : Pas vrm... 22-09-30_06 (vs _05)
         """Maximal importation rate of macrophage in the brain under MCP-1 signaling (/day)."""
 
         self.K_P = 6.23e-10 * 1e2
