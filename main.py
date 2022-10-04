@@ -168,8 +168,8 @@ else:  # p.AP == 0:
     APOE = "-"
 
 number = 3
-date = "22-10-03"
-CommentModif = "_n=15&K_TaM*2e2&K_Fi=1.708e-10&kappa_PMhat*1e-1&K_P*1e2&Fo0=5e-17&CondInitABomodif"
+date = "22-10-04"
+CommentModif = "_n=15&K_TaM*2e2&K_Fi=1.708e-10&kappa_PMhat*1e-1&K_P*1e2&Fo0=5e-17&CondInitModif"
 # &kappa_TaMhatanti*1e-2
 # "_n=10ETd_FiNe-5ETFo0=0ETK_TaM*2e2ETK_Fi*1e-6ETkappa_MproTaFadok98minETkappa_PMhat*1e-1_3"
 # ETkappaTalphaHallswoth94
@@ -208,11 +208,14 @@ FigInfos = {"max_step": str(max_step),
                                # "kappa_TaManti = 4.8 * 1e-1. "
                                # "kappa_TaMhatanti = 1 / (10 / 24) * 1e-2. "
                                "K_P = 6.23e-10 * 1e2. "
-                               "[M_anti]_0 = 1e-12. "
+                               # "K_ABpo = (1.11 + 0.53) / 527.4 / 1000 * 1e-4. "
+                               "[M_anti]_0 = 1e-5. "
                                # "[AB_p^o]_0 = 1e-29. "
-                               "[AB_m^o]_0 = 4e-11, [AB_o^o]_0 = 6e-17 et [AB_p^o]_0 = 5e-28. "
+                               "[AB_m^o]_0, [AB_o^o]_0 et [AB_p^o]_0 à l'équilibre. "
+                               # "[AB_m^o]_0 = 4e-11, [AB_o^o]_0 = 6e-17 et [AB_p^o]_0 = 5e-28. "
                                # "self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000 * 5. "
                                # "K_ABooM = 0.060 / 527.4 / 1000 * 1e-5. "
+                               # "[M_NA]_0 = (1 - 0.67/100) * M_0 - (y0[11] + y0[12]), [hat{M}_pro]_0 = [hat{M}_anti]_0 = 0.67/100 * M_0 * 0.5. Impact aussi plaques et cytokines. "
             }
 
 im = Image.open("Figures/" + FigName)

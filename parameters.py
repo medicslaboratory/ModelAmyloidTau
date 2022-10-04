@@ -205,6 +205,7 @@ class Parameters():
         # = (Rate with APOE / self.d_MprohatABpo) - 1
 
         self.K_ABpo = (1.11 + 0.53) / 527.4 / 1000  # approx 3.11e-6
+        # self.K_ABpo = (1.11 + 0.53) / 527.4 / 1000 * 1e-4  # approx 3.11e-10
         """Concentration of extracellular amyloid-beta42 plaques at which the degradation rate of AB_p^o by M_anti and 
         hat{M}_anti is half maximal (Michaelis-Menten constant) (g/mL) """
 
