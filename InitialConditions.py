@@ -21,7 +21,7 @@ def InitialConditions(AgeStart=30):
     # y0[1] = 1e-11   # Todo ou  ??
     # y0[1] = (p.lambda_ABmo * (1 + p.AP * p.delta_APm) + p.lambda_AABmo) / (p.d_ABmo(AgeStart*365) + p.kappa_ABmoABoo *
     #                                                                        (1 + p.AP * p.delta_APmo))
-    A = 2 * p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo)
+    A = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo)
     B = p.d_ABmo(AgeStart * 365)
     C = -p.lambda_ABmo * (1 + p.AP * p.delta_APm)
     y0[1] = (-B + math.sqrt((B ** 2) - (4 * A * C))) / (2 * A)
@@ -33,7 +33,7 @@ def InitialConditions(AgeStart=30):
     """AB_o^o (Amyloid-beta oligomers extracell.)"""
     # y0[2] = 5e-13  # 0
     # y0[2] = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2) / (p.d_ABoo + p.kappa_ABooABpo)
-    A = 2 * p.kappa_ABooABpo
+    A = p.kappa_ABooABpo
     B = p.d_ABoo
     C = - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2)
     y0[2] = (-B + math.sqrt((B ** 2) - (4 * A * C))) / (2 * A)
@@ -44,12 +44,12 @@ def InitialConditions(AgeStart=30):
 
     """AB_p^o (Amyloid-beta plaque extracell.)"""
     # y0[3] = 1e-18
-    # A = 2 * p.kappa_ABooABpo
+    # A = p.kappa_ABooABpo
     # B = p.d_ABoo
     # C = - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2)
     # eqABoo = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
     # y0[3] = 5e-28
-    ## Prend équilibre, donc après microglies et macropphages !
+    # # Prend équilibre, donc après microglies et macropphages !
 
     """G (GSK3)"""
     # y0[4] = p.lambda_InsG / p.d_G  # ~= 0.16168
@@ -60,7 +60,7 @@ def InitialConditions(AgeStart=30):
     # y0[5] = 6e-7
     # (p.lambda_tau + p.lambda_Gtau * (y0[4] / p.G_0))/p.d_tau => avant fig _39
     # = 2.57e-5    # Hao: Concentration of tau proteins is, in health, 137 pg/ml and, in AD, 490 pg/ml
-    A = 2 * p.kappa_tauFi
+    A = p.kappa_tauFi
     B = p.d_tau
     C = -(p.lambda_tau + p.lambda_Gtau)
     y0[5] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
@@ -92,12 +92,13 @@ def InitialConditions(AgeStart=30):
     # M_NA : Après M_pro et M_anti.
 
     """M_pro (Proinflammatory microglia)"""
-    y0[11] = 1e-12  # y0[10] * (p.beta / (p.beta + 1))
+    # y0[11] = 1e-12  # y0[10] * (p.beta / (p.beta + 1))
+    y0[11] = 1e-12
 
     """M_anti (Anti-inflammatory microglia)"""
     # y0[12] = 1e-12
-    y0[12] = 1e-5
-    # y0[12] = 1e-4
+    # y0[12] = 1e-5
+    y0[12] = 1e-4
     # y0[12] = 5e-4
     # y0[10] * (1 / (p.beta + 1))
     # y0[12] = y0[11] * (p.kappa_MhatproTa / p.d_Ta) / (p.kappa_MantiI10 / p.d_I10)  # pour qu'au départ I_10 et T_a soient égaux.
@@ -108,17 +109,17 @@ def InitialConditions(AgeStart=30):
         M_0 = 3.811e-2
     else:  # men
         M_0 = 3.193e-2
-    y0[10] = y0[10] - (y0[11] + y0[12])
+    y0[10] = M_0 - (y0[11] + y0[12])
     # y0[10] = (1 - 0.67/100) * M_0 - (y0[11] + y0[12])
 
     """hat{M}_pro (Proinflammatory macrophages)"""
     # y0[13] = p.Mprohateq/1.5  # 0
-    y0[13] = 1e-12
+    # y0[13] = 1e-12
     # y0[13] = p.Mhatmax/2
 
     """hat{M}_anti (Anti-inflammatory macrophages)"""
     # y0[14] = 1e-9  # ou (p.kappa_TB * y0[15])/p.d_Mantihat, si y0[15] defini avant # Hao: 0
-    y0[14] = 1e-12
+    # y0[14] = 1e-12
     # y0[14] = p.Mhatmax/3
     # y0[14] = y0[14] * (p.kappa_MhatproTa / p.d_Ta) / (p.kappa_MantiI10 / p.d_I10)  # pour qu'au départ I_10 et T_a soient égaux.
 
@@ -131,6 +132,7 @@ def InitialConditions(AgeStart=30):
     F = p.kappa_ABooABpo * (y0[2] ** 2)
     D = (p.d_MantiABpo * y0[12] + p.d_hatMantiABpo * y0[14]) * (1 + p.AP * p.delta_APdp)
     y0[3] = (F * p.K_ABpo) / (D - F)
+    # y0[3] = 2.5e-25
 
     """T_{beta} (TGF-beta)"""
     # y0[15] = p.K_TbM * 1e-7  # = 5.9e-18 (i.e. même diff ordre de grandeur entre [Tb]_0 et K_TbM que [Ta]_0 et K_TaM).

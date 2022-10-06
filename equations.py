@@ -55,11 +55,11 @@ def ODEsystem(t, y):
 
     # Amyloid-beta monomer outside the neurons (AB_m^o)
     dydt[1] = (y[0] / y[8]) * abs(dydt[8]) + p.lambda_ABmo * (1 + p.AP * p.delta_APm) * (y[8] / p.N_0) \
-              + p.lambda_AABmo * (y[9] / p.A_0) - 2 * p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y[1] ** 2) \
+              + p.lambda_AABmo * (y[9] / p.A_0) - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y[1] ** 2) \
               - p.d_ABmo(t) * y[1]
 
     # Amyloid-beta oligomers outside (AB_o^o)
-    dydt[2] = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y[1] ** 2) - 2 * p.kappa_ABooABpo * (y[2] ** 2) \
+    dydt[2] = p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y[1] ** 2) - p.kappa_ABooABpo * (y[2] ** 2) \
               - p.d_ABoo * y[2]
 
     # Amyloid-beta plaque outside the neurons (AB_p^o)
@@ -81,7 +81,7 @@ def ODEsystem(t, y):
 
     # tau proteins (tau)
     dydt[5] = p.lambda_tau * (y[8] / p.N_0) + p.lambda_Gtau * (y[4] / p.G_0) \
-              - 2 * p.kappa_tauFi * (y[5] ** 2) * (y[8] / p.N_0) - (y[5] / y[8]) * abs(dydt[8]) - p.d_tau * y[5]
+              - p.kappa_tauFi * (y[5] ** 2) * (y[8] / p.N_0) - (y[5] / y[8]) * abs(dydt[8]) - p.d_tau * y[5]
     # # Ajout "* (y[8] / p.N_0)" au 2e terme.
     # dydt[5] = p.lambda_tau * (y[8] / p.N_0) + p.lambda_Gtau * (y[4] / p.G_0) * (y[8] / p.N_0)\
     #           - p.kappa_tauFi * (y[5] ** 2) * (y[8] / p.N_0) - (y[5] / y[8]) * abs(dydt[8]) - p.d_tau * y[5]

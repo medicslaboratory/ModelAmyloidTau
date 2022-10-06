@@ -107,23 +107,27 @@ class Parameters():
         # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-6  # ~ 3.708e-10
         # TODO: Perte linéaire, car soit K est trop grand, soit F_i n'est pas assez haut. Pour avoir e-4 ou -5,
         #  il faudrait que tau soit e-2 (à cause du carré), ce qui est très grand...
-        self.K_Fi = 1.708e-10
+        # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-5  # ~ 3.708e-9
+        # self.K_Fi = 1.708e-10
+        # self.K_Fi = 1.25e-10
+        self.K_Fi = 1.2e-10
         """Concentration of intracellular NFTs (F_i) for which the death rate of neuron induced by F_i is 
         half-maximal (g/mL)."""
 
         self.n = 15
-        # self.n = 10  # Ralentis beaucoup la perte neuronale
+        # self.n = 12  # Ralentis beaucoup la perte neuronale
         """Sigmoid function coefficient (unitless)."""
         # TODO: À déterminer avec le modèle.
 
         # self.d_TaN = (1/2) * self.d_FiN  # = (1 / 2) * 1/(2.51 * 365)  # approx 5.4576e-4
         # self.d_TaN = 0.01 / 365  # approx 2.7397e-5
-        self.d_TaN = 7e-5 / 365  # approx 1.9178e-7  # Données de Potvin. Voir mémoire.
+        self.d_TaN = 7.26e-3 / 365 * 10  # approx 1.989e-5  # Données de Potvin. Voir mémoire.
         # Plutôt peu de différence avec 0.01/365 (22-09-22_01 vs 22-09-23_05)
         # TODO: Peut-être changer. Revoir.
         """Maximal death rate of neurons induced by T_alpha (TNF-alpha) (/day)."""
 
         self.K_Ta = 4.48e-12
+        # self.K_Ta = 2.24e-12  # change rien 22-10-05_20 vs _23
         """Concentration of T_alpha (TNF-alpha) for which the death rate of neuron induced by TNF-alpha is 
         half-maximal (g/mL)."""
 
@@ -134,7 +138,8 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR AB^i #
         #######################################
 
-        self.lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau  # approx. = 1.3681e-10
+        # self.lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau  # approx. = 1.3681e-10
+        self.lambda_ABi = 1.4157348479999998e-09  # Lindstrom21
         """Creation rate of amyloid-beta42 inside neuron from APP (g/mL/day)."""
 
         self.delta_APi = (8373e-9 - 2178e-9) / (5631e-9 - 783e-9) - 1  # approx. 0.2778
@@ -205,7 +210,7 @@ class Parameters():
         # = (Rate with APOE / self.d_MprohatABpo) - 1
 
         self.K_ABpo = (1.11 + 0.53) / 527.4 / 1000  # approx 3.11e-6
-        # self.K_ABpo = (1.11 + 0.53) / 527.4 / 1000 * 1e-4  # approx 3.11e-10
+        # self.K_ABpo = (1.11 + 0.53) / 527.4 / 1000 * 1e-18
         """Concentration of extracellular amyloid-beta42 plaques at which the degradation rate of AB_p^o by M_anti and 
         hat{M}_anti is half maximal (Michaelis-Menten constant) (g/mL) """
 
@@ -220,15 +225,6 @@ class Parameters():
         self.Ins_0 = self.Ins((365 * 30), self.S)  # Ins_0^F = 3.0054655e-11 ; Ins_0^M = 3.2968585e-11
         """Normal concentration of insulin, sex dependent (g/mL). 
         Correspond to the brain concentration at 30 years old."""
-        # TODO: Supprimer ci-dessous si fonction fonctionne.
-        # if self.S == 0:  # woman
-        #     self.Ins_0 = 3.006e-11  # 0.1 * (-4.151e-15 * (365 * 30) + 3.460e-10) = 3.0054655e-11
-        #     """Normal concentration of insulin, sex dependent (g/mL).
-        #     Correspond to the brain concentration at 30 years old."""
-        # elif self.S == 1:  # men
-        #     self.Ins_0 = 3.296e-11  # 0.1 * (-4.257e-15 * (365 * 30) + 3.763e-10) = 3.2968585e-11
-        #     """Normal concentration of insulin, sex dependent (g/mL).
-        #     Correspond to the brain concentration at 30 years old."""
 
         self.d_G = math.log(2) / (41 / 24)  # approx 0.4057
         # Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
@@ -322,18 +318,21 @@ class Parameters():
         # CONSTANTS FOR THE EQUATION FOR M_NA #
         #######################################
 
-        TotalMaxActivRateM = 0.2141
+        TotalMaxActivRateM = 0.2141  # * 0.5
 
         self.kappa_FoM = TotalMaxActivRateM * 2 / 3  # approx 0.1427
+        # self.kappa_FoM = TotalMaxActivRateM * 1/2
         # TODO: 28.32 * 2? Trop grand! Latex pour autre, changer si change idée.
         """Activation rate of microglia by F_o (NFT) (/day)."""
 
         self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000  # approx 1.3243e-12
-        # self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000 * 5
+        # self.K_Fo = 16 * ((1000 * 72500) / Avogadro) * 1000
+        # modif K_Fo: 22-09-30_03 & _04  et 22-10-06_18
         """Concentration of extracellular NFTs at which the rate of activation of microglia by F_o 
         is half-maximal (g/mL)."""
 
         self.kappa_ABooM = TotalMaxActivRateM * 1 / 3  # approx 0.07137
+        # self.kappa_ABooM = TotalMaxActivRateM * 1 / 2
         # TODO: 28.32 ? Trop grand! Latex pour autre, changer si change idée.
         """Activation rate of microglia by extracellular amyloid-beta42 oligomer (/day). """
 
@@ -355,7 +354,7 @@ class Parameters():
 
         self.beta = 1
         # self.beta = 10  # Plus pro- que anti-.
-        # self.beta = 1e-1  # Plus anti- que pro-.
+        # self.beta = 1e-1  # Plus anti- que pro-. # Aide un peu, mais retarde pas vrm le changement ... 22-10-05_20 vs _24
         """Proinflammatory / anti-inflammatory environnemental ratio (M_pro/M_anti ratio), unitless. 
         If beta>1, favors proinflammatory polarization; if beta<1, favors anti-inflammatory polarization."""
 
@@ -397,7 +396,7 @@ class Parameters():
 
         # self.kappa_PMhat = 0.33  # * 1e-3
         # TODO: Revoir valeur, incohérence (voir mémoire)
-        self.kappa_PMhat = 0.33 * 1e-1
+        self.kappa_PMhat = 0.33 * 1e-2
         # TODO: Aide à déplacer l'augmentation vers la droite (retarder). Fig 22-09-29_08_.. (vs _06) et suivantes.
         # self.kappa_PMhat = 1/6  # ~ 0.1667
         # 1/6 : Pas vrm... 22-09-30_06 (vs _05)
