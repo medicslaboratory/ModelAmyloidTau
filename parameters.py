@@ -41,7 +41,7 @@ class Parameters():
             return 0.1 * (-4.257e-15 * t + 3.763e-10)
 
     def __init__(self):
-        self.AP = 1
+        self.AP = 0
         """AP equals to 1 if one has the APOE4 gene and 0 otherwise."""
 
         self.S = 0
@@ -109,8 +109,8 @@ class Parameters():
         #  il faudrait que tau soit e-2 (à cause du carré), ce qui est très grand...
         # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-5  # ~ 3.708e-9
         # self.K_Fi = 1.708e-10
-        # self.K_Fi = 1.25e-10
-        self.K_Fi = 1.2e-10
+        self.K_Fi = 1.25e-10
+        # self.K_Fi = 1.2e-10
         """Concentration of intracellular NFTs (F_i) for which the death rate of neuron induced by F_i is 
         half-maximal (g/mL)."""
 

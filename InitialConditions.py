@@ -25,7 +25,7 @@ def InitialConditions(AgeStart=30):
     B = p.d_ABmo(AgeStart * 365)
     C = -p.lambda_ABmo * (1 + p.AP * p.delta_APm)
     y0[1] = (-B + math.sqrt((B ** 2) - (4 * A * C))) / (2 * A)
-    # Prendre - donne nég, prend +. Avec AgeStart=30, et AP=1: = 3.993234230841937e-11; AP=0: 3.125011431885944e-11
+    # Prendre - donne nég, prend +. Avec AgeStart=30, et AP=1: = 4.13206616750243e-10; AP=0: 3.233829730236738e-10
     # y0[1] = 4e-11
     # Par expérience, pour pas avoir de différence au départ, prendre (22-09-07_..._12 vs _13):
     # y0[1] = 0
@@ -37,7 +37,7 @@ def InitialConditions(AgeStart=30):
     B = p.d_ABoo
     C = - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2)
     y0[2] = (-B + math.sqrt((B ** 2) - (4 * A * C))) / (2 * A)
-    # Prendre - donne nég, prend +. Avec AgeStart=30, et AP=1 : = 6.039515199063317e-17; AP=0 : 3.698922412809225e-17
+    # Prendre - donne nég, prend +. Avec AgeStart=30, et AP=1 : = 6.468006453985709e-15; AP=0 : 1.4672579335221297e-15
     # y0[2] = 6e-17
     # Par expérience, pour pas avoir de différence au départ, prendre (22-09-07_..._12 vs _13):
     # y0[2] = 0
@@ -129,9 +129,9 @@ def InitialConditions(AgeStart=30):
     # y0[14] = 0.67/100 * M_0 * 0.5
 
     """AB_p^o (Amyloid-beta plaque extracell.) - Équilibre!"""
-    F = p.kappa_ABooABpo * (y0[2] ** 2)
+    Psi = p.kappa_ABooABpo * (y0[2] ** 2)   # AP=1 : 1.985969404177517e-24 ; AP=0 : 1.0219851779307061e-25
     D = (p.d_MantiABpo * y0[12] + p.d_hatMantiABpo * y0[14]) * (1 + p.AP * p.delta_APdp)
-    y0[3] = (F * p.K_ABpo) / (D - F)
+    y0[3] = (Psi * p.K_ABpo) / (D - Psi)
     # y0[3] = 2.5e-25
 
     """T_{beta} (TGF-beta)"""

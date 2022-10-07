@@ -1,4 +1,4 @@
-# Date : 17 January 2022
+# Date : 7 Octobre 2022
 # Author : Éléonore Chamberland
 
 import numpy as np
@@ -8,9 +8,11 @@ import os
 from scipy.integrate import solve_ivp
 from PIL import Image
 from PIL import PngImagePlugin
+import datetime
 import equations as eqns
 from InitialConditions import InitialConditions
 import parameters as param
+import figuresfunctions as ff
 
 p = param.Parameters()
 
@@ -31,157 +33,27 @@ rtolstr = "{:.0e}".format(rtol)
 
 atol = np.ones(19) * 1e-15
 atol[3] = 1e-35
+atolstr = "array"
 
 method = "BDF"
 # method = "Radau"
 # method = "LSODA"
 sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, rtol=rtol, atol=atol)
 
-"""Generate the figure"""
-fig, axs = plt.subplots(nrows=4, ncols=5, sharex="all")  # If no text under the figure, add: layout="constrained"
-fig.set_size_inches(35 / 2.54, 20 / 2.54, forward=True)
-
-# Making a list for Label names in the plot
-labelname = [r'$A \beta^{i}$', r'$A \beta_{m}^{o}$', r'$A \beta_{o}^{o}$', r'$A \beta_{p}^{o}$', '$GSK 3$', r'$\tau$',
-             '$F_i$', '$F_o$', '$N$', '$A$', '$M_{NA}$', '$M_{pro}$', '$M_{anti}$', r'$\hat{M}_{pro}$', r'$\hat{M}_{anti}$',
-             r'$T_{\beta}$', '$I_{10}$', r'$T_{\alpha}$', '$P$']
-
-k = np.argmax(sol.t >= ((AgeStart+0.5)*365))  # First indice to skip the first half year.
-
-i = 0
-for ax in axs.flat:
-    if i < 19:
-        # # """Plot tout."""
-        ax.plot(sol.t / 365, sol.y[i, :])  # , '.-', ms=2
-        # # """Plot sans la première demie année."""
-        # ax.plot(sol.t[k:] / 365, sol.y[i, k:])
-        ax.grid()
-        if i >= 14:
-            ax.set_xlabel('Age (years)')
-        ax.set_ylabel(labelname[i])
-        formatter = ticker.ScalarFormatter(useMathText=True)
-        formatter.set_scientific(True)
-        formatter.set_powerlimits((-1, 1))
-        # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-        # notation will be used if exp <= -1 or exp >= 1.
-        ax.yaxis.set_major_formatter(formatter)
-    i = i+1
-
-"""Pour afficher certains les graphs de concentration intraneuronale."""
-# """Add the plot of ABi/N in the graph for ABi"""
-# axs[0, 0].set_ylabel(labelname[0], color='b')
-# ax1 = axs[0, 0].twinx()
-# ax1.plot(sol.t / 365, sol.y[0, :]/sol.y[8, :], "g-")  # ABi/N
-# ax1.set_ylabel(r"$A \beta^{i} / N$", color='g')
-# formatter1 = ticker.ScalarFormatter(useMathText=True)
-# formatter1.set_scientific(True)
-# formatter1.set_powerlimits((-1, 1))
-# ax1.yaxis.set_major_formatter(formatter1)
-#
-# """Add the plot of GSK3/N in the graph for GSK3"""
-# axs[0, 4].set_ylabel(labelname[4], color='b')
-# ax2 = axs[0, 4].twinx()
-# ax2.plot(sol.t / 365, sol.y[4, :] / sol.y[8, :], "g-")  # G/N
-# ax2.set_ylabel(r"$GSK3/N$", color='g')
-# formatter2 = ticker.ScalarFormatter(useMathText=True)
-# formatter2.set_scientific(True)
-# formatter2.set_powerlimits((-1, 1))
-# ax2.yaxis.set_major_formatter(formatter2)
-#
-# """Add the plot of tau/N in the graph for tau"""
-# axs[1, 0].set_ylabel(labelname[5], color='b')
-# ax3 = axs[1, 0].twinx()
-# ax3.plot(sol.t / 365, sol.y[5, :] / sol.y[8, :], "g-")  # tau/N
-# ax3.set_ylabel(r"$\tau/N$", color='g')
-# formatter3 = ticker.ScalarFormatter(useMathText=True)
-# formatter3.set_scientific(True)
-# formatter3.set_powerlimits((-1, 1))
-# ax3.yaxis.set_major_formatter(formatter3)
-#
-# """Add the plot of F_i/N in the graph for F_i"""
-# axs[1, 1].set_ylabel(labelname[6], color='b')
-# ax4 = axs[1, 1].twinx()
-# ax4.plot(sol.t / 365, sol.y[6, :] / sol.y[8, :], "g-")  # tau/N
-# ax4.set_ylabel(r"$F_i/N$", color='g')
-# formatter4 = ticker.ScalarFormatter(useMathText=True)
-# formatter4.set_scientific(True)
-# formatter4.set_powerlimits((-1, 1))
-# ax4.yaxis.set_major_formatter(formatter4)
-
-"""Pour afficher un graph à la dernière position 
-(doit retirer le 'axs[3, 4].remove()' et 'axs.flat[14].tick_params('x', labelbottom=True)' ci-dessous)."""
-axs.flat[14].tick_params('x', labelbottom=True)
-axs[3, 4].remove()
-# ax = axs[3, 4]
-# # # dABpodt = p.kappa_ABooABpo * (sol.y[2, :] ** 2) - ((p.d_MantiABpo * sol.y[12, :] + p.d_hatMantiABpo * sol.y[14, :])
-# # #                                                    * (1 + p.AP * p.delta_APdp) * (sol.y[3, :] / (sol.y[3, :]
-# # #                                                                                                  + p.K_ABpo)))
-# # # ax.plot(sol.t / 365, dABpodt)  # , '.-', ms=2
-# # # dNdtFi = - p.d_FiN * (1 / (1 + np.exp(- p.n * (sol.y[6, :] - p.K_Fi)))) * sol.y[8, :]
-# # # ax.plot(sol.t / 365, dNdtFi)  # , '.-', ms=2
-# ax.grid()
-# # # ax.set_xlabel('Age (years)')
-# # # ax.set_ylabel("dABpo/dt")
-# # # ax.set_ylabel("dN/dt du à F_i")
-# ax2 = axs[3, 4].twinx()
-# # # axs[3, 4].plot(sol.t / 365, sol.y[12, :], "b-")  # M_anti
-# # # axs[3, 4].set_ylabel("Manti", color='b')
-# # # ax2.plot(sol.t / 365, sol.y[16, :], "g-")  # I_10
-# # # ax2.set_ylabel("I10", color='g')
-# axs[3, 4].plot(sol.t / 365, sol.y[11, :], "b-")  # M_pro
-# # axs[3, 4].set_ylabel("M_pro", color='b')
-# axs[3, 4].plot(sol.t / 365, sol.y[13, :], "r-")  # hat{M}_pro
-# axs[3, 4].set_ylabel("M_pro (blue); hat{M}_pro (red)")
-# ax2.plot(sol.t / 365, sol.y[17, :], "g-")  # T_alpha
-# ax2.set_ylabel("T_a", color='g')
-
-plt.subplots_adjust(hspace=.2, wspace=.2)
-plt.tight_layout()
-
-# """Peut-être utiliser cela plutôt que les deux lignes précédentes si overlap. Ne l'utilise pas de base, car produit
-# des graphs plus petits (plus distancés)."""
-# plt.tight_layout(rect=(0, 0.1, 1, 1))
-
-"""Write the initial values used"""
-plt.subplots_adjust(bottom=0.16)
-icNameValue = [str(labelname[i]) + " = " + "{:.2e}".format(y0[i]) for i in np.arange(19)]
-initcond = "Initial conditions used (in g/mL) : \n" + ", ".join(icNameValue[:10]) + ", \n" + ", ".join(icNameValue[10:])
-plt.text(0.03, 0.08, initcond, fontsize=9, ha='left', va='top', transform=plt.gcf().transFigure)  # , wrap=True
-
-"""Write the full name of the variables"""
-# plt.subplots_adjust(bottom=0.16)
-# VariablesDef = r'$A \beta^{i}$: Intracellular beta-amyloid monomer; ' \
-#                r'$A \beta_{m}^{o}$: Extracellular beta-amyloid monomer; ' \
-#                r'$A \beta_{o}^{o}$: Extracellular beta-amyloid oligomer; ' \
-#                r'$A \beta_{p}^{o}$: Extracellular beta-amyloid plaques; ' \
-#                r'$GSK 3$: Glycogen synthase kinase-3; ' + '\n' + r'$\tau$: Hyperphosphorylated tau protein; ' \
-#                r'$F_i$: Intracellular NFTs; $F_o$: Extracellular NFTs; ' \
-#                r'$N$: Neurons; $A$: Astrocytes; $M_{NA}$: Resting microglia; ' \
-#                r'$M_{pro}$ Proinflammatory microglia; $M_{anti}$: Anti-inflammatory microglia; ' + '\n' + \
-#                r'$\hat{M}_{pro}$: Proinflammatory macrophages; ' \
-#                r'$\hat{M}_{anti}$: Anti-inflammatory macrophages; $T_{\beta}$: TGF-$\beta$; ' \
-#                r'$I_{10}$: Interleukin-10; $T_{\alpha}$: TNF-$\alpha$; $P$: MCP-1.'
-# plt.text(0.03, 0.08, VariablesDef, fontsize=9, ha='left', va='top', transform=plt.gcf().transFigure)
-
-"""Save the plot as a .png file"""
-if p.S == 0:
-    sex = "F"
-else:  # p.S == 1:
-    sex = "M"
-
-if p.AP == 1:
-    APOE = "+"
-else:  # p.AP == 0:
-    APOE = "-"
+number = 3
 
 # 22-10-05_20 pas mal, perte environ -11,5%
 # 22-10-06_15 : ~-6.178%
-# 22-10-05_21 : perte environ ~-10.77%
-# 22-10-05_33 : perte environ -10.628%
-# 22-10-05_34 : perte environ -11.3947%
-number = 34
-date = "22-10-06"
-CommentModif = "same05_20_modifManti0"
+# 22-10-06_21 : perte environ ~-10.77%
+# 22-10-06_33 : perte environ -10.628%  n=15&K_TaM*2e2&K_Fi=1.25e-10&kappa_PMhat*1e-2&K_P*1e2&Fo0=5e-17&lambda_ABiLindstrom21&d_TaNmodif*10
+# 22-10-06_34 : perte environ -11.3947%  " " K_Fi=1.2e-10 " "
+
+# 22-10-07_01 (même que 22-10-06_33) (K_Fi=1.2e-10): -11.394726350603838 %
+# 22-10-07_02 (K_Fi=1.25e-10) : -10.628227731913643 %
+# 22-10-07_03 (comme _02, mais APOE-) : -10.627498374162005 %
+
+CommentModif = "comme02"
+# CommentModif = "n=15&K_TaM*2e2&K_Fi=1.2e-10&kappa_PMhat*1e-2&K_P*1e2&Fo0=5e-17&lambda_ABiLindstrom21&d_TaNmodif*10"
 # CommentModif = "_n=15&K_TaM*2e2&K_Fi=1.25e-10&kappa_PMhat*1e-2&K_P*1e2&Fo0=5e-17&CondInitModif&lambda_ABiLindstrom21" \
 #                "&d_TaNmodif*10_atol=array"
 # &kappa_TaMhatanti*1e-2   &d_TaNmodif*10 &d_TaNmodif*5 &K_Fo=16*-
@@ -191,16 +63,11 @@ CommentModif = "same05_20_modifManti0"
 # conserve : d_TaN=001on365ETprodGmultNsurN0ET2*transfosETDegGavecN
 # À partir de 22-09-28_5..., conserve : d_TaN=7e-5on365 et F_i0ettau0equilibre
 # À partir de 22-09-29_8..., conserve : kappa_MproTaFadok98min # (impact aussi kappa_MhatproTa)
-my_path = os.path.abspath('Figures')
-FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
-          str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + CommentModif + ".png"
-while os.path.exists(os.path.join(my_path, FigName)):
-    number = number+1
-    FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
-              str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + \
-              CommentModif + ".png"
 
-plt.savefig(os.path.join(my_path, FigName), dpi=180)
+solt = sol.t / 365
+
+FigName = ff.main_figure(solt, sol.y, y0, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number, CommentModif)
+
 
 """Add information to the figure."""
 FigInfos = {"max_step": str(max_step),
@@ -209,13 +76,13 @@ FigInfos = {"max_step": str(max_step),
                                "p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) * (y[8]/p.N_0). "
                                # "transfo aggrédation *2. "
                                "Ajout '- (y[4] / y[8]) * abs(dydt[8])' à eqn GSK3. "
-                               "n = 14. "
+                               "n = 15. "
                                "[F_i]_0 = y0[6] = équilibre, et tau aussi. "
                                # "d_FiN = 1 / (20 * 365) (Kril et al. 2002). "
                                "d_FiN = 1 / (2.51 * 365). "
                                "[F_o]_0 = 5e-17. " 
                                # "K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-6 ~= 3.708e-10. "
-                               "K_Fi = 1.2e-10. "
+                               "K_Fi = 1.25e-10. "
                                # "K_Ta = 2.24e-12 (pour perte neurones)."
                                "K_TaM = 2.24e-12 * 2e2, impact aussi K_TaMhat. "
                                "kappa_MhatproTa = (1.5e-9 / 18 * 24) / (4e6 * m_Mhat), min value from Fadok98 (impact aussi kappa_MproTa). "
@@ -259,151 +126,27 @@ im.save("Figures/" + FigName, "png", pnginfo=Infos)
 # im = Image.open("Path of the figure")  # "Path of the figure" is, for example, "Figures/Figure_22-09-08_..._01.png".
 # im.info
 
-"""Trace les graphs des pertes neuronales par chaque cause (F_i et TNFa) dans une figure indépendante."""
-dNdtFi = - p.d_FiN * (1 / (1 + np.exp(- p.n * (sol.y[6, :] - p.K_Fi)))) * sol.y[8, :]
-dNdtTa = - p.d_TaN * (sol.y[17, :] / (sol.y[17, :] + p.K_Ta)) * (1 / (1 + (sol.y[16, :] / p.K_I10))) * sol.y[8, :]
+"""Rate figures"""
 
-# # Pour un graph.
-# fig, ax1 = plt.subplots(1, 1)
-# plt.suptitle("Taux de perte neuronale")
-# # # Un graph : Deux axes x.
-# ax1.plot(sol.t / 365, dNdtFi + dNdtTa, "r-", label=r"Total")
-# ax1.plot(sol.t / 365, dNdtFi, "b-", label=r"Par $F_i$")  # loss by F_i
-# ax1.set_ylabel(r"$dN/dt$ total et par $F_i$", color="k")
-# # ax1.set_ylabel(r"$dN/dt$ par $F_i$", color="b")
-# formatter = ticker.ScalarFormatter(useMathText=True)
-# formatter.set_scientific(True)
-# formatter.set_powerlimits((-1, 1))
-# # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-# # notation will be used if exp <= -1 or exp >= 1.
-# ax1.yaxis.set_major_formatter(formatter)
-# ax2 = ax1.twinx()
-# ax2.plot(sol.t / 365, dNdtTa, "g-", label=r"Par $T_\alpha$")  # loss by TNFa
-# ax2.set_ylabel(r"$dN/dt$ par $T_\alpha$", color='g')
-# formatter = ticker.ScalarFormatter(useMathText=True)
-# formatter.set_scientific(True)
-# formatter.set_powerlimits((-1, 1))
-# # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-# # notation will be used if exp <= -1 or exp >= 1.
-# ax2.yaxis.set_major_formatter(formatter)
-# ax1.set_xlabel("Age (years)")
-# ax1.legend(loc='center left')
-# ax1.grid()
+fig_neuloss = ff.fig_neuronal_loss_rates(sol.t, sol.y)
 
-# # Un graph : Une axe x. Recommande moins.
-# ax1.plot(sol.t / 365, dNdtFi + dNdtTa, "r-", label=r"Total")
-# ax1.plot(sol.t / 365, dNdtFi, "b-", label=r"Par $F_i$")  # loss by F_i
-# ax1.plot(sol.t / 365, dNdtTa, "g-", label=r"Par $T_\alpha$")  # loss by TNFa
-# ax1.legend()
-# ax1.set_ylabel(r"$dN/dt$ par facteur")
-# ax1.set_xlabel("Age (years)")
-# formatter = ticker.ScalarFormatter(useMathText=True)
-# formatter.set_scientific(True)
-# formatter.set_powerlimits((-1, 1))
-# # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-# # notation will be used if exp <= -1 or exp >= 1.
-# ax1.yaxis.set_major_formatter(formatter)
-# ax1.grid()
+fig_microactiv = ff.fig_microglia_activation_rates(sol.t, sol.y)
 
-# # Pour deux graphs superposés
-_, axs = plt.subplots(2, 1, sharex="all")
-plt.suptitle("Taux de perte neuronale")
-axs[0].plot(sol.t / 365, dNdtFi + dNdtTa, "r-", label=r"Total")
-axs[0].plot(sol.t / 365, dNdtFi, "b-", label=r"Par $F_i$")  # loss by F_i
-axs[0].set_ylabel(r"$dN/dt$ total et par $F_i$")
-axs[0].legend()
-# axs[0].plot(sol.t / 365, dNdtFi)
-# axs[0].set_ylabel(r"$dN/dt$ par $F_i$")
-formatter = ticker.ScalarFormatter(useMathText=True)
-formatter.set_scientific(True)
-formatter.set_powerlimits((-1, 1))
-# formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-# notation will be used if exp <= -1 or exp >= 1.
-axs[0].yaxis.set_major_formatter(formatter)
-axs[0].grid()
-axs[1].plot(sol.t / 365, dNdtTa)
-axs[1].set_ylabel(r"$dN/dt$ par $T_\alpha$")
-formatter = ticker.ScalarFormatter(useMathText=True)
-formatter.set_scientific(True)
-formatter.set_powerlimits((-1, 1))
-# formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-# notation will be used if exp <= -1 or exp >= 1.
-axs[1].yaxis.set_major_formatter(formatter)
-axs[1].grid()
+fig_astroactiv = ff.fig_astrocyte_activation_rates(sol.t, sol.y)
 
-plt.tight_layout()
-
-""" Graph activation des microglies """
-_, ax = plt.subplots(1, 1)
-plt.suptitle("Taux d'activation pour les microglies")
-M_activ = p.kappa_FoM * (sol.y[7, :] / (sol.y[7, :] + p.K_Fo)) * sol.y[10, :] + \
-          p.kappa_ABooM * (sol.y[2, :] / (sol.y[2, :] + p.K_ABooM)) * sol.y[10, :]
-epsilon_Ta = sol.y[17, :] / (sol.y[17, :] + p.K_TaAct)
-epsilon_I10 = sol.y[16, :] / (sol.y[16, :] + p.K_I10Act)
-ax.plot(sol.t / 365, ((p.beta * epsilon_Ta) / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ, "b-",
-        label="Taux activ. pro-infl.")
-ax.plot(sol.t / 365, (epsilon_I10 / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ, "r-",
-        label="Taux activ. anti-infl.")
-ax.set_ylabel("Taux")
-ax.plot(sol.t / 365, M_activ, "k", label=r"$M_{activ}$")
-ax.plot(sol.t / 365, p.kappa_FoM * (sol.y[7, :] / (sol.y[7, :] + p.K_Fo)) * sol.y[10, :], label=r"$M_{activ}$ par $F_o$")
-ax.plot(sol.t / 365, p.kappa_ABooM * (sol.y[2, :] / (sol.y[2, :] + p.K_ABooM)) * sol.y[10, :],
-        label=r"$M_{activ}$ par ${A\beta}_{o}^{o}$")
-ax.grid()
-ax.set_xlabel('Age (years)')
-# ax2 = ax.twinx()
-AntiToPro = p.kappa_TaManti * (sol.y[17, :] / (sol.y[17, :] + p.K_TaM)) * sol.y[12, :]
-ProToAnti = p.kappa_TbMpro * (sol.y[15, :] / (sol.y[15, :] + p.K_TbM)) * sol.y[11, :]
-ax.plot(sol.t / 365, AntiToPro, "g-", label=r"Taux conversion anti $\rightarrow$ pro")
-ax.plot(sol.t / 365, ProToAnti, "m-", label=r"Taux conversion pro $\rightarrow$ anti")
-# ax2.plot(sol.t / 365, AntiToPro, "g-", label="rate anti -> pro")
-# ax2.set_ylabel("Rate anti to pro", color='g')
-formatter = ticker.ScalarFormatter(useMathText=True)
-formatter.set_scientific(True)
-formatter.set_powerlimits((-1, 1))
-# formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-# notation will be used if exp <= -1 or exp >= 1.
-ax.yaxis.set_major_formatter(formatter)
-ax.legend()
-plt.tight_layout()
-
-
-"""Graphs activation des astrocytes"""
-# dAdtABpo = p.kappa_ABpoA * sol.y[3, :] * (p.A_max - sol.y[9, :])
-# dAdtTa = p.kappa_TaA * sol.y[17, :] * (p.A_max - sol.y[9, :])
-# # # Un graph.
-# fig, ax1 = plt.subplots(1, 1)
-# plt.suptitle("Taux d'activation des astrocytes")
-# # # Un graph : Deux axes x.
-# ax1.plot(sol.t / 365, dAdtABpo + dAdtTa, "r-", label=r"Total")
-# ax1.plot(sol.t / 365, dAdtTa, "b-", label=r"Par $T_\alpha$")  # activ by T_a
-# ax1.set_ylabel(r"$dA/dt$ total et par $T_\alpha$", color="k")
-# ax1.legend(loc='center left')
-# # ax1.set_ylabel(r"$dA/dt$ par $T_\alpha$", color="b")
-# formatter = ticker.ScalarFormatter(useMathText=True)
-# formatter.set_scientific(True)
-# formatter.set_powerlimits((-1, 1))
-# # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-# # notation will be used if exp <= -1 or exp >= 1.
-# ax1.yaxis.set_major_formatter(formatter)
-# ax2 = ax1.twinx()
-# ax2.plot(sol.t / 365, dAdtABpo, "g-", label=r"Par $A\beta_p^o$")  # loss by ABpo
-# ax2.set_ylabel(r"$dN/dt$ par $A\beta_p^o$", color='g')
-# formatter = ticker.ScalarFormatter(useMathText=True)
-# formatter.set_scientific(True)
-# formatter.set_powerlimits((-1, 1))
-# # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-# # notation will be used if exp <= -1 or exp >= 1.
-# ax2.yaxis.set_major_formatter(formatter)
-# ax1.set_xlabel("Age (years)")
-# ax1.grid()
-#
-# plt.tight_layout()
-
+"""Save the figures of rates"""
+# today = datetime.date.today()
+# date = today.strftime("%y-%m-%d")
+# my_path = os.path.abspath('Figures')
+# # Save the neuronal loss figure
+# fig_neuloss.savefig(os.path.join(my_path, FigName[:19] + "NeuronalLoss"), dpi=180)
+# # Save the microglia activation figure
+# fig_microactiv.savefig(os.path.join(my_path, FigName[:19] + "MicrogliaActiv"), dpi=180)
+# # Save the astroglia activation figure
+# fig_astroactiv.savefig(os.path.join(my_path, FigName[:19] + "AstrogliaActiv"), dpi=180)
 
 NeuronalLossInPercent = (sol.y[8, -1] - sol.y[8, 0]) / sol.y[8, 0] * 100
 print("Concentration de neurones initiale: ", sol.y[8, 0], "\nConcentration de neurones finale: ", sol.y[8, -1],
       "\nPourcentage de perte: ", NeuronalLossInPercent)
 
 plt.show()
-
