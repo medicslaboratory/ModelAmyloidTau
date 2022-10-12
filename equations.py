@@ -9,7 +9,7 @@ import numpy as np
 import parameters as param
 
 
-def ODEsystem(t, y):
+def ODEsystem(t, y, Sex, APOE_status):
     """
     Function that defines the equations of the model.
     :param t:
@@ -34,7 +34,7 @@ def ODEsystem(t, y):
         y[17]  T_{alpha} (TNF-alpha)
         y[18]  P (MCP-1)
     """
-    p = param.Parameters()
+    p = param.Parameters(Sex, APOE_status)
 
     print(t/365, "ans")
 

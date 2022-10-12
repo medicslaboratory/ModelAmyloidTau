@@ -5,13 +5,16 @@ import os
 import matplotlib.pyplot as plt
 from matplotlib import ticker
 import numpy as np
+from scipy.integrate import solve_ivp
 import parameters as param
+from InitialConditions import InitialConditions
+import equations as eqns
 import datetime
 
-p = param.Parameters()
+# p = param.Parameters()
 
 
-def main_figure(solt, soly, y0, AgeStart, AgeEnd, methodstr, maxstepstr, rtolstr, atolstr, number, CommentModif="",
+def main_figure(solt, soly, p, y0, AgeStart, AgeEnd, methodstr, maxstepstr, rtolstr, atolstr, number, CommentModif="",
                 IntraneuronalConcentration=False, SkipFirstHalfYear=False):
     """
     Figure principale du modèle présentant les graphiques de chaque variable en fonction du temps.
@@ -198,7 +201,7 @@ def main_figure(solt, soly, y0, AgeStart, AgeEnd, methodstr, maxstepstr, rtolstr
     return FigName
 
 
-def fig_neuronal_loss_rates(solt, soly):
+def fig_neuronal_loss_rates(solt, soly, p):
     dNdtFi = - p.d_FiN * (1 / (1 + np.exp(- p.n * (soly[6, :] - p.K_Fi)))) * soly[8, :]
     dNdtTa = - p.d_TaN * (soly[17, :] / (soly[17, :] + p.K_Ta)) * (1 / (1 + (soly[16, :] / p.K_I10))) * soly[8, :]
 
@@ -276,7 +279,7 @@ def fig_neuronal_loss_rates(solt, soly):
     return fig
 
 
-def fig_microglia_activation_rates(solt, soly):
+def fig_microglia_activation_rates(solt, soly, p):
     """
     Graphique des taux d'activation des microglies.
     :param solt:
@@ -320,7 +323,7 @@ def fig_microglia_activation_rates(solt, soly):
     return fig
 
 
-def fig_astrocyte_activation_rates(solt, soly):
+def fig_astrocyte_activation_rates(solt, soly, p):
     """
     Graphiques des taux d'activation des astrocytes.
     :param solt:
@@ -362,3 +365,115 @@ def fig_astrocyte_activation_rates(solt, soly):
 
     return fig
 
+
+def main_figure_4_models(AgeStart, AgeEnd, methodstr, max_step, rtol, atol, number, CommentModif="",
+                         SkipFirstHalfYear=False):
+
+    p_Fneg = param.Parameters(Sex=0, APOE_status=0)  # F ; APOE-
+    y0_Fneg = InitialConditions(p_Fneg, AgeStart)
+    sol_Fneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fneg, method=methodstr, args=[0, 0],
+                         max_step=max_step, rtol=rtol, atol=atol)
+
+    p_Fpos = param.Parameters(Sex=0, APOE_status=1)  # F ; APOE+
+    y0_Fpos = InitialConditions(p_Fpos, AgeStart)
+    sol_Fpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fpos, method=methodstr, args=[0, 1],
+                         max_step=max_step, rtol=rtol, atol=atol)
+
+    p_Mneg = param.Parameters(Sex=1, APOE_status=0)  # M ; APOE-
+    y0_Mneg = InitialConditions(p_Mneg, AgeStart)
+    sol_Mneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mneg, method=methodstr, args=[1, 0],
+                         max_step=max_step, rtol=rtol, atol=atol)
+
+    p_Mpos = param.Parameters(Sex=1, APOE_status=1)  # M ; APOE+
+    y0_Mpos = InitialConditions(p_Mpos, AgeStart)
+    sol_Mpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mpos, method=methodstr, args=[1, 1],
+                         max_step=max_step, rtol=rtol, atol=atol)
+
+    fig, axs = plt.subplots(nrows=4, ncols=5, sharex="all")  # If no text under the figure, add: layout="constrained"
+    fig.set_size_inches(35 / 2.54, 20 / 2.54, forward=True)
+
+    # Making a list for Label names in the plot
+    labelname = [r'$A \beta^{i}$', r'$A \beta_{m}^{o}$', r'$A \beta_{o}^{o}$', r'$A \beta_{p}^{o}$', '$GSK 3$',
+                 r'$\tau$', '$F_i$', '$F_o$', '$N$', '$A$', '$M_{NA}$', '$M_{pro}$', '$M_{anti}$', r'$\hat{M}_{pro}$',
+                 r'$\hat{M}_{anti}$', r'$T_{\beta}$', '$I_{10}$', r'$T_{\alpha}$', '$P$']
+
+    colors = ["hotpink", "purple", "royalblue", "darkblue"]
+    labels = ["F, APOE-", "F, APOE+", "M, APOE-", "M, APOE+"]
+    s = 0
+    for sol in [sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos]:
+        solt = sol.t / 365
+        soly = sol.y
+        k = np.argmax(solt >= (AgeStart+0.5))  # First indice of "solt" to skip the first half year.
+        i = 0
+        for ax in axs.flat:
+            if i < 19:
+                if i < 18:
+                    ax.plot(solt, soly[i, :], color=colors[s])  # , '.-', ms=2
+
+                    if SkipFirstHalfYear:  # """Plot sans la première demie année."""
+                        ax.plot(solt[k:], soly[i, k:], color=colors[s])
+
+                else:  # i == 18
+                    ax.plot(solt, soly[i, :], color=colors[s], label=labels[s])  # , '.-', ms=2
+
+                    if SkipFirstHalfYear:  # """Plot sans la première demie année."""
+                        ax.plot(solt[k:], soly[i, k:], color=colors[s], label=labels[s])
+
+                if s == 3:  # Si l'on est à la dernière option.
+                    ax.grid()
+                    if i >= 14:
+                        ax.set_xlabel('Age (years)')
+                    ax.set_ylabel(labelname[i])
+                    formatter = ticker.ScalarFormatter(useMathText=True)
+                    formatter.set_scientific(True)
+                    formatter.set_powerlimits((-1, 1))
+                    # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
+                    # notation will be used if exp <= -1 or exp >= 1.
+                    ax.yaxis.set_major_formatter(formatter)
+            i = i + 1
+        s = s + 1
+    handles, labels = axs.flat[18].get_legend_handles_labels()
+    fig.legend(handles, labels, loc='lower left', bbox_to_anchor=(0.85, 0.08))
+
+    axs.flat[14].tick_params('x', labelbottom=True)  # Ajout des graduations au 14e graphique (hat{M}_anti)
+    axs[3, 4].remove()  # Retire le dernier graphique
+
+    plt.subplots_adjust(hspace=.2, wspace=.2)
+    plt.tight_layout()
+
+    """Save the plot as a .png file"""
+
+    today = datetime.date.today()
+    date = today.strftime("%y-%m-%d")
+
+    if CommentModif != "":
+        CommentModif = "_" + CommentModif
+
+    my_path = os.path.abspath('Figures')
+    FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + methodstr + "_AllInOne_" + \
+              str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + ".png"
+    while os.path.exists(os.path.join(my_path, FigName)):
+        number = number+1
+        FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + methodstr + "_AllInOne_" + \
+                  str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + ".png"
+
+    plt.savefig(os.path.join(my_path, FigName), dpi=180)
+
+    s = 0
+    for sol in [sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos]:
+        NeuronalLossInPercent = (sol.y[8, -1] - sol.y[8, 0]) / sol.y[8, 0] * 100
+        # print(labels[s])
+        # print("Concentration de neurones initiale: ", sol.y[8, 0], "\nConcentration de neurones finale: ", sol.y[8, -1],
+        #       "\nPourcentage de perte: ", NeuronalLossInPercent)
+        print(labels[s] + ": " + str(NeuronalLossInPercent) + " %")
+        s = s + 1
+
+    s = 0
+    for y0 in [y0_Fneg, y0_Fpos, y0_Mneg, y0_Mpos]:
+        icNameValue = [str(labelname[i]) + " = " + "{:.5e}".format(y0[i]) for i in np.arange(19)]
+        print(labels[s])
+        initcond = "Initial conditions used (in g/mL): " + ", ".join(icNameValue[:])
+        print(initcond)
+        s = s + 1
+
+    return FigName

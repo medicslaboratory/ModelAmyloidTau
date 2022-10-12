@@ -1,13 +1,14 @@
 import math
 import numpy as np
 from scipy.constants import Avogadro  # Avogadro number
-import parameters as param
-p = param.Parameters()
+# import parameters as param
+# p = param.Parameters()
 
 
-def InitialConditions(AgeStart=30):
+def InitialConditions(p, AgeStart=30):
     """
     Function that defines de vector of initial conditions of the model, in g/mL.
+    :param p: Parameter class.
     :param AgeStart: Age for which the integration of the model will start. # TODO: Si utilise toujours pas, à retirer.
     :return: y0 : a vector with the initial conditions.
     """
@@ -15,7 +16,7 @@ def InitialConditions(AgeStart=30):
 
     """AB^i (Amyloid-beta monomer intracell.)"""
     # 1e-6 changé pour éviter saut départ...
-    y0[0] = p.lambda_ABi * (1 + p.AP * p.delta_APi) / p.d_ABi
+    y0[0] = p.lambda_ABi * (1 + p.AP * p.delta_APi) / p.d_ABi  # APOE+: 1.903101570888682e-10 ; APOE-: 1.4893036990586492e-10
 
     """AB_m^o (Amyloid-beta monomer extracell.)"""
     # y0[1] = 1e-11   # Todo ou  ??
@@ -53,7 +54,7 @@ def InitialConditions(AgeStart=30):
 
     """G (GSK3)"""
     # y0[4] = p.lambda_InsG / p.d_G  # ~= 0.16168
-    y0[4] = p.G_0   # ~ 5.344e-05 (for women)
+    y0[4] = p.G_0   # F: ~ 5.3445e-05 ; M: ~ 1.5007e-5
 
     """tau (tau proteins)"""
     # y0[5] = (p.lambda_tau + p.lambda_Gtau)/p.d_tau
@@ -87,7 +88,8 @@ def InitialConditions(AgeStart=30):
     # T_alpha_0 = 2.79e-5
     # Q = (p.kappa_ABpoA * y0[3] + p.kappa_TaA * T_alpha_0)
     # y0[9] = (Q * p.A_max) / (Q + p.d_A)
-    y0[9] = 0  # p.A_0/1000
+    # p.A_0/1000
+    y0[9] = 0
 
     # M_NA : Après M_pro et M_anti.
 
@@ -137,24 +139,25 @@ def InitialConditions(AgeStart=30):
     """T_{beta} (TGF-beta)"""
     # y0[15] = p.K_TbM * 1e-7  # = 5.9e-18 (i.e. même diff ordre de grandeur entre [Tb]_0 et K_TbM que [Ta]_0 et K_TaM).
     #                          # Figure_22-09-13_..._05...: Modif pas utile, atteint équilibre avant de réaugmenter.
-    y0[15] = (p.kappa_MantiTb * y0[12] + p.kappa_MhatantiTb * y0[14])/p.d_Tb  # = 3.774586223657386e-22
+    y0[15] = (p.kappa_MantiTb * y0[12] + p.kappa_MhatantiTb * y0[14])/p.d_Tb  # = 1.887293111828693e-14
     # y0[15] = 1e-11  # aide pas
 
     """I_10 (IL-10 = Interleukin 10)"""
     y0[16] = (p.kappa_MantiI10 * y0[12] + p.kappa_MhatantiI10 * y0[14]) / p.d_I10
-    # = 2.6173735792085045e-17 (avec DeWaalMalefyt91); = 2.8272775160026403e-19 avec Mia14
+    # = 1.4136387580013201e-11, avec Mia14
     # y0[16] = p.K_I10Act
     # Hao : 1.0e-5
 
     """T_{alpha} (TNF-alpha)"""
     # y0[17] = 1e-12  # aide pas
-    y0[17] = (p.kappa_MproTa * y0[11] + p.kappa_MhatproTa * y0[13]) / p.d_Ta  # nouv kappas (Fadok98): ~7.31e-21
+    y0[17] = (p.kappa_MproTa * y0[11] + p.kappa_MhatproTa * y0[13]) / p.d_Ta
+    # nouv kappas (Fadok98) min: = 1.827060352940543e-21
     # 1.1620103844701855e-19 (av)
     # y0[17] = p.K_TaAct
     # Hao 2e-5
 
     """P (MCP-1)"""
-    y0[18] = (p.kappa_MproP * y0[11] + p.kappa_MhatproP * y0[13] + p.kappa_AP * y0[9]) / p.d_P  # 3.975362086617884e-19
+    y0[18] = (p.kappa_MproP * y0[11] + p.kappa_MhatproP * y0[13] + p.kappa_AP * y0[9]) / p.d_P  # 1.987681043308942e-19
     # Hao: 5e-9
 
     return y0
