@@ -13,6 +13,7 @@ import equations as eqns
 from InitialConditions import InitialConditions
 import parameters as param
 import figuresfunctions as ff
+import ratefiguresfunctions as rff
 
 
 AgeStart = 30
@@ -109,9 +110,9 @@ method = "BDF"
 
 # 22-10-12_07 = _06
 
-number = 7
-# CommentModif = "maxstep" + maxstepstr + "_rtol" + rtolstr + \
-#                   "_atol" + atolstr + "_layouttight"
+number = 9
+CommentModif = "maxstep" + maxstepstr + "_rtol" + rtolstr + \
+                  "_atol" + atolstr + "_layouttight"
 # CommentModif = "maxstep" + "Default" + "_rtol" + rtolstr + \
 #                   "_atol" + atolstr  # + "_layouttight_modifplacelegend"
 
@@ -126,15 +127,15 @@ number = 7
 # À partir de 22-09-28_5..., conserve : d_TaN=7e-5on365 et F_i0ettau0equilibre
 # À partir de 22-09-29_8..., conserve : kappa_MproTaFadok98min # (impact aussi kappa_MhatproTa)
 
-p = param.Parameters(Sex=1, APOE_status=0)
-y0 = InitialConditions(p, AgeStart)
-sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, args=[0, 0],
-                rtol=rtol, atol=atol)
+# p = param.Parameters(Sex=0, APOE_status=0)
+# y0 = InitialConditions(p, AgeStart)
+# sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, args=[0, 0],
+#                 rtol=rtol, atol=atol)
+#
+# solt = sol.t / 365
 
-solt = sol.t / 365
 
-
-FigName = ff.main_figure(solt, sol.y, p, y0, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number, CommentModif="")
+# FigName = ff.main_figure(solt, sol.y, p, y0, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number, CommentModif="")
 
 # sols = ff.run_4_model(AgeStart, AgeEnd, method, max_step, rtol, atol)
 
@@ -210,49 +211,21 @@ FigName = ff.main_figure(solt, sol.y, p, y0, AgeStart, AgeEnd, method, maxstepst
 
 
 """Rate figures"""
-# p = param.Parameters(Sex=1, APOE_status=0)
-# y0 = InitialConditions(p, AgeStart)
-# sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, args=[0, 0],
-#                 rtol=rtol, atol=atol)
-# soly = sol.y
-# solt = sol.t / 365
+sex = 0
+APOE4 = 0
+p = param.Parameters(Sex=sex, APOE_status=APOE4)
+y0 = InitialConditions(p, AgeStart)
+sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, args=[sex, APOE4],
+                rtol=rtol, atol=atol)
+
+# fig_neuloss_V2 = rff.fig_neuronal_loss_rates_V2(sol.t, sol.y, p)
+
+# fig_neuloss = rff.fig_neuronal_loss_rates(sol.t, sol.y, p)
 #
-# dNdtFi = - p.d_FiN * (1 / (1 + np.exp(- p.n * (soly[6, :] - p.K_Fi))))
-# dNdtTa = - p.d_TaN * (soly[17, :] / (soly[17, :] + p.K_Ta)) * (1 / (1 + (soly[16, :] / p.K_I10)))
+# fig_microactiv = rff.fig_microglia_activation_rates(sol.t, sol.y, p)
+fig_microactiv_V2 = rff.fig_microglia_activation_rates_V2(sol.t, sol.y, p)
 #
-# fig, axs = plt.subplots(2, 1, sharex="all", layout="tight", figsize=(6.4, 7))
-# # plt.suptitle("Taux de perte neuronale")
-# # axs[0].plot(solt, dNdtFi + dNdtTa, "r-", label=r"Total")  # total loss
-# axs[0].plot(solt, dNdtFi, "b-", label=r"Par $F_i$")  # loss by F_i
-# axs[0].set_ylabel(r"$dN/dt$ par $F_i$")
-# axs[0].legend()
-# # axs[0].plot(solt, dNdtFi)
-# # axs[0].set_ylabel(r"$dN/dt$ par $F_i$")
-# formatter = ticker.ScalarFormatter(useMathText=True)
-# formatter.set_scientific(True)
-# formatter.set_powerlimits((-1, 1))
-# # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-# # notation will be used if exp <= -1 or exp >= 1.
-# axs[0].yaxis.set_major_formatter(formatter)
-# axs[0].grid()
-# axs[1].plot(solt, dNdtTa, "g-")  # loss by T_a
-# axs[1].set_ylabel(r"$dN/dt$ par $T_\alpha$")
-# formatter = ticker.ScalarFormatter(useMathText=True)
-# formatter.set_scientific(True)
-# formatter.set_powerlimits((-1, 1))
-# # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-# # notation will be used if exp <= -1 or exp >= 1.
-# axs[1].yaxis.set_major_formatter(formatter)
-# axs[1].grid()
-# axs[1].set_xlabel("Âge (années)")
-#
-#
-#
-# fig_neuloss = ff.fig_neuronal_loss_rates(sol.t, sol.y, p)
-#
-# fig_microactiv = ff.fig_microglia_activation_rates(sol.t, sol.y, p)
-#
-# fig_astroactiv = ff.fig_astrocyte_activation_rates(sol.t, sol.y, p)
+# fig_astroactiv = rff.fig_astrocyte_activation_rates(sol.t, sol.y, p)
 
 
 """Save the figures of rates"""
@@ -268,15 +241,18 @@ if p.AP == 1:
     APOE = "+"
 else:  # p.AP == 0:
     APOE = "-"
+
 FigId = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
               str(AgeEnd - AgeStart).replace(".", "") + "y"
-# Save the neuronal loss figure
+
+# # Save the neuronal loss figure
+# fig_neuloss_V2.savefig(os.path.join(my_path, FigId + "_NeuronalLossV2_" + CommentModif + ".png"), dpi=180)
 # fig_neuloss.savefig(os.path.join(my_path, FigId + "_NeuronalLoss_" + CommentModif + ".png"), dpi=180)
-# fig.savefig(os.path.join(my_path, FigId + "_NeuronalRates_" + CommentModif + ".png"), dpi=180)
 # # Save the microglia activation figure
-# fig_microactiv.savefig(os.path.join(my_path, FigName[:19] + "MicrogliaActiv"), dpi=180)
+# fig_microactiv.savefig(os.path.join(my_path, FigId + "_MicrogliaActiv_" + CommentModif + ".png"), dpi=180)
+fig_microactiv_V2.savefig(os.path.join(my_path, FigId + "_MicrogliaActiv_" + CommentModif + ".png"), dpi=180)
 # # Save the astroglia activation figure
-# fig_astroactiv.savefig(os.path.join(my_path, FigName[:19] + "AstrogliaActiv"), dpi=180)
+# fig_astroactiv.savefig(os.path.join(my_path, FigId + "_AstrogliaActiv_" + CommentModif + ".png"), dpi=180)
 
 
 """Print neuronal loss in percent"""
