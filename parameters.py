@@ -61,85 +61,18 @@ class Parameters:
             self.A_0 = 0.12
             """Reference density of astrocytes in man (g/cm^3) (= g/mL)."""
 
-        # self.N_0_F = 0.45
-        # """Reference density of neuron in woman (g/cm^3) (= g/mL)."""
-        #
-        # self.N_0_M = 0.42
-        # """Reference density of neuron in man (g/cm^3) (= g/mL)."""
-        #
-        # self.gamma_N = (self.N_0_M / self.N_0_F) - 1
-        # """Constant for the differentiation of the sex on the reference density of neuron (N_0)."""
-        #
-        # self.N_0 = self.N_0_F * (1 + self.S * self.gamma_N)
-        # """Reference density of neuron with differentiation for the sex (g/cm^3) (= g/mL).
-        # Voir Herculano-Houzel. Varie beaucoup selon la région. Dans néocortex pour nous. Nous prendrons N_0 pour une
-        # personne ayant environ 30 ans."""
-        #
-        # self.A_0_F = 0.10
-        # """Reference density of astrocytes in woman (g/cm^3) (= g/mL)."""
-        #
-        # self.A_0_M = 0.12
-        # """Reference density of astrocytes in man (g/cm^3) (= g/mL)."""
-        #
-        # self.gamma_A = (self.A_0_M / self.A_0_F) - 1
-        # """Constant for the differentiation of the sex on the reference density of astrocytes (N_0)."""
-        #
-        # self.A_0 = self.A_0_F * (1 + self.S * self.gamma_A)
-        # """Reference density of astrocytes with differentiation for the sex (g/cm^3) (= g/mL).
-        # Même idée que N_0."""
-
         M_ABm = 4514
         """Molar mass of a peptide (monomer) of AB42 (g/mol)."""
 
         m_Mhat = 4.990e-9
         """Mass of a macrophage (or microglia) (g)."""
 
-        ##########################################
-        # CONSTANTS FOR THE EQUATION FOR NEURONS #
-        ##########################################
-
-        self.d_FiN = 1 / (2.51 * 365)  # = 1.0915e-3
-        # self.d_FiN = 1 / (2.51 * 365) * 1e-1
-        # self.d_FiN = 1 / (20 * 365)  # 20 ans temps de survie (Kril et al. 2002)
-        """Maximal death rate of neurons induced by F_i (/day)."""
-
-        # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4
-        # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-6  # ~ 3.708e-10
-        # TODO: Perte linéaire, car soit K est trop grand, soit F_i n'est pas assez haut. Pour avoir e-4 ou -5,
-        #  il faudrait que tau soit e-2 (à cause du carré), ce qui est très grand...
-        # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-5  # ~ 3.708e-9
-        # self.K_Fi = 1.708e-10
-        self.K_Fi = 1.25e-10
-        # self.K_Fi = 1.2e-10
-        """Concentration of intracellular NFTs (F_i) for which the death rate of neuron induced by F_i is 
-        half-maximal (g/mL)."""
-
-        self.n = 15
-        # self.n = 12  # Ralentis beaucoup la perte neuronale
-        """Sigmoid function coefficient (unitless)."""
-        # TODO: À déterminer avec le modèle.
-
-        # self.d_TaN = (1/2) * self.d_FiN  # = (1 / 2) * 1/(2.51 * 365)  # approx 5.4576e-4
-        # self.d_TaN = 0.01 / 365  # approx 2.7397e-5
-        self.d_TaN = 7.26e-3 / 365 * 10  # approx 1.989e-5  # Données de Potvin. Voir mémoire.
-        # Plutôt peu de différence avec 0.01/365 (22-09-22_01 vs 22-09-23_05)
-        # TODO: Peut-être changer. Revoir.
-        """Maximal death rate of neurons induced by T_alpha (TNF-alpha) (/day)."""
-
-        self.K_Ta = 4.48e-12
-        # self.K_Ta = 2.24e-12  # change rien 22-10-05_20 vs _23
-        """Concentration of T_alpha (TNF-alpha) for which the death rate of neuron induced by TNF-alpha is 
-        half-maximal (g/mL)."""
-
-        self.K_I10 = 2.12e-12
-        """Concentration of IL-10 for which the rate of neuron death induced by TNF-alpha is divided by two (g/mL)."""
-
         #######################################
         # CONSTANTS FOR THE EQUATION FOR AB^i #
         #######################################
 
         # self.lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau  # approx. = 1.3681e-10
-        self.lambda_ABi = 3.63e-12 * 1e-3 * M_ABm * 86400 / 2   # ~ 1.4157e-06  # Lindstrom21
+        self.lambda_ABi = (3.63e-12 * 1e-3 * M_ABm * 86400) / 2   # ~ 1.4157e-06 / 2 ~= 7.0787e-07  # Lindstrom21
         """Creation rate of amyloid-beta42 inside neuron from APP (g/mL/day)."""
 
         self.delta_APi = (8373 - 2178) / (5631 - 783) - 1  # approx. 0.2778
@@ -156,13 +89,13 @@ class Parameters:
 
         self.lambda_ABmo = self.lambda_ABi
         # Voir lambda_ABi pour tests.
-        """Creation rate of Amyloid Beta42 monomer outside (without APOE allele) (g/mL/day)."""
+        """Creation rate of amyloid-beta monomer outside (without APOE4 allele) (g/mL/day)."""
 
         self.delta_APm = self.delta_APi
         """This constant quantifies the impact of the APOE4 gene on the creation rate of amyloid-beta42 monomer outside 
         neurons, i.e. on lambda_ABmo (unitless)."""
 
-        self.lambda_AABmo = (1 / 13) * self.lambda_ABmo  # approx. 1.0524e-11
+        self.lambda_AABmo = (1 / 13) * self.lambda_ABmo  # approx. 5.4451e-08 (avec Lindstrom21)
         """Creation rate of amyloid-beta42 monomer outside by astrocytes (g/mL/day)"""
 
         kappa_ABmoABoo_min = 38 * 1000 * (1 / (2 * M_ABm)) * 86400  # approx. 3.63669e5
@@ -187,10 +120,6 @@ class Parameters:
 
         self.kappa_ABooABpo = (3 / 7) * 1e6 * 1000 / (2 * M_ABm)  # approx 4.7471e4
         """Conversion rate of extracellular amyloid-beta42 oligomer to plaques (mL/g/day)."""
-
-        # self.delta_APop = 1  # (no difference)
-        # """This constant quantifies the impact of the APOE4 gene on the conversion rate of extracellular
-        # amyloid-beta42 oligomer to plaques."""
 
         self.d_ABoo = 0.3e-3 * 86400  # approx 25.92
         """Degradation rate of extracellular amyloid-beta42 oligomer (/day)."""
@@ -297,6 +226,42 @@ class Parameters:
         self.d_Fo = 1 / 10 * self.d_tau  # approx 1.343e-2
         """Degradation rate of extracellular NFT (/day)."""
 
+        ##############################################
+        # CONSTANTS FOR THE EQUATION FOR NEURONS (N) #
+        ##############################################
+
+        self.d_FiN = 1 / (2.51 * 365)  # = 1.0915e-3
+        # self.d_FiN = 1 / (2.51 * 365) * 1e-1
+        # self.d_FiN = 1 / (20 * 365)  # 20 ans temps de survie (Kril et al. 2002)
+        """Maximal death rate of neurons induced by F_i (/day)."""
+
+        # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4
+        # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-6  # ~ 3.708e-10
+        # Perte linéaire, car soit K est trop grand, soit F_i n'est pas assez haut. Pour avoir e-4 ou -5,
+        #  il faudrait que tau soit e-2 (à cause du carré et k_tauFi e-1), ce qui est très grand...
+        # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-5  # ~ 3.708e-9
+        # self.K_Fi = 1.708e-10
+        self.K_Fi = 1.25e-10  ## <--
+        # self.K_Fi = 1.2e-10
+        """Concentration of intracellular NFTs (F_i) for which the death rate of neuron induced by F_i is 
+        half-maximal (g/mL)."""
+
+        self.n = 15
+        """Sigmoid function coefficient (unitless)."""
+
+        # self.d_TaN = (1/2) * self.d_FiN  # = (1 / 2) * 1/(2.51 * 365)  # approx 5.4576e-4
+        self.d_TaN = 7.26e-3 / 365 * 10  # approx 1.989e-5 * 10 = 1.989e-4
+        # Données de Potvin. Voir mémoire.
+        """Maximal death rate of neurons induced by T_alpha (TNF-alpha) (/day)."""
+
+        self.K_Ta = 4.48e-12
+        # self.K_Ta = 2.24e-12  # change rien 22-10-05_20 vs _23
+        """Concentration of T_alpha (TNF-alpha) for which the death rate of neuron induced by TNF-alpha is 
+        half-maximal (g/mL)."""
+
+        self.K_I10 = 2.12e-12
+        """Concentration of IL-10 for which the rate of neuron death induced by TNF-alpha is divided by two (g/mL)."""
+
         #################################################
         # CONSTANTS FOR THE EQUATION FOR ASTROCYTES (A) #
         #################################################
@@ -322,7 +287,6 @@ class Parameters:
         TotalMaxActivRateM = 0.2141  # * 0.5
 
         self.kappa_FoM = TotalMaxActivRateM * 2 / 3  # approx 0.1427
-        # self.kappa_FoM = TotalMaxActivRateM * 1/2
         # 28.32 * 2? Trop grand! Latex pour autre, changer si change idée.
         """Activation rate of microglia by F_o (NFT) (/day)."""
 
@@ -333,14 +297,14 @@ class Parameters:
         is half-maximal (g/mL)."""
 
         self.kappa_ABooM = TotalMaxActivRateM * 1 / 3  # approx 0.07137
-        # self.kappa_ABooM = TotalMaxActivRateM * 1 / 2
         # 28.32 ? Trop grand! Latex pour autre, changer si change idée.
         """Activation rate of microglia by extracellular amyloid-beta42 oligomer (/day). """
 
         # self.K_ABooM = 0.060 / 527.4 / 1000  # approx 1.1377e-7
-        self.K_ABooM = 0.060 / 527.4 / 1000 * 1.5e2
+        self.K_ABooM = 0.060 / 527.4 / 1000 * 1.5e2  # 1.7064846416382253e-05
+        # *1.5e2 => 22-10-11_14 (et autre car gardé, latex ok).
+        # self.K_ABooM = 0.428 / 496.7 / 1000 * 1e2  # 8.616871350916045e-05  # 22-10-12_05, non mieux l'autre.
         # À voir. *1e-5 : 22-09-30_10 (vs _06). Permet d'avoir une activation par les oligos.
-        # TODO: *1.5e2 => 22-10-11_14
         """Concentration of extracellular amyloid-beta42 oligomer at which the rate of activation of microglia by 
         oligomer is half-maximal (g/mL)."""
 
@@ -360,7 +324,7 @@ class Parameters:
         """Proinflammatory / anti-inflammatory environnemental ratio (M_pro/M_anti ratio), unitless. 
         If beta>1, favors proinflammatory polarization; if beta<1, favors anti-inflammatory polarization."""
 
-        self.K_TaAct = 2.24e-12  # = self.K_TaM (def after)
+        self.K_TaAct = 2.24e-12
         # Même genre de pattern avec 2.24e-10, va quand meme au dessus (22-09-23_15).
         """Half-saturation constant of TNF-alpha for the activation of microglia to a proinflammatory 
         polarization (g/mL)."""
@@ -383,12 +347,13 @@ class Parameters:
         """Maximal conversion rate of anti-inflammatory microglia to proinflammatory under TNF-alpha 
         signaling (/day)."""
 
-        self.K_TaM = 2.24e-12 * 2e2
+        self.K_TaM = 2.24e-12 * 2e2  # = 4.48e-10
         # test plus grand : 22-09-27_16_... à _18_...
-        # TODO: - Différence importante entre *1e2 et *5e2: 22-09-28_07_... vs _08_...
-        #    - Figure avec *4e2 me semble assez bien (22-09-29_03_...)!
+        # - Différence importante entre *1e2 et *5e2: 22-09-28_07_... vs _08_...
+        # - Figure avec *4e2 me semble assez bien (22-09-29_03_...)!
         #       Juste plaques bizarre, il faudrait prendre un pas de temps plus petit
-        #    - Ou avec *2e2 et kappa_MproTa = min de Fadok98 : 22-09-29_06_... .
+        #  - Ou avec *2e2 et kappa_MproTa = min de Fadok98 : 22-09-29_06_... .
+        #   Modif Latex ok
         # self.K_TaM = self.K_TaAct
         """Concentration of TNF-alpha for which the conversion of Manti to Mpro is half maximal (g/mL)."""
 
@@ -397,15 +362,17 @@ class Parameters:
         #############################################################
 
         # self.kappa_PMhat = 0.33  # * 1e-3
-        # TODO: Revoir valeur, incohérence (voir mémoire)
-        self.kappa_PMhat = 0.33 * 1e-2
-        # TODO: Aide à déplacer l'augmentation vers la droite (retarder). Fig 22-09-29_08_.. (vs _06) et suivantes.
+        # Revoir valeur, incohérence (voir mémoire)
+        self.kappa_PMhat = 1 / 3 * 1e-2  # approx 3.33e-3
+        # Aide à déplacer l'augmentation vers la droite (retarder). Fig 22-09-29_08_.. (vs _06) et suivantes.
+        # Latex ok
         # self.kappa_PMhat = 1/6  # ~ 0.1667
         # 1/6 : Pas vrm... 22-09-30_06 (vs _05)
         """Maximal importation rate of macrophage in the brain under MCP-1 signaling (/day)."""
 
-        self.K_P = 6.23e-10 * 1e2
-        # TODO: *1e2 : Adoucis les courbes lors de anti -> pro, donc tout le modèle. Fig 22-09-29_14_... (vs _09)
+        self.K_P = 6.23e-10 * 1e2  # =6.23e-8
+        # *1e2 : Adoucis les courbes lors de anti -> pro, donc tout le modèle. Fig 22-09-29_14_... (vs _09)
+        # modif letex ok
         """Concentration of MCP-1 for which the rate of importation of macrophage is half-maximal (g/mL)."""
 
         self.Mhatmax = (830 * m_Mhat) / 2e-4  # = 0.0207085
