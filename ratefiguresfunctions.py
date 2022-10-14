@@ -110,7 +110,7 @@ def fig_neuronal_loss_rates_V2(solt, soly, p):
     axs[0].plot(solt, dNdtFi, "-", color="mediumblue", label=r"$\frac{dN}{dt}$ par $F_i$ (g/mL/j)")  # loss by F_i
     # axs[0].plot(solt, RatedNdtFi, "-", color="dodgerblue", label=r"Taux de $dN/dt$ par $F_i$ (/j)")
     axs[0].set_ylabel(r"Taux")
-    axs[0].legend()
+    axs[0].legend(loc="upper left")
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
     formatter.set_powerlimits((-1, 1))
@@ -123,7 +123,7 @@ def fig_neuronal_loss_rates_V2(solt, soly, p):
     # axs[1].plot(solt, dNdtFi, "-", color="mediumblue", label=r"$\frac{dN}{dt}$ par $F_i$ (g/mL/j)")  # loss by F_i
     axs[1].plot(solt, RatedNdtFi, "-", color="dodgerblue", label=r"Taux de $\frac{dN}{dt}$ par $F_i$ (/j)")
     axs[1].set_ylabel(r"Taux")
-    axs[1].legend()
+    axs[1].legend(loc="upper right")
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
     formatter.set_powerlimits((-1, 1))
@@ -150,7 +150,7 @@ def fig_neuronal_loss_rates_V2(solt, soly, p):
     axs[2].plot(solt, dNdtTa, "g-", label=r"$\frac{dN}{dt}$ par $T_\alpha$ (g/mL/j)")  # loss by T_a
     axs[2].plot(solt, RatedNdtTa, "-", color="limegreen", label=r"Taux de $\frac{dN}{dt}$ par $T_\alpha$ (/j)")
     axs[2].set_ylabel(r"Taux")
-    axs[2].legend()
+    axs[2].legend(loc="lower left")
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
     formatter.set_powerlimits((-1, 1))
@@ -233,7 +233,7 @@ def fig_microglia_activation_rates_V2(solt, soly, p):
     #         label="Taux activ. pro-infl.")
     # axs[0].plot(solt, (epsilon_I10 / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ, "r-",
     #         label="Taux activ. anti-infl.")
-    axs[0].plot(solt, M_activ, "k", label=r"$M_{activ}$")
+    axs[0].plot(solt, M_activ, "k", label=r"$M_{activ}$", linewidth=2)
     axs[0].plot(solt, p.kappa_FoM * (soly[7, :] / (soly[7, :] + p.K_Fo)) * soly[10, :],
             label=r"$M_{activ}$ par $F_o$")
     axs[0].plot(solt, p.kappa_ABooM * (soly[2, :] / (soly[2, :] + p.K_ABooM)) * soly[10, :],
@@ -251,9 +251,9 @@ def fig_microglia_activation_rates_V2(solt, soly, p):
     # axs[0].set_xlabel('Âge (années)')
 
     axs[1].plot(solt, ((p.beta * epsilon_Ta) / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ, "b-",
-                label="Taux activ. pro-infl.")
+                label="Taux d'activation pro-infl.")
     axs[1].plot(solt, (epsilon_I10 / (p.beta * epsilon_Ta + epsilon_I10)) * M_activ, "r-",
-                label="Taux activ. anti-infl.")
+                label="Taux d'activation anti-infl.")
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
     formatter.set_powerlimits((-1, 1))
@@ -262,7 +262,7 @@ def fig_microglia_activation_rates_V2(solt, soly, p):
     axs[1].yaxis.set_major_formatter(formatter)
     axs[1].set_ylabel("Taux")
     axs[1].grid()
-    axs[1].legend()
+    axs[1].legend(loc="lower right")
 
     AntiToPro = p.kappa_TaManti * (soly[17, :] / (soly[17, :] + p.K_TaM)) * soly[12, :]
     ProToAnti = p.kappa_TbMpro * (soly[15, :] / (soly[15, :] + p.K_TbM)) * soly[11, :]
@@ -277,11 +277,14 @@ def fig_microglia_activation_rates_V2(solt, soly, p):
     axs[2].yaxis.set_major_formatter(formatter)
     axs[2].set_ylabel("Taux")
     axs[2].grid()
-    axs[2].legend()
+    axs[2].legend(loc="lower right")  # 'upper left', 'upper right', 'lower left', 'lower right'
     axs[2].set_xlabel('Âge (années)')
 
-    return fig
+    axs[0].set_ylim(-0.05e-5, 3.50e-5)
+    axs[1].set_ylim(-0.05e-5, 1.75e-5)
+    axs[2].set_ylim(-0.05e-4, 1.50e-4)
 
+    return fig
 
 
 def fig_astrocyte_activation_rates(solt, soly, p):
@@ -291,18 +294,20 @@ def fig_astrocyte_activation_rates(solt, soly, p):
     :param soly:
     :return:
     """
+    solt = solt / 365
+
     dAdtABpo = p.kappa_ABpoA * soly[3, :] * (p.A_max - soly[9, :])
     dAdtTa = p.kappa_TaA * soly[17, :] * (p.A_max - soly[9, :])
 
     """Un graphique"""
     fig, ax1 = plt.subplots(1, 1)
-    plt.suptitle("Taux d'activation des astrocytes")
+    # plt.suptitle("Taux d'activation des astrocytes")
 
     """Un graph : Deux axes des x."""
-    ax1.plot(solt, dAdtABpo + dAdtTa, "r-", label=r"Total")  # total activation
-    ax1.plot(solt, dAdtTa, "b-", label=r"Par $T_\alpha$")  # activ by T_a
-    ax1.set_ylabel(r"$dA/dt$ total et par $T_\alpha$", color="k")
-    ax1.legend(loc='center left')
+    ax1.plot(solt, dAdtABpo + dAdtTa, "r-", linewidth=2, label=r"Activation totale")  # total activation
+    ax1.plot(solt, dAdtTa, "b-", label=r"Activation par $T_\alpha$")  # activ by T_a
+    ax1.set_ylabel(r"Activation totale et par $T_\alpha$", color="k")
+    # ax1.legend(loc='center left')
     # ax1.set_ylabel(r"$dA/dt$ par $T_\alpha$", color="b")
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
@@ -311,8 +316,8 @@ def fig_astrocyte_activation_rates(solt, soly, p):
     # notation will be used if exp <= -1 or exp >= 1.
     ax1.yaxis.set_major_formatter(formatter)
     ax2 = ax1.twinx()
-    ax2.plot(solt, dAdtABpo, "g-", label=r"Par $A\beta_p^o$")  # activ by ABpo
-    ax2.set_ylabel(r"$dN/dt$ par $A\beta_p^o$", color='g')
+    ax2.plot(solt, dAdtABpo, "g-", label=r"Activation par $A\beta_p^o$")  # activ by ABpo
+    ax2.set_ylabel(r"Activation par $A\beta_p^o$", color='g')
     formatter = ticker.ScalarFormatter(useMathText=True)
     formatter.set_scientific(True)
     formatter.set_powerlimits((-1, 1))
@@ -322,6 +327,20 @@ def fig_astrocyte_activation_rates(solt, soly, p):
     # ax1.set_xlabel("Age (years)")
     ax1.set_xlabel('Âge (années)')
     ax1.grid()
+
+    ax1.set_ylim(-1e-6, 6.5e-5)
+    ax1.set_yticks(np.linspace(0, 6.0e-5, 7))
+
+    if p.AP == 0:  # APOE4-
+        ax2.set_ylim(-1.5e-17, 9.75e-16)
+        ax2.set_yticks(np.linspace(0, 9.0e-16, 7))
+    else:  # p.AP == 1:  # APEO4+
+        ax2.set_ylim(-0.7e-15, 4.55e-14)
+        ax2.set_yticks(np.linspace(0, 4.2e-14, 7))
+
+    handles1, labels1 = ax1.get_legend_handles_labels()
+    handles2, labels2 = ax2.get_legend_handles_labels()
+    ax1.legend(handles=handles1+handles2, labels=labels1+labels2)
 
     plt.tight_layout()
 

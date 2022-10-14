@@ -110,7 +110,7 @@ method = "BDF"
 
 # 22-10-12_07 = _06
 
-number = 9
+number = 3
 CommentModif = "maxstep" + maxstepstr + "_rtol" + rtolstr + \
                   "_atol" + atolstr + "_layouttight"
 # CommentModif = "maxstep" + "Default" + "_rtol" + rtolstr + \
@@ -131,14 +131,14 @@ CommentModif = "maxstep" + maxstepstr + "_rtol" + rtolstr + \
 # y0 = InitialConditions(p, AgeStart)
 # sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, args=[0, 0],
 #                 rtol=rtol, atol=atol)
-#
+
 # solt = sol.t / 365
 
 
 # FigName = ff.main_figure(solt, sol.y, p, y0, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number, CommentModif="")
 
-# sols = ff.run_4_model(AgeStart, AgeEnd, method, max_step, rtol, atol)
-
+sols = ff.run_4_model(AgeStart, AgeEnd, method, max_step, rtol, atol)
+#
 # FigName = ff.main_figure_4_models(sols, AgeStart, AgeEnd, method, max_step, rtol, atol, number,
 #                                   CommentModif=CommentModif, SkipFirstHalfYear=False)
 
@@ -211,46 +211,82 @@ CommentModif = "maxstep" + maxstepstr + "_rtol" + rtolstr + \
 
 
 """Rate figures"""
-sex = 0
-APOE4 = 0
-p = param.Parameters(Sex=sex, APOE_status=APOE4)
-y0 = InitialConditions(p, AgeStart)
-sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, args=[sex, APOE4],
-                rtol=rtol, atol=atol)
+# today = datetime.date.today()
+# date = today.strftime("%y-%m-%d")
+# my_path = os.path.abspath('Figures')
+#
+# for combi in [[0, 0], [0, 1], [1, 0], [1, 1]]:
+#     sex, APOE4 = combi
+#     p = param.Parameters(Sex=sex, APOE_status=APOE4)
+#     y0 = InitialConditions(p, AgeStart)
+#     sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step,
+#                     args=[sex, APOE4], rtol=rtol, atol=atol)
+#
+#     # fig_neuloss_V2 = rff.fig_neuronal_loss_rates_V2(sol.t, sol.y, p)
+#     fig_astroactiv = rff.fig_astrocyte_activation_rates(sol.t, sol.y, p)
+#
+#     if p.S == 0:
+#         sex = "F"
+#     else:  # p.S == 1:
+#         sex = "M"
+#     if p.AP == 1:
+#         APOE = "+"
+#     else:  # p.AP == 0:
+#         APOE = "-"
+#
+#     # fig_neuloss_V2.savefig(os.path.join(my_path, "Figure_" + date + "_" + f"{number:02}" + "_NeuronalLossV2_" + sex +
+#     #                                     "_APOE" + APOE + "_" + method + "_" + str(AgeEnd - AgeStart).replace(".", "") +
+#     #                                     "y_" + CommentModif + ".png"), dpi=180)
+#     fig_astroactiv.savefig(os.path.join(my_path, "Figure_" + date + "_" + f"{number:02}" + "_AstrogliaActiv_" + sex +
+#                                         "_APOE" + APOE + "_" + method + "_" + str(AgeEnd - AgeStart).replace(".", "") +
+#                                         "y_" + CommentModif + ".png"), dpi=180)
+
+
+# sex = 1
+# APOE4 = 0
+# p = param.Parameters(Sex=sex, APOE_status=APOE4)
+# y0 = InitialConditions(p, AgeStart)
+# sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, args=[sex, APOE4],
+#                 rtol=rtol, atol=atol)
 
 # fig_neuloss_V2 = rff.fig_neuronal_loss_rates_V2(sol.t, sol.y, p)
 
 # fig_neuloss = rff.fig_neuronal_loss_rates(sol.t, sol.y, p)
 #
 # fig_microactiv = rff.fig_microglia_activation_rates(sol.t, sol.y, p)
-fig_microactiv_V2 = rff.fig_microglia_activation_rates_V2(sol.t, sol.y, p)
+# fig_microactiv_V2 = rff.fig_microglia_activation_rates_V2(sol.t, sol.y, p)
 #
 # fig_astroactiv = rff.fig_astrocyte_activation_rates(sol.t, sol.y, p)
 
 
 """Save the figures of rates"""
-today = datetime.date.today()
-date = today.strftime("%y-%m-%d")
-my_path = os.path.abspath('Figures')
-
-if p.S == 0:
-    sex = "F"
-else:  # p.S == 1:
-    sex = "M"
-if p.AP == 1:
-    APOE = "+"
-else:  # p.AP == 0:
-    APOE = "-"
-
-FigId = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
-              str(AgeEnd - AgeStart).replace(".", "") + "y"
+# today = datetime.date.today()
+# date = today.strftime("%y-%m-%d")
+# my_path = os.path.abspath('Figures')
+#
+# if p.S == 0:
+#     sex = "F"
+# else:  # p.S == 1:
+#     sex = "M"
+# if p.AP == 1:
+#     APOE = "+"
+# else:  # p.AP == 0:
+#     APOE = "-"
+#
+# FigId = "Figure_" + date + "_" + f"{number:02}" + "_" + method + "_APOE" + APOE + "_" + sex + "_" + \
+#               str(AgeEnd - AgeStart).replace(".", "") + "y"
 
 # # Save the neuronal loss figure
 # fig_neuloss_V2.savefig(os.path.join(my_path, FigId + "_NeuronalLossV2_" + CommentModif + ".png"), dpi=180)
 # fig_neuloss.savefig(os.path.join(my_path, FigId + "_NeuronalLoss_" + CommentModif + ".png"), dpi=180)
+# fig_neulossV2.savefig(os.path.join(my_path, "Figure_" + date + "_" + f"{number:02}" + "_NeuronalLossV2_" + sex +
+#                                  "_APOE" + APOE + "_" + method + "_" + str(AgeEnd - AgeStart).replace(".", "") +
+#                                  "y_" + CommentModif + ".png"), dpi=180)
 # # Save the microglia activation figure
 # fig_microactiv.savefig(os.path.join(my_path, FigId + "_MicrogliaActiv_" + CommentModif + ".png"), dpi=180)
-fig_microactiv_V2.savefig(os.path.join(my_path, FigId + "_MicrogliaActiv_" + CommentModif + ".png"), dpi=180)
+# fig_microactiv_V2.savefig(os.path.join(my_path, "Figure_" + date + "_" + f"{number:02}" + "_MicrogliaActiv_" + sex +
+#                                        "_APOE" + APOE + "_" + method + "_" + str(AgeEnd - AgeStart).replace(".", "") +
+#                                        "y_" + CommentModif + ".png"), dpi=180)
 # # Save the astroglia activation figure
 # fig_astroactiv.savefig(os.path.join(my_path, FigId + "_AstrogliaActiv_" + CommentModif + ".png"), dpi=180)
 
@@ -259,5 +295,16 @@ fig_microactiv_V2.savefig(os.path.join(my_path, FigId + "_MicrogliaActiv_" + Com
 # NeuronalLossInPercent = (sol.y[8, -1] - sol.y[8, 0]) / sol.y[8, 0] * 100
 # print("Concentration de neurones initiale: ", sol.y[8, 0], "\nConcentration de neurones finale: ", sol.y[8, -1],
 #       "\nPourcentage de perte: ", NeuronalLossInPercent)
+
+"""Microglia activation"""
+s = 0
+labels = ["F, APOE4-", "F, APOE4+", "M, APOE4-", "M, APOE4+"]
+for sol in sols:  # [sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos]:
+    AstrogliaActivInPercent = (sol.y[10, -1] - sol.y[10, 0]) / sol.y[10, 0] * 100
+    # print(labels[s])
+    # print("Concentration de neurones initiale: ", sol.y[8, 0], "\nConcentration de neurones finale: ", sol.y[8, -1],
+    #       "\nPourcentage de perte: ", NeuronalLossInPercent)
+    print(labels[s] + ": " + str(AstrogliaActivInPercent) + " %")
+    s = s + 1
 
 plt.show()
