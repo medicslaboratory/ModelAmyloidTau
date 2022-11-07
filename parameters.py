@@ -40,7 +40,14 @@ class Parameters:
         elif S == 1:  # men
             return 0.1 * (-4.257e-15 * t + 3.763e-10)
 
-    def __init__(self, Sex, APOE_status):
+    def __init__(self, Sex, APOE_status, xi=1):
+        """
+        Definition of the parameters of the model.
+
+        :param Sex: Sex of the person (0 for a woman, and 1 for a man).
+        :param APOE_status: APOE4 status of the person, 1 if one has the APOE4 gene and 0 otherwise.
+        :param xi: 0 < xi <= 1. Sera multiplié à TotalMaxActivRateM, donc à kappa_FoM et à kappa_ABooM.
+        """
         self.AP = APOE_status
         """AP equals to 1 if one has the APOE4 gene and 0 otherwise."""
 
@@ -284,7 +291,7 @@ class Parameters:
         # CONSTANTS FOR THE EQUATION FOR M_NA #
         #######################################
 
-        TotalMaxActivRateM = 0.2141  # * 0.5
+        TotalMaxActivRateM = 0.2141 * xi
 
         self.kappa_FoM = TotalMaxActivRateM * 2 / 3  # approx 0.1427
         # 28.32 * 2? Trop grand! Latex pour autre, changer si change idée.

@@ -110,9 +110,17 @@ method = "BDF"
 
 # 22-10-12_07 = _06
 
-number = 3
-CommentModif = "maxstep" + maxstepstr + "_rtol" + rtolstr + \
-                  "_atol" + atolstr + "_layouttight"
+# Inst=Ins0 (22-11-06):
+#     F, APOE4-: -9.423377283267758 %
+#     F, APOE4+: -11.43200539411662 %
+#     M, APOE4-: -8.324484735602956 %
+#     M, APOE4+: -11.328186942499707 %
+
+# number = 1
+# CommentModif = "xi=5e-1"
+# CommentModif = "Inst=Ins0"
+# CommentModif = "maxstep" + maxstepstr + "_rtol" + rtolstr + \
+#                   "_atol" + atolstr + "_layouttight"
 # CommentModif = "maxstep" + "Default" + "_rtol" + rtolstr + \
 #                   "_atol" + atolstr  # + "_layouttight_modifplacelegend"
 
@@ -134,13 +142,17 @@ CommentModif = "maxstep" + maxstepstr + "_rtol" + rtolstr + \
 
 # solt = sol.t / 365
 
-
 # FigName = ff.main_figure(solt, sol.y, p, y0, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number, CommentModif="")
 
-sols = ff.run_4_model(AgeStart, AgeEnd, method, max_step, rtol, atol)
-#
+"""main figure, 4 sub-models"""
+# number = 1
+# CommentModif = "xi=5e-1"
+# CommentModif = "Inst=Ins0"
+
+# sols = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=0.5)
+
 # FigName = ff.main_figure_4_models(sols, AgeStart, AgeEnd, method, max_step, rtol, atol, number,
-#                                   CommentModif=CommentModif, SkipFirstHalfYear=False)
+#                                   CommentModif=CommentModif, SkipFirstHalfYear=False, orientation="portrait")
 
 """Add information to the figure."""
 # FigInfos = {"max_step": str(max_step),
@@ -201,6 +213,50 @@ sols = ff.run_4_model(AgeStart, AgeEnd, method, max_step, rtol, atol)
 # from PIL import Image
 # im = Image.open("Path of the figure")  # "Path of the figure" is, for example, "Figures/Figure_22-09-08_..._01.png".
 # im.info
+
+
+"""Figure of comparison of models (base vs Without insulin variation)"""
+# sol_Fpos_InsVarT = ff.run_1_model(0, 1, AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True)
+# sol_Fpos_InsVarF = ff.run_1_model(0, 1, AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=False)
+#
+# number = 1
+# CommentModif = "F_APOE+_InsVar_portrait"
+# # # CommentModif = "F_APOE+_InsVar_paysage"
+# #
+# # FigName = ff.main_figure_comparison(sol_Fpos_InsVarT.t, sol_Fpos_InsVarT.y, sol_Fpos_InsVarF.t, sol_Fpos_InsVarF.y,
+# #                                     ["$Ins(t)$ original", "$Ins(t) = Ins_0$"], AgeStart, AgeEnd, method, number,
+# #                                     CommentModif=CommentModif, color1="k", color2="darkorange")  #, orientation="paysage")
+# FigName = ff.main_figure_comparison_many([sol_Fpos_InsVarT.t, sol_Fpos_InsVarF.t], [sol_Fpos_InsVarT.y, sol_Fpos_InsVarF.y],
+#                                          ["$Ins(t)$ original", "$Ins(t) = Ins_0$"], ["k", "darkorange"], AgeStart,
+#                                          AgeEnd, method, number, CommentModif=CommentModif)  #, orientation="paysage")
+
+"""Figure of comparison of models (base vs 0<xi<1)"""
+xis = [1, 0.8, 0.5, 0.3]
+solts = []
+solys = []
+for i in range(len(xis)):
+    sol = ff.run_1_model(0, 1, AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=xis[i])
+    solts.append(sol.t)
+    solys.append(sol.y)
+
+number = 1
+xi_text = "{:.0e}".format(xis[0])
+labels = [r"$\xi = 1$ (base)"]
+for xi in xis[1:]:
+    xi_text = xi_text + "_{:.0e}".format(xi)
+    labels.append(r"$\xi = {:.1f}$".format(xi))
+CommentModif = "F_APOE+_xi=" + xi_text + "_portrait"
+# CommentModif = "F_APOE+_xi=" + xi_text + "_paysage"
+
+colors_list = ["k", "b", "g", "orange", "purple"]
+alphas = [1, 0.8, 0.7, 0.6, 0.5]
+
+# FigName = ff.main_figure_comparison(sol_Fpos_InsVarT.t, sol_Fpos_InsVarT.y, sol_Fpos_InsVarF.t, sol_Fpos_InsVarF.y,
+#                                     [r"$\xi = 1$ (base)", r"$\xi = 0.5$ (modifié)"], AgeStart, AgeEnd, method, number,
+#                                     CommentModif=CommentModif, color1="k", color2="darkorange")  #, orientation="paysage")
+FigName = ff.main_figure_comparison_many(solts, solys, labels, colors_list[:len(xis)], AgeStart, AgeEnd, method, number,
+                                         CommentModif=CommentModif, alphas=alphas)  # , orientation="paysage")
+
 
 """Figure of a single variable."""
 # FigNameABpo = ff.fig_one_variable_all_models(3, sols, AgeStart, AgeEnd, method, number,
@@ -297,14 +353,14 @@ sols = ff.run_4_model(AgeStart, AgeEnd, method, max_step, rtol, atol)
 #       "\nPourcentage de perte: ", NeuronalLossInPercent)
 
 """Microglia activation"""
-s = 0
-labels = ["F, APOE4-", "F, APOE4+", "M, APOE4-", "M, APOE4+"]
-for sol in sols:  # [sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos]:
-    AstrogliaActivInPercent = (sol.y[10, -1] - sol.y[10, 0]) / sol.y[10, 0] * 100
-    # print(labels[s])
-    # print("Concentration de neurones initiale: ", sol.y[8, 0], "\nConcentration de neurones finale: ", sol.y[8, -1],
-    #       "\nPourcentage de perte: ", NeuronalLossInPercent)
-    print(labels[s] + ": " + str(AstrogliaActivInPercent) + " %")
-    s = s + 1
-
+# s = 0
+# labels = ["F, APOE4-", "F, APOE4+", "M, APOE4-", "M, APOE4+"]
+# for sol in sols:  # [sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos]:
+#     MicrogliaActivInPercent = (sol.y[10, -1] - sol.y[10, 0]) / sol.y[10, 0] * 100
+#     # print(labels[s])
+#     # print("Concentration de neurones initiale: ", sol.y[8, 0], "\nConcentration de neurones finale: ", sol.y[8, -1],
+#     #       "\nPourcentage de perte: ", NeuronalLossInPercent)
+#     print(labels[s] + ": " + str(MicrogliaActivInPercent) + " %")
+#     s = s + 1
+#
 plt.show()

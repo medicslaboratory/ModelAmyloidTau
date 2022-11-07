@@ -9,7 +9,7 @@ import numpy as np
 import parameters as param
 
 
-def ODEsystem(t, y, Sex, APOE_status):
+def ODEsystem(t, y, Sex, APOE_status, InsVar=True, xi=1):
     """
     Function that defines the equations of the model.
     :param t:
@@ -34,7 +34,7 @@ def ODEsystem(t, y, Sex, APOE_status):
         y[17]  T_{alpha} (TNF-alpha)
         y[18]  P (MCP-1)
     """
-    p = param.Parameters(Sex, APOE_status)
+    p = param.Parameters(Sex, APOE_status, xi)
 
     print(t/365, "ans")
 
@@ -75,9 +75,12 @@ def ODEsystem(t, y, Sex, APOE_status):
     #  Fait que augmentation de l'activité de la GSK3 (22-09-08_..._08 vs _09). Bien!
     #  À confirmer, déjà ajusté dans Latex.
     # Ajout du "* (y[8]/p.N_0)" et "- (y[4] / y[8]) * abs(dydt[8])" - OK.
-    dydt[4] = p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) * (y[8] / p.N_0) - p.d_G * y[4] - (y[4] / y[8]) * abs(dydt[8])
+    if InsVar:
+        dydt[4] = p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) * (y[8] / p.N_0) - p.d_G * y[4] - (y[4] / y[8]) * abs(dydt[8])  # ****
     # # Ajout - (y[4] / y[8]) * abs(dydt[8]), pas impact.
     # dydt[4] = p.lambda_InsG * (p.Ins_0 / p.Ins(t, p.S)) - p.d_G * y[4] - (y[4] / y[8]) * abs(dydt[8])
+    else:  # Insuline cste
+        dydt[4] = p.lambda_InsG * (y[8] / p.N_0) - p.d_G * y[4] - (y[4] / y[8]) * abs(dydt[8])
 
     # tau proteins (tau)
     dydt[5] = p.lambda_tau * (y[8] / p.N_0) + p.lambda_Gtau * (y[4] / p.G_0) \
