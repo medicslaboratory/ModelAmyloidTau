@@ -29,6 +29,7 @@ maxstepstr = "Default"
 # rtolstr = "Array"
 # rtol = 1e-10  # Default value : 1e-3
 rtol = 1e-5
+# rtol = 1e-10
 rtolstr = "{:.0e}".format(rtol)
 
 # # atol default value : 1e-6
@@ -36,12 +37,12 @@ rtolstr = "{:.0e}".format(rtol)
 # atol[3] = 1e-20
 # atolstr = "array"
 atol = 1e-22
+# atol = 1e-26
 atolstr = "{:.0e}".format(atol)
 
 method = "BDF"
 # method = "Radau"
 # method = "LSODA"
-
 
 
 # 22-10-05_20 pas mal, perte environ -11,5%
@@ -139,20 +140,25 @@ method = "BDF"
 # y0 = InitialConditions(p, AgeStart)
 # sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step, args=[0, 0],
 #                 rtol=rtol, atol=atol)
-
+#
 # solt = sol.t / 365
-
-# FigName = ff.main_figure(solt, sol.y, p, y0, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number, CommentModif="")
+#
+# FigName = ff.main_figure(solt, sol.y, p, y0, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
+#                          CommentModif="", IntraneuronalConcentration=True)
 
 """main figure, 4 sub-models"""
-# number = 1
+number = 1
+Commentmodif = ""
 # CommentModif = "xi=5e-1"
 # CommentModif = "Inst=Ins0"
 
-# sols = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=0.5)
+sols = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=0.5)
 
 # FigName = ff.main_figure_4_models(sols, AgeStart, AgeEnd, method, max_step, rtol, atol, number,
 #                                   CommentModif=CommentModif, SkipFirstHalfYear=False, orientation="portrait")
+
+ff.figure_intracellular_concentrations(sols, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
+                                       CommentModif=Commentmodif)
 
 """Add information to the figure."""
 # FigInfos = {"max_step": str(max_step),
@@ -231,31 +237,34 @@ method = "BDF"
 #                                          AgeEnd, method, number, CommentModif=CommentModif)  #, orientation="paysage")
 
 """Figure of comparison of models (base vs 0<xi<1)"""
-xis = [1, 0.8, 0.5, 0.3]
-solts = []
-solys = []
-for i in range(len(xis)):
-    sol = ff.run_1_model(0, 1, AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=xis[i])
-    solts.append(sol.t)
-    solys.append(sol.y)
-
-number = 1
-xi_text = "{:.0e}".format(xis[0])
-labels = [r"$\xi = 1$ (base)"]
-for xi in xis[1:]:
-    xi_text = xi_text + "_{:.0e}".format(xi)
-    labels.append(r"$\xi = {:.1f}$".format(xi))
-CommentModif = "F_APOE+_xi=" + xi_text + "_portrait"
-# CommentModif = "F_APOE+_xi=" + xi_text + "_paysage"
-
-colors_list = ["k", "b", "g", "orange", "purple"]
-alphas = [1, 0.8, 0.7, 0.6, 0.5]
-
-# FigName = ff.main_figure_comparison(sol_Fpos_InsVarT.t, sol_Fpos_InsVarT.y, sol_Fpos_InsVarF.t, sol_Fpos_InsVarF.y,
-#                                     [r"$\xi = 1$ (base)", r"$\xi = 0.5$ (modifié)"], AgeStart, AgeEnd, method, number,
-#                                     CommentModif=CommentModif, color1="k", color2="darkorange")  #, orientation="paysage")
-FigName = ff.main_figure_comparison_many(solts, solys, labels, colors_list[:len(xis)], AgeStart, AgeEnd, method, number,
-                                         CommentModif=CommentModif, alphas=alphas)  # , orientation="paysage")
+# xis = [1, 0.8, 0.5, 0.3]
+# solts = []
+# solys = []
+# for i in range(len(xis)):
+#     sol = ff.run_1_model(0, 1, AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=xis[i])  # F,+
+#     # sol = ff.run_1_model(1, 0, AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=xis[i])  # H,-
+#     solts.append(sol.t)
+#     solys.append(sol.y)
+#
+# number = 1
+# xi_text = "{:.0e}".format(xis[0])
+# labels = [r"$\xi = 1$ (base)"]
+# for xi in xis[1:]:
+#     xi_text = xi_text + "_{:.0e}".format(xi)
+#     labels.append(r"$\xi = {:.1f}$".format(xi))
+#
+# # CommentModif = "H_APOE-_xi=" + xi_text + "_portrait"
+# CommentModif = "F_APOE+_xi=" + xi_text + "_portrait"
+# # CommentModif = "F_APOE+_xi=" + xi_text + "_paysage"
+#
+# colors_list = ["k", "b", "g", "orange", "purple"]
+# alphas = [1, 0.8, 0.7, 0.6, 0.5]
+#
+# # FigName = ff.main_figure_comparison(sol_Fpos_InsVarT.t, sol_Fpos_InsVarT.y, sol_Fpos_InsVarF.t, sol_Fpos_InsVarF.y,
+# #                                     [r"$\xi = 1$ (base)", r"$\xi = 0.5$ (modifié)"], AgeStart, AgeEnd, method, number,
+# #                                     CommentModif=CommentModif, color1="k", color2="darkorange")  #, orientation="paysage")
+# FigName = ff.main_figure_comparison_many(solts, solys, labels, colors_list[:len(xis)], AgeStart, AgeEnd, method, number,
+#                                          CommentModif=CommentModif, alphas=alphas)  # , orientation="paysage")
 
 
 """Figure of a single variable."""
