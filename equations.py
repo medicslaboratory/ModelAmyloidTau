@@ -36,7 +36,7 @@ def ODEsystem(t, y, Sex, APOE_status, InsVar=True, xi=1):
     """
     p = param.Parameters(Sex, APOE_status, xi)
 
-    print(t/365, "ans")
+    # print(t/365, "ans")
 
     dydt = np.zeros(19)
 

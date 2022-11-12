@@ -590,7 +590,8 @@ def fig_one_variable_all_models(variable, sols, AgeStart, AgeEnd, methodstr, num
     return FigName
 
 
-def main_figure_comparison(solt1, soly1, solt2, soly2, labels, AgeStart, AgeEnd, methodstr, number, CommentModif="", SkipFirstHalfYear=False, color1="k", color2="b", orientation="portrait"):
+def main_figure_comparison(solt1, soly1, solt2, soly2, labels, AgeStart, AgeEnd, methodstr, number, CommentModif="",
+                           SkipFirstHalfYear=False, color1="k", color2="b", orientation="portrait"):
     """
     Figure principale du modèle présentant les graphiques de chaque variable en fonction du temps.
     La figure est générée puis enregistrée dans le dossier "Figure".
@@ -648,7 +649,6 @@ def main_figure_comparison(solt1, soly1, solt2, soly2, labels, AgeStart, AgeEnd,
                 ax.plot(solt1, soly1[i, :], color=color1, label=labels[0])  # , '.-', ms=2
                 ax.plot(solt2, soly2[i, :], color=color2, alpha=0.8, label=labels[1])
 
-
             ax.grid()
             if orientation == "portrait":
                 indice = 15
@@ -661,8 +661,8 @@ def main_figure_comparison(solt1, soly1, solt2, soly2, labels, AgeStart, AgeEnd,
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
             formatter.set_powerlimits((-1, 1))
-            # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
-            # notation will be used if exp <= -1 or exp >= 1.
+            # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10,
+            #   scientific notation will be used if exp <= -1 or exp >= 1.
             ax.yaxis.set_major_formatter(formatter)
         i = i+1
     axs.flat[19].remove()  # Retire le dernier graphique
@@ -697,7 +697,8 @@ def main_figure_comparison(solt1, soly1, solt2, soly2, labels, AgeStart, AgeEnd,
     return FigName
 
 
-def main_figure_comparison_many(solst, solsy, labels, colors, AgeStart, AgeEnd, methodstr, number, CommentModif="", SkipFirstHalfYear=False, orientation="portrait", alphas=[1, 0.8]):
+def main_figure_comparison_many(solst, solsy, labels, colors, AgeStart, AgeEnd, methodstr, number, CommentModif="",
+                                SkipFirstHalfYear=False, orientation="portrait", alphas=(1, 0.8)):
     """
     Figure principale du modèle présentant les graphiques de chaque variable en fonction du temps.
     La figure est générée puis enregistrée dans le dossier "Figure".
@@ -763,10 +764,12 @@ def main_figure_comparison_many(solst, solsy, labels, colors, AgeStart, AgeEnd, 
         if i < 19:
             if SkipFirstHalfYear:  # """Plot sans la première demie année."""
                 for j in range(nbmodel):
-                    ax.plot(solst[j], solsy[j][i, ks[j]:], color=colors[j], alpha=alphas[j], label=labels[j], linewidth=1.5)
+                    ax.plot(solst[j], solsy[j][i, ks[j]:], color=colors[j], alpha=alphas[j], label=labels[j],
+                            linewidth=1.5)
             else:
                 for j in range(nbmodel):
-                    ax.plot(solst[j], solsy[j][i, :], color=colors[j], alpha=alphas[j], label=labels[j], linewidth=1.5)  # , '.-', ms=2
+                    ax.plot(solst[j], solsy[j][i, :], color=colors[j], alpha=alphas[j], label=labels[j],
+                            linewidth=1.5)  # , '.-', ms=2
 
             ax.grid()
             if orientation == "portrait":

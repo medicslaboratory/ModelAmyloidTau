@@ -243,6 +243,7 @@ class Parameters:
         """Maximal death rate of neurons induced by F_i (/day)."""
 
         # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4
+        # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-3  # approx 3.708e-4
         # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-6  # ~ 3.708e-10
         # Perte linéaire, car soit K est trop grand, soit F_i n'est pas assez haut. Pour avoir e-4 ou -5,
         #  il faudrait que tau soit e-2 (à cause du carré et k_tauFi e-1), ce qui est très grand...
@@ -257,6 +258,7 @@ class Parameters:
         """Sigmoid function coefficient (unitless)."""
 
         # self.d_TaN = (1/2) * self.d_FiN  # = (1 / 2) * 1/(2.51 * 365)  # approx 5.4576e-4
+        # self.d_TaN = 7.26e-3 / 365  # Init
         self.d_TaN = 7.26e-3 / 365 * 10  # approx 1.989e-5 * 10 = 1.989e-4
         # Données de Potvin. Voir mémoire.
         """Maximal death rate of neurons induced by T_alpha (TNF-alpha) (/day)."""
@@ -282,6 +284,7 @@ class Parameters:
         """Activation rate of astrocytes by TNF-alpha (mL/g/day)."""
 
         self.kappa_ABpoA = (self.kappa_TaA * 2.24e-12) / (2 * self.K_ABpo)  # approx 3.3136
+        # self.kappa_ABpoA = (self.kappa_TaA * 2.24e-12) / (2 * 1e-10)
         """Activation rate of astrocytes by extracellular amyloid-beta42 plaque (mL/g/day)."""
 
         self.d_A = 0.4
@@ -291,10 +294,15 @@ class Parameters:
         # CONSTANTS FOR THE EQUATION FOR M_NA #
         #######################################
 
-        TotalMaxActivRateM = 0.2141 * xi
+        TotalMaxActivRateM = 0.20 * xi
+        # TotalMaxActivRateM = 1.07104e-4 * xi
+        # TotalMaxActivRateM = 1.07104e-4 * 100 * xi
+        # TotalMaxActivRateM = 0.2141 * xi
 
-        self.kappa_FoM = TotalMaxActivRateM * 2 / 3  # approx 0.1427
+        self.kappa_FoM = TotalMaxActivRateM * 2 / 3  # approx 0.133 (av approx 0.1427)
         # 28.32 * 2? Trop grand! Latex pour autre, changer si change idée.
+        # self.kappa_FoM = 0.02  # hao
+        # self.kappa_FoM = 0.02 * 2  # hao*2
         """Activation rate of microglia by F_o (NFT) (/day)."""
 
         self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000  # approx 1.3243e-12
@@ -303,8 +311,10 @@ class Parameters:
         """Concentration of extracellular NFTs at which the rate of activation of microglia by F_o 
         is half-maximal (g/mL)."""
 
-        self.kappa_ABooM = TotalMaxActivRateM * 1 / 3  # approx 0.07137
+        self.kappa_ABooM = TotalMaxActivRateM * 1 / 3  # approx 0.0667 (av approx 0.07137)
         # 28.32 ? Trop grand! Latex pour autre, changer si change idée.
+        # self.kappa_ABooM = 0.0023  # Hao
+        # self.kappa_ABooM = 0.0023 * 2  # Hao*2
         """Activation rate of microglia by extracellular amyloid-beta42 oligomer (/day). """
 
         # self.K_ABooM = 0.060 / 527.4 / 1000  # approx 1.1377e-7
@@ -355,6 +365,7 @@ class Parameters:
         signaling (/day)."""
 
         self.K_TaM = 2.24e-12 * 2e2  # = 4.48e-10
+        # self.K_TaM = 2.24e-12 * 1.9e2  # = 4.48e-10
         # test plus grand : 22-09-27_16_... à _18_...
         # - Différence importante entre *1e2 et *5e2: 22-09-28_07_... vs _08_...
         # - Figure avec *4e2 me semble assez bien (22-09-29_03_...)!
@@ -371,6 +382,7 @@ class Parameters:
         # self.kappa_PMhat = 0.33  # * 1e-3
         # Revoir valeur, incohérence (voir mémoire)
         self.kappa_PMhat = 1 / 3 * 1e-2  # approx 3.33e-3
+        # self.kappa_PMhat = 1 / 3 / 50  # approx 6.66e-3
         # Aide à déplacer l'augmentation vers la droite (retarder). Fig 22-09-29_08_.. (vs _06) et suivantes.
         # Latex ok
         # self.kappa_PMhat = 1/6  # ~ 0.1667
@@ -379,7 +391,7 @@ class Parameters:
 
         self.K_P = 6.23e-10 * 1e2  # =6.23e-8
         # *1e2 : Adoucis les courbes lors de anti -> pro, donc tout le modèle. Fig 22-09-29_14_... (vs _09)
-        # modif letex ok
+        # modif latex ok
         """Concentration of MCP-1 for which the rate of importation of macrophage is half-maximal (g/mL)."""
 
         self.Mhatmax = (830 * m_Mhat) / 2e-4  # = 0.0207085
