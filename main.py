@@ -46,28 +46,38 @@ method = "BDF"
 
 """main figure, 4 sub-models"""
 number = 1
-CommentModif = "vf"
-# CommentModif = "xi=5e-1"
-# CommentModif = "Inst=Ins0"
 
-sols = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=1)
+"""Base"""
+# CommentModif = "vf"
+# sols = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=1)
 
 # FigName = ff.main_figure_4_models(sols, AgeStart, AgeEnd, method, max_step, rtol, atol, number,
 #                                   CommentModif=CommentModif, SkipFirstHalfYear=False)  #, orientation="paysage")
 #
 # ff.figure_intracellular_concentrations(sols, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
 #                                        CommentModif=CommentModif)
+# ff.figure_intracellular_concentrations_SexDiff(sols, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
+#                                                CommentModif=CommentModif)
 
+"""xi = 0.5"""
 # CommentModif = "xi=5e-1"
 # sols_xi = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=0.5)
 # _ = ff.main_figure_4_models(sols_xi, AgeStart, AgeEnd, method, max_step, rtol, atol, number,
 #                             CommentModif=CommentModif, SkipFirstHalfYear=False)
-#
+# ff.figure_intracellular_concentrations(sols_xi, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
+#                                        CommentModif=CommentModif)
+# ff.figure_intracellular_concentrations_SexDiff(sols_xi, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
+#                                                CommentModif=CommentModif)
+
+"""Sans variation de l'insuline"""
 # CommentModif = "Inst=Ins0"
 # sols_ins = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=False, xi=1)
 # _ = ff.main_figure_4_models(sols_ins, AgeStart, AgeEnd, method, max_step, rtol, atol, number,
 #                             CommentModif=CommentModif, SkipFirstHalfYear=False)
-
+# ff.figure_intracellular_concentrations(sols_ins, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
+#                                        CommentModif=CommentModif)
+# ff.figure_intracellular_concentrations_SexDiff(sols_ins, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
+#                                                CommentModif=CommentModif)
 
 """Figure of comparison of models (base vs Without insulin variation)"""
 # sol_Fpos_InsVarT = ff.run_1_model(0, 1, AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True)
@@ -123,41 +133,46 @@ sols = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=Tr
 
 
 """Rate figures"""
-CommentModif = "vf"
-
-today = datetime.date.today()
-date = today.strftime("%y-%m-%d")
-my_path = os.path.abspath('Figures')
-
-for combi in [[0, 0], [0, 1], [1, 0], [1, 1]]:
-    sex, APOE4 = combi
-    p = param.Parameters(Sex=sex, APOE_status=APOE4)
-    y0 = InitialConditions(p, AgeStart)
-    sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step,
-                    args=[sex, APOE4], rtol=rtol, atol=atol)
-
-    fig_neuloss_V2 = rff.fig_neuronal_loss_rates_V2(sol.t, sol.y, p)
-    # fig_astroactiv = rff.fig_astrocyte_activation_rates(sol.t, sol.y, p)
-    fig_microactiv_V2 = rff.fig_microglia_activation_rates_V2(sol.t, sol.y, p)
-
-    if p.S == 0:
-        sex = "F"
-    else:  # p.S == 1:
-        sex = "M"
-    if p.AP == 1:
-        APOE = "+"
-    else:  # p.AP == 0:
-        APOE = "-"
-
-    fig_neuloss_V2.savefig(os.path.join(my_path, "Figure_" + date + "_" + f"{number:02}" + "_NeuronalLossV2_" + sex +
-                                        "_APOE" + APOE + "_" + method + "_" + str(AgeEnd - AgeStart).replace(".", "") +
-                                        "y_" + CommentModif + ".png"), dpi=180)
-    # fig_astroactiv.savefig(os.path.join(my_path, "Figure_" + date + "_" + f"{number:02}" + "_AstrogliaActiv_" + sex +
-    #                                     "_APOE" + APOE + "_" + method + "_" + str(AgeEnd - AgeStart).replace(".", "") +
-    #                                     "y_" + CommentModif + ".png"), dpi=180)
-    fig_microactiv_V2.savefig(os.path.join(my_path, "Figure_" + date + "_" + f"{number:02}" + "_MicrogliaActiv_" + sex +
-                                           "_APOE" + APOE + "_" + method + "_" + str(AgeEnd - AgeStart).replace(".", "")
-                                           + "y_" + CommentModif + ".png"), dpi=180)
+# CommentModif = "vf"
+#
+# today = datetime.date.today()
+# date = today.strftime("%y-%m-%d")
+# my_path = os.path.abspath('Figures')
+#
+# InsVar = True
+# # xi = 0.5
+# xi = 1
+# for combi in [[0, 0], [0, 1], [1, 0], [1, 1]]:
+#     sex, APOE4 = combi
+#     sol, p = ff.run_1_model(sex, APOE4, AgeStart, AgeEnd, method, max_step, rtol, atol,
+#                             InsVar=InsVar, xi=xi, return_p=True)
+#     # p = param.Parameters(Sex=sex, APOE_status=APOE4)
+#     # y0 = InitialConditions(p, AgeStart)
+#     # sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step,
+#     #                 args=[sex, APOE4, InsVar], rtol=rtol, atol=atol)
+#
+#     fig_neuloss_V2 = rff.fig_neuronal_loss_rates_V2(sol.t, sol.y, p)
+#     fig_astroactiv = rff.fig_astrocyte_activation_rates(sol.t, sol.y, p)
+#     fig_microactiv_V2 = rff.fig_microglia_activation_rates_V2(sol.t, sol.y, p)
+#
+#     if p.S == 0:
+#         sex = "F"
+#     else:  # p.S == 1:
+#         sex = "M"
+#     if p.AP == 1:
+#         APOE = "+"
+#     else:  # p.AP == 0:
+#         APOE = "-"
+#
+#     fig_neuloss_V2.savefig(os.path.join(my_path, "Figure_" + date + "_" + f"{number:02}" + "_NeuronalLossV2_" + sex +
+#                                         "_APOE" + APOE + "_" + method + "_" + str(AgeEnd - AgeStart).replace(".", "") +
+#                                         "y_" + CommentModif + ".png"), dpi=180)
+#     fig_astroactiv.savefig(os.path.join(my_path, "Figure_" + date + "_" + f"{number:02}" + "_AstrogliaActiv_" + sex +
+#                                         "_APOE" + APOE + "_" + method + "_" + str(AgeEnd - AgeStart).replace(".", "") +
+#                                         "y_" + CommentModif + ".png"), dpi=180)
+#     fig_microactiv_V2.savefig(os.path.join(my_path, "Figure_" + date + "_" + f"{number:02}" + "_MicrogliaActiv_" + sex +
+#                                            "_APOE" + APOE + "_" + method + "_" + str(AgeEnd - AgeStart).replace(".", "")
+#                                            + "y_" + CommentModif + ".png"), dpi=180)
 
 
 """Print neuronal loss in percent"""
@@ -165,16 +180,31 @@ for combi in [[0, 0], [0, 1], [1, 0], [1, 1]]:
 # print("Concentration de neurones initiale: ", sol.y[8, 0], "\nConcentration de neurones finale: ", sol.y[8, -1],
 #       "\nPourcentage de perte: ", NeuronalLossInPercent)
 
+
 """Microglia activation"""
-# s = 0
-# labels = ["F, APOE4-", "F, APOE4+", "M, APOE4-", "M, APOE4+"]
-# for sol in sols:  # [sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos]:
-#     MicrogliaActivInPercent = (sol.y[10, -1] - sol.y[10, 0]) / sol.y[10, 0] * 100
-#     # print(labels[s])
-#     # print("Concentration de neurones initiale: ", sol.y[8, 0], "\nConcentration de neurones finale: ", sol.y[8, -1],
-#     #       "\nPourcentage de perte: ", NeuronalLossInPercent)
-#     print(labels[s] + ": " + str(MicrogliaActivInPercent) + " %")
-#     s = s + 1
+
+
+def print_microglia_activ(sols, model=""):
+    if model != "":
+        titre = "Pourcentage d'activation des microglies pour le modèle " + model
+        print(titre)
+    else:
+        print("Pourcentage d'activation des microglies")
+    s = 0
+    labels = ["F, APOE4-", "F, APOE4+", "M, APOE4-", "M, APOE4+"]
+    for sol in sols:  # [sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos]:
+        # MicrogliaActivInPercent = abs(sol.y[10, -1] - sol.y[10, 0]) / sol.y[10, 0] * 100
+        #   # abs([M_NA]_f + [M_NA]_0) / [M_NA]_0 * 100
+        # # Donne pas exactement le même résultat que :
+        MicrogliaActivInPercent = (sol.y[11, -1] + sol.y[12, -1]) / sol.y[10, 0] * 100
+        #   # ([M_pro]_f + [M_anti]_f) / [M_NA]_0 * 100
+        print(labels[s] + ": " + str(MicrogliaActivInPercent) + " %" + " ({:.2f}%)".format(MicrogliaActivInPercent))
+        s = s + 1
+
+
+# print_microglia_activ(sols, "base")
+# print_microglia_activ(sols_ins, "Ins(t)=Ins_0")
+# print_microglia_activ(sols_xi, "xi=0.5")
 
 """show figures"""
-# plt.show()
+plt.show()

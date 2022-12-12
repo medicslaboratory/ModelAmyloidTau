@@ -14,12 +14,15 @@ import datetime
 # p = param.Parameters()
 
 
-def run_1_model(Sex, APOE_status, AgeStart, AgeEnd, methodstr, max_step, rtol, atol, InsVar=True, xi=1):
+def run_1_model(Sex, APOE_status, AgeStart, AgeEnd, methodstr, max_step, rtol, atol, InsVar=True, xi=1, return_p=False):
     p = param.Parameters(Sex=Sex, APOE_status=APOE_status, xi=xi)
     y0 = InitialConditions(p, AgeStart)
     sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=methodstr,
                     args=[Sex, APOE_status, InsVar, xi], max_step=max_step, rtol=rtol, atol=atol)
-    return sol
+    if return_p:
+        return sol, p
+    else:
+        return sol
 
 
 def run_4_models(AgeStart, AgeEnd, methodstr, max_step, rtol, atol, InsVar=True, xi=1):
@@ -282,7 +285,7 @@ def figure_intracellular_concentrations(sols, AgeStart, AgeEnd, methodstr, max_s
         axs[0].plot(solt, soly[0, :] / soly[8, :], color=colors[s], label=labels[s])  # ABi/N
         axs[1].plot(solt, soly[4, :] / soly[8, :], color=colors[s], label=labels[s], alpha=alphas[s])  # G/N
         axs[2].plot(solt, soly[5, :] / soly[8, :], color=colors[s], label=labels[s], alpha=alphas[s])  # tau/N
-        axs[3].plot(solt, soly[6, :] / soly[8, :], color=colors[s], label=labels[s], alpha=alphas[s])  # tau/N
+        axs[3].plot(solt, (soly[6, :] / soly[8, :]), color=colors[s], label=labels[s], alpha=alphas[s])  # Fi/N
         s = s + 1
 
     i = 0
@@ -308,12 +311,107 @@ def figure_intracellular_concentrations(sols, AgeStart, AgeEnd, methodstr, max_s
     if CommentModif != "":
         CommentModif = "_" + CommentModif
     my_path = os.path.abspath('Figures')
-    FigName = "Figure_" + date + "_Intracellular_" + "{:0>2d}".format(number) + "_" + methodstr + \
+    FigName = "Figure_" + date + "_" + "{:0>2d}".format(number) + "_Intracellular_" + methodstr + "_" + \
               str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + "_mstep=" + max_step + "_rtol" + \
               rtol + "_atol" + atol + ".png"
     while os.path.exists(os.path.join(my_path, FigName)):
         number = number + 1
-        FigName = "Figure_" + date + "_Intracellular_" + f"{number:02}" + "_" + methodstr + \
+        FigName = "Figure_" + date + "_" + "{:0>2d}".format(number) + "_Intracellular_" + methodstr + "_" + \
+                  str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + "_mstep=" + max_step + "_rtol" + \
+                  rtol + "_atol" + atol + ".png"
+    plt.savefig(os.path.join(my_path, FigName), dpi=180)
+
+
+def figure_intracellular_concentrations_SexDiff(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol, number, CommentModif=""):
+    sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos = sols
+
+    p_Fneg = param.Parameters(Sex=0, APOE_status=0)  # F ; APOE4-
+    y0_Fneg = InitialConditions(p_Fneg, AgeStart)
+    # sol_Fneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fneg, method=methodstr, args=[0, 0],
+    #                      max_step=max_step, rtol=rtol, atol=atol)
+    #
+    p_Fpos = param.Parameters(Sex=0, APOE_status=1)  # F ; APOE4+
+    y0_Fpos = InitialConditions(p_Fpos, AgeStart)
+    # sol_Fpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fpos, method=methodstr, args=[0, 1],
+    #                      max_step=max_step, rtol=rtol, atol=atol)
+    #
+    p_Mneg = param.Parameters(Sex=1, APOE_status=0)  # M ; APOE4-
+    y0_Mneg = InitialConditions(p_Mneg, AgeStart)
+    # sol_Mneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mneg, method=methodstr, args=[1, 0],
+    #                      max_step=max_step, rtol=rtol, atol=atol)
+    #
+    p_Mpos = param.Parameters(Sex=1, APOE_status=1)  # M ; APOE4+
+    y0_Mpos = InitialConditions(p_Mpos, AgeStart)
+    # sol_Mpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mpos, method=methodstr, args=[1, 1],
+    #                      max_step=max_step, rtol=rtol, atol=atol)
+
+    fig, axs = plt.subplots(nrows=4, ncols=2, sharex="all", figsize=(8, 9), layout="tight")
+    # axs = axs.flat
+
+    variablenames = [r"$A \beta^{i} / N$", r"$GSK3/N$", r"$\tau/N$", r"$F_i/N$"]
+    colors = ["purple", "hotpink", "darkblue", "royalblue"]
+    labels = ["F, APOE4+", "F, APOE4-", "M, APOE4+", "M, APOE4-"]
+    alphas = [1, 0.8, 1, 0.8]
+    s = 0
+    for sol in [sol_Fpos, sol_Fneg]:
+        solt = sol.t / 365
+        soly = sol.y
+
+        axs[0, 0].plot(solt, soly[0, :] / soly[8, :], color=colors[s], label=labels[s])  # ABi/N
+        # y = soly[0, :] / soly[8, :]
+        axs[1, 0].plot(solt, soly[4, :] / soly[8, :], color=colors[s], label=labels[s], alpha=alphas[s])  # G/N
+        axs[2, 0].plot(solt, soly[5, :] / soly[8, :], color=colors[s], label=labels[s], alpha=alphas[s])  # tau/N
+        axs[3, 0].plot(solt, (soly[6, :] / soly[8, :]), color=colors[s], label=labels[s], alpha=alphas[s])  # Fi/N
+        axs[0, 0].set_ylabel(variablenames[0])
+        axs[1, 0].set_ylabel(variablenames[1])
+        axs[2, 0].set_ylabel(variablenames[2])
+        axs[3, 0].set_ylabel(variablenames[3])
+        s = s + 1
+
+    for sol in [sol_Mpos,  sol_Mneg]:
+        solt = sol.t / 365
+        soly = sol.y
+
+        axs[0, 1].plot(solt, soly[0, :] / soly[8, :], color=colors[s], label=labels[s])  # ABi/N
+        # y = soly[0, :] / soly[8, :]
+        axs[1, 1].plot(solt, soly[4, :] / soly[8, :], color=colors[s], label=labels[s], alpha=alphas[s])  # G/N
+        axs[2, 1].plot(solt, soly[5, :] / soly[8, :], color=colors[s], label=labels[s], alpha=alphas[s])  # tau/N
+        axs[3, 1].plot(solt, (soly[6, :] / soly[8, :]), color=colors[s], label=labels[s], alpha=alphas[s])  # Fi/N
+        axs[0, 1].set_ylabel(variablenames[0])
+        axs[1, 1].set_ylabel(variablenames[1])
+        axs[2, 1].set_ylabel(variablenames[2])
+        axs[3, 1].set_ylabel(variablenames[3])
+        s = s + 1
+
+    i = 0
+    for ax in axs.flat:
+        ax.grid()
+        if i >= 6:
+            ax.set_xlabel('Âge (années)')
+        formatter = ticker.ScalarFormatter(useMathText=True)
+        formatter.set_scientific(True)
+        formatter.set_powerlimits((-1, 1))
+        # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
+        # notation will be used if exp <= -1 or exp >= 1.
+        ax.yaxis.set_major_formatter(formatter)
+        i += 1
+    # handles, labels = axs[3].get_legend_handles_labels()
+    # fig.legend(handles, labels, loc='lower left', bbox_to_anchor=(0.81, 0.06))  # (0.82, 0.06)
+    axs[3, 0].legend()
+    axs[3, 1].legend()
+
+    """Save the plot as a .png file"""
+    today = datetime.date.today()
+    date = today.strftime("%y-%m-%d")
+    if CommentModif != "":
+        CommentModif = "_" + CommentModif
+    my_path = os.path.abspath('Figures')
+    FigName = "Figure_" + date + "_" + "{:0>2d}".format(number) + "_IntracellularSex_" + methodstr + "_" + \
+              str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + "_mstep=" + max_step + "_rtol" + \
+              rtol + "_atol" + atol + ".png"
+    while os.path.exists(os.path.join(my_path, FigName)):
+        number = number + 1
+        FigName = "Figure_" + date + "_" + "{:0>2d}".format(number) + "_IntracellularSex_" + methodstr + "_" + \
                   str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + "_mstep=" + max_step + "_rtol" + \
                   rtol + "_atol" + atol + ".png"
     plt.savefig(os.path.join(my_path, FigName), dpi=180)

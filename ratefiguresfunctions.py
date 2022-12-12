@@ -168,8 +168,8 @@ def fig_neuronal_loss_rates_V2(solt, soly, p):
 
 
 def fig_microglia_activation_rates(solt, soly, p):
-    """
-    Graphique des taux d'activation des microglies.
+    """Graphique des taux d'activation des microglies.
+
     :param solt:
     :param soly:
     :return:
