@@ -250,23 +250,23 @@ def main_figure(solt, soly, p, y0, AgeStart, AgeEnd, methodstr, maxstepstr, rtol
 def figure_intracellular_concentrations(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol, number, CommentModif=""):
     sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos = sols
 
-    p_Fneg = param.Parameters(Sex=0, APOE_status=0)  # F ; APOE4-
-    y0_Fneg = InitialConditions(p_Fneg, AgeStart)
+    # p_Fneg = param.Parameters(Sex=0, APOE_status=0)  # F ; APOE4-
+    # y0_Fneg = InitialConditions(p_Fneg, AgeStart)
     # sol_Fneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fneg, method=methodstr, args=[0, 0],
     #                      max_step=max_step, rtol=rtol, atol=atol)
     #
-    p_Fpos = param.Parameters(Sex=0, APOE_status=1)  # F ; APOE4+
-    y0_Fpos = InitialConditions(p_Fpos, AgeStart)
+    # p_Fpos = param.Parameters(Sex=0, APOE_status=1)  # F ; APOE4+
+    # y0_Fpos = InitialConditions(p_Fpos, AgeStart)
     # sol_Fpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fpos, method=methodstr, args=[0, 1],
     #                      max_step=max_step, rtol=rtol, atol=atol)
     #
-    p_Mneg = param.Parameters(Sex=1, APOE_status=0)  # M ; APOE4-
-    y0_Mneg = InitialConditions(p_Mneg, AgeStart)
+    # p_Mneg = param.Parameters(Sex=1, APOE_status=0)  # M ; APOE4-
+    # y0_Mneg = InitialConditions(p_Mneg, AgeStart)
     # sol_Mneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mneg, method=methodstr, args=[1, 0],
     #                      max_step=max_step, rtol=rtol, atol=atol)
     #
-    p_Mpos = param.Parameters(Sex=1, APOE_status=1)  # M ; APOE4+
-    y0_Mpos = InitialConditions(p_Mpos, AgeStart)
+    # p_Mpos = param.Parameters(Sex=1, APOE_status=1)  # M ; APOE4+
+    # y0_Mpos = InitialConditions(p_Mpos, AgeStart)
     # sol_Mpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mpos, method=methodstr, args=[1, 1],
     #                      max_step=max_step, rtol=rtol, atol=atol)
 
@@ -282,9 +282,9 @@ def figure_intracellular_concentrations(sols, AgeStart, AgeEnd, methodstr, max_s
         solt = sol.t / 365
         soly = sol.y
 
-        axs[0].plot(solt, soly[0, :] / soly[8, :], color=colors[s], label=labels[s])  # ABi/N
-        axs[1].plot(solt, soly[4, :] / soly[8, :], color=colors[s], label=labels[s], alpha=alphas[s])  # G/N
-        axs[2].plot(solt, soly[5, :] / soly[8, :], color=colors[s], label=labels[s], alpha=alphas[s])  # tau/N
+        axs[0].plot(solt, (soly[0, :] / soly[8, :]), color=colors[s], label=labels[s])  # ABi/N
+        axs[1].plot(solt, (soly[4, :] / soly[8, :]), color=colors[s], label=labels[s], alpha=alphas[s])  # G/N
+        axs[2].plot(solt, (soly[5, :] / soly[8, :]), color=colors[s], label=labels[s], alpha=alphas[s])  # tau/N
         axs[3].plot(solt, (soly[6, :] / soly[8, :]), color=colors[s], label=labels[s], alpha=alphas[s])  # Fi/N
         s = s + 1
 
@@ -325,23 +325,23 @@ def figure_intracellular_concentrations(sols, AgeStart, AgeEnd, methodstr, max_s
 def figure_intracellular_concentrations_SexDiff(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol, number, CommentModif=""):
     sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos = sols
 
-    p_Fneg = param.Parameters(Sex=0, APOE_status=0)  # F ; APOE4-
-    y0_Fneg = InitialConditions(p_Fneg, AgeStart)
+    # p_Fneg = param.Parameters(Sex=0, APOE_status=0)  # F ; APOE4-
+    # y0_Fneg = InitialConditions(p_Fneg, AgeStart)
     # sol_Fneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fneg, method=methodstr, args=[0, 0],
     #                      max_step=max_step, rtol=rtol, atol=atol)
     #
-    p_Fpos = param.Parameters(Sex=0, APOE_status=1)  # F ; APOE4+
-    y0_Fpos = InitialConditions(p_Fpos, AgeStart)
+    # p_Fpos = param.Parameters(Sex=0, APOE_status=1)  # F ; APOE4+
+    # y0_Fpos = InitialConditions(p_Fpos, AgeStart)
     # sol_Fpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fpos, method=methodstr, args=[0, 1],
     #                      max_step=max_step, rtol=rtol, atol=atol)
     #
-    p_Mneg = param.Parameters(Sex=1, APOE_status=0)  # M ; APOE4-
-    y0_Mneg = InitialConditions(p_Mneg, AgeStart)
+    # p_Mneg = param.Parameters(Sex=1, APOE_status=0)  # M ; APOE4-
+    # y0_Mneg = InitialConditions(p_Mneg, AgeStart)
     # sol_Mneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mneg, method=methodstr, args=[1, 0],
     #                      max_step=max_step, rtol=rtol, atol=atol)
     #
-    p_Mpos = param.Parameters(Sex=1, APOE_status=1)  # M ; APOE4+
-    y0_Mpos = InitialConditions(p_Mpos, AgeStart)
+    # p_Mpos = param.Parameters(Sex=1, APOE_status=1)  # M ; APOE4+
+    # y0_Mpos = InitialConditions(p_Mpos, AgeStart)
     # sol_Mpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mpos, method=methodstr, args=[1, 1],
     #                      max_step=max_step, rtol=rtol, atol=atol)
 

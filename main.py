@@ -60,14 +60,14 @@ number = 1
 #                                                CommentModif=CommentModif)
 
 """xi = 0.5"""
-# CommentModif = "xi=5e-1"
-# sols_xi = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=0.5)
-# _ = ff.main_figure_4_models(sols_xi, AgeStart, AgeEnd, method, max_step, rtol, atol, number,
-#                             CommentModif=CommentModif, SkipFirstHalfYear=False)
-# ff.figure_intracellular_concentrations(sols_xi, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
-#                                        CommentModif=CommentModif)
-# ff.figure_intracellular_concentrations_SexDiff(sols_xi, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
-#                                                CommentModif=CommentModif)
+CommentModif = "xi=5e-1"
+sols_xi = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=0.5)
+_ = ff.main_figure_4_models(sols_xi, AgeStart, AgeEnd, method, max_step, rtol, atol, number,
+                            CommentModif=CommentModif, SkipFirstHalfYear=False)
+ff.figure_intracellular_concentrations(sols_xi, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
+                                       CommentModif=CommentModif)
+ff.figure_intracellular_concentrations_SexDiff(sols_xi, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
+                                               CommentModif=CommentModif)
 
 """Sans variation de l'insuline"""
 # CommentModif = "Inst=Ins0"
