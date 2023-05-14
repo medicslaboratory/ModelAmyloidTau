@@ -1,5 +1,8 @@
-# Date : 7 Octobre 2022
-# Author : Éléonore Chamberland
+"""
+Date : 7 Octobre 2022
+Author : Éléonore Chamberland
+"""
+
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,56 +27,52 @@ max_step = np.inf  # Default
 maxstepstr = "Default"
 # max_step = 1
 # maxstepstr = str(max_step).replace('.', '')
-# rtol = np.ones(19) * 1e-10
-# rtol[3] = 1e-29
-# rtolstr = "Array"
-# rtol = 1e-10  # Default value : 1e-3
+
 rtol = 1e-5
-# rtol = 1e-10
 rtolstr = "{:.0e}".format(rtol)
 
-# # atol default value : 1e-6
-# atol = np.ones(19) * 1e-15
-# atol[3] = 1e-20
-# atolstr = "array"
 atol = 1e-22
-# atol = 1e-26
 atolstr = "{:.0e}".format(atol)
 
 method = "BDF"
 # method = "Radau"
 # method = "LSODA"
 
+# Making a list for Label names in the plot
+labelname = [r'$A \beta^{i}$', r'$A \beta_{m}^{o}$', r'$A \beta_{o}^{o}$', r'$A \beta_{p}^{o}$', '$GSK 3$',
+             r'$\tau$', '$F_i$', '$F_o$', '$N$', '$A$', '$M_{NA}$', '$M_{pro}$', '$M_{anti}$', r'$\hat{M}_{pro}$',
+             r'$\hat{M}_{anti}$', r'$T_{\beta}$', '$I_{10}$', r'$T_{\alpha}$', '$P$']
+
 """main figure, 4 sub-models"""
 number = 1
 
 """Base"""
-# CommentModif = "vf"
-# sols = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=1)
+CommentModif = "test"
+sols = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=1)
 
-# FigName = ff.main_figure_4_models(sols, AgeStart, AgeEnd, method, max_step, rtol, atol, number,
-#                                   CommentModif=CommentModif, SkipFirstHalfYear=False)  #, orientation="paysage")
-#
+FigName = ff.main_figure_4_models(sols, AgeStart, AgeEnd, method, number,
+                                  CommentModif=CommentModif, SkipFirstHalfYear=False, orientation="paysage")
+
 # ff.figure_intracellular_concentrations(sols, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
 #                                        CommentModif=CommentModif)
 # ff.figure_intracellular_concentrations_SexDiff(sols, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
 #                                                CommentModif=CommentModif)
 
 """xi = 0.5"""
-CommentModif = "xi=5e-1"
-sols_xi = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=0.5)
-_ = ff.main_figure_4_models(sols_xi, AgeStart, AgeEnd, method, max_step, rtol, atol, number,
-                            CommentModif=CommentModif, SkipFirstHalfYear=False)
-ff.figure_intracellular_concentrations(sols_xi, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
-                                       CommentModif=CommentModif)
-ff.figure_intracellular_concentrations_SexDiff(sols_xi, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
-                                               CommentModif=CommentModif)
+# CommentModif = "xi=5e-1"
+# sols_xi = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True, xi=0.5)
+# _ = ff.main_figure_4_models(sols_xi, AgeStart, AgeEnd, method, number,
+#                             CommentModif=CommentModif, SkipFirstHalfYear=False)
+# ff.figure_intracellular_concentrations(sols_xi, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
+#                                        CommentModif=CommentModif)
+# ff.figure_intracellular_concentrations_SexDiff(sols_xi, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
+#                                                CommentModif=CommentModif)
 
 """Sans variation de l'insuline"""
 # CommentModif = "Inst=Ins0"
 # sols_ins = ff.run_4_models(AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=False, xi=1)
-# _ = ff.main_figure_4_models(sols_ins, AgeStart, AgeEnd, method, max_step, rtol, atol, number,
-#                             CommentModif=CommentModif, SkipFirstHalfYear=False)
+# _ = ff.main_figure_4_models(sols_ins, AgeStart, AgeEnd, method,number,
+#                             CommentModif=CommentModif, SkipFirstHalfYear=False, orientation="paysage")
 # ff.figure_intracellular_concentrations(sols_ins, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
 #                                        CommentModif=CommentModif)
 # ff.figure_intracellular_concentrations_SexDiff(sols_ins, AgeStart, AgeEnd, method, maxstepstr, rtolstr, atolstr, number,
@@ -82,17 +81,17 @@ ff.figure_intracellular_concentrations_SexDiff(sols_xi, AgeStart, AgeEnd, method
 """Figure of comparison of models (base vs Without insulin variation)"""
 # sol_Fpos_InsVarT = ff.run_1_model(0, 1, AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=True)
 # sol_Fpos_InsVarF = ff.run_1_model(0, 1, AgeStart, AgeEnd, method, max_step, rtol, atol, InsVar=False)
-#
-# number = 1
-# CommentModif = "F_APOE+_InsVar_portrait"
-# # # CommentModif = "F_APOE+_InsVar_paysage"
 # #
+# # number = 1
+# # CommentModif = "F_APOE+_InsVar_portrait"
+# CommentModif = "F_APOE+_InsVar_paysage"
+#
 # # FigName = ff.main_figure_comparison(sol_Fpos_InsVarT.t, sol_Fpos_InsVarT.y, sol_Fpos_InsVarF.t, sol_Fpos_InsVarF.y,
 # #                                     ["$Ins(t)$ original", "$Ins(t) = Ins_0$"], AgeStart, AgeEnd, method, number,
 # #                                     CommentModif=CommentModif, color1="k", color2="darkorange")  #, orientation="paysage")
 # _ = ff.main_figure_comparison_many([sol_Fpos_InsVarT.t, sol_Fpos_InsVarF.t], [sol_Fpos_InsVarT.y, sol_Fpos_InsVarF.y],
 #                                    ["$Ins(t)$ original", "$Ins(t) = Ins_0$"], ["k", "darkorange"], AgeStart,
-#                                    AgeEnd, method, number, CommentModif=CommentModif)  #, orientation="paysage")
+#                                    AgeEnd, method, number, CommentModif=CommentModif, orientation="paysage")
 
 """Figure of comparison of models (base vs 0<xi<1)"""
 # xis = [1, 0.8, 0.5, 0.3]
@@ -146,8 +145,8 @@ ff.figure_intracellular_concentrations_SexDiff(sols_xi, AgeStart, AgeEnd, method
 #     sex, APOE4 = combi
 #     sol, p = ff.run_1_model(sex, APOE4, AgeStart, AgeEnd, method, max_step, rtol, atol,
 #                             InsVar=InsVar, xi=xi, return_p=True)
-#     # p = param.Parameters(Sex=sex, APOE_status=APOE4)
-#     # y0 = InitialConditions(p, AgeStart)
+#     p = param.Parameters(Sex=sex, APOE_status=APOE4)
+#     y0 = InitialConditions(p, AgeStart)
 #     # sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=method, max_step=max_step,
 #     #                 args=[sex, APOE4, InsVar], rtol=rtol, atol=atol)
 #
@@ -155,14 +154,19 @@ ff.figure_intracellular_concentrations_SexDiff(sols_xi, AgeStart, AgeEnd, method
 #     fig_astroactiv = rff.fig_astrocyte_activation_rates(sol.t, sol.y, p)
 #     fig_microactiv_V2 = rff.fig_microglia_activation_rates_V2(sol.t, sol.y, p)
 #
-#     if p.S == 0:
-#         sex = "F"
-#     else:  # p.S == 1:
-#         sex = "M"
-#     if p.AP == 1:
-#         APOE = "+"
-#     else:  # p.AP == 0:
-#         APOE = "-"
+    # if p.S == 0:
+    #     sex = "F"
+    # else:  # p.S == 1:
+    #     sex = "M"
+    # if p.AP == 1:
+    #     APOE = "+"
+    # else:  # p.AP == 0:
+    #     APOE = "-"
+    #
+    # print("Initial condition (g/mL) for " + sex + ", APOE4" + APOE + ":")
+    # icNameValue = [str(labelname[i]) + " = " + "{:.3e}".format(y0[i]) for i in np.arange(19)]
+    # initcond = ", ".join(icNameValue[:10]) + ", \n" + ", ".join(icNameValue[10:])
+    # print(initcond)
 #
 #     fig_neuloss_V2.savefig(os.path.join(my_path, "Figure_" + date + "_" + f"{number:02}" + "_NeuronalLossV2_" + sex +
 #                                         "_APOE" + APOE + "_" + method + "_" + str(AgeEnd - AgeStart).replace(".", "") +
@@ -184,22 +188,22 @@ ff.figure_intracellular_concentrations_SexDiff(sols_xi, AgeStart, AgeEnd, method
 """Microglia activation"""
 
 
-def print_microglia_activ(sols, model=""):
-    if model != "":
-        titre = "Pourcentage d'activation des microglies pour le modèle " + model
-        print(titre)
-    else:
-        print("Pourcentage d'activation des microglies")
-    s = 0
-    labels = ["F, APOE4-", "F, APOE4+", "M, APOE4-", "M, APOE4+"]
-    for sol in sols:  # [sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos]:
-        # MicrogliaActivInPercent = abs(sol.y[10, -1] - sol.y[10, 0]) / sol.y[10, 0] * 100
-        #   # abs([M_NA]_f + [M_NA]_0) / [M_NA]_0 * 100
-        # # Donne pas exactement le même résultat que :
-        MicrogliaActivInPercent = (sol.y[11, -1] + sol.y[12, -1]) / sol.y[10, 0] * 100
-        #   # ([M_pro]_f + [M_anti]_f) / [M_NA]_0 * 100
-        print(labels[s] + ": " + str(MicrogliaActivInPercent) + " %" + " ({:.2f}%)".format(MicrogliaActivInPercent))
-        s = s + 1
+# def print_microglia_activ(sols, model=""):
+#     if model != "":
+#         titre = "Pourcentage d'activation des microglies pour le modèle " + model
+#         print(titre)
+#     else:
+#         print("Pourcentage d'activation des microglies")
+#     s = 0
+#     labels = ["F, APOE4-", "F, APOE4+", "M, APOE4-", "M, APOE4+"]
+#     for sol in sols:  # [sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos]:
+#         # MicrogliaActivInPercent = abs(sol.y[10, -1] - sol.y[10, 0]) / sol.y[10, 0] * 100
+#         #   # abs([M_NA]_f + [M_NA]_0) / [M_NA]_0 * 100
+#         # # Donne pas exactement le même résultat que :
+#         MicrogliaActivInPercent = (sol.y[11, -1] + sol.y[12, -1]) / sol.y[10, 0] * 100
+#         #   # ([M_pro]_f + [M_anti]_f) / [M_NA]_0 * 100
+#         print(labels[s] + ": " + str(MicrogliaActivInPercent) + " %" + " ({:.2f}%)".format(MicrogliaActivInPercent))
+#         s = s + 1
 
 
 # print_microglia_activ(sols, "base")

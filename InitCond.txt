@@ -1,0 +1,19 @@
+Modèle base
+Initial condition (g/mL) for F, APOE4-:
+$A \beta^{i}$ = 7.447e-08, $A \beta_{m}^{o}$ = 1.596e-07, $A \beta_{o}^{o}$ = 3.573e-10, $A \beta_{p}^{o}$ = 2.311e-16, $GSK 3$ = 5.344e-05, $\tau$ = 6.495e-07, $F_i$ = 4.675e-11, $F_o$ = 5.000e-17, $N$ = 4.500e-01, $A$ = 0.000e+00, $M_{NA}$ = 3.801e-02, $M_{pro}$ = 1.000e-12, $M_{anti}$ = 1.000e-04, $\hat{M}_{pro}$ = 0.000e+00, $\hat{M}_{anti}$ = 0.000e+00, $T_{\beta}$ = 1.887e-14, $I_{10}$ = 1.414e-11, $T_{\alpha}$ = 1.827e-21, $P$ = 1.988e-19
+Initial condition (g/mL) for F, APOE4+:
+$A \beta^{i}$ = 9.516e-08, $A \beta_{m}^{o}$ = 1.978e-07, $A \beta_{o}^{o}$ = 1.483e-09, $A \beta_{p}^{o}$ = 1.592e-14, $GSK 3$ = 5.344e-05, $\tau$ = 6.495e-07, $F_i$ = 4.675e-11, $F_o$ = 5.000e-17, $N$ = 4.500e-01, $A$ = 0.000e+00, $M_{NA}$ = 3.801e-02, $M_{pro}$ = 1.000e-12, $M_{anti}$ = 1.000e-04, $\hat{M}_{pro}$ = 0.000e+00, $\hat{M}_{anti}$ = 0.000e+00, $T_{\beta}$ = 1.887e-14, $I_{10}$ = 1.414e-11, $T_{\alpha}$ = 1.827e-21, $P$ = 1.988e-19
+Initial condition (g/mL) for M, APOE4-:
+$A \beta^{i}$ = 7.447e-08, $A \beta_{m}^{o}$ = 1.596e-07, $A \beta_{o}^{o}$ = 3.573e-10, $A \beta_{p}^{o}$ = 2.311e-16, $GSK 3$ = 1.501e-05, $\tau$ = 6.495e-07, $F_i$ = 4.675e-11, $F_o$ = 5.000e-17, $N$ = 4.200e-01, $A$ = 0.000e+00, $M_{NA}$ = 3.183e-02, $M_{pro}$ = 1.000e-12, $M_{anti}$ = 1.000e-04, $\hat{M}_{pro}$ = 0.000e+00, $\hat{M}_{anti}$ = 0.000e+00, $T_{\beta}$ = 1.887e-14, $I_{10}$ = 1.414e-11, $T_{\alpha}$ = 1.827e-21, $P$ = 1.988e-19
+Initial condition (g/mL) for M, APOE4+:
+$A \beta^{i}$ = 9.516e-08, $A \beta_{m}^{o}$ = 1.978e-07, $A \beta_{o}^{o}$ = 1.483e-09, $A \beta_{p}^{o}$ = 1.592e-14, $GSK 3$ = 1.501e-05, $\tau$ = 6.495e-07, $F_i$ = 4.675e-11, $F_o$ = 5.000e-17, $N$ = 4.200e-01, $A$ = 0.000e+00, $M_{NA}$ = 3.183e-02, $M_{pro}$ = 1.000e-12, $M_{anti}$ = 1.000e-04, $\hat{M}_{pro}$ = 0.000e+00, $\hat{M}_{anti}$ = 0.000e+00, $T_{\beta}$ = 1.887e-14, $I_{10}$ = 1.414e-11, $T_{\alpha}$ = 1.827e-21, $P$ = 1.988e-19
+
+
+Initial condition (g/mL) for F, APOE4-:
+$A \beta^{i}$ = 7.45e-08, $A \beta_{m}^{o}$ = 1.60e-07, $A \beta_{o}^{o}$ = 3.57e-10, $A \beta_{p}^{o}$ = 2.31e-16, $GSK 3$ = 5.34e-05, $\tau$ = 6.49e-07, $F_i$ = 4.68e-11, $F_o$ = 5.00e-17, $N$ = 4.50e-01, $A$ = 0.00e+00, $M_{NA}$ = 3.80e-02, $M_{pro}$ = 1.00e-12, $M_{anti}$ = 1.00e-04, $\hat{M}_{pro}$ = 0.00e+00, $\hat{M}_{anti}$ = 0.00e+00, $T_{\beta}$ = 1.89e-14, $I_{10}$ = 1.41e-11, $T_{\alpha}$ = 1.83e-21, $P$ = 1.99e-19
+Initial condition (g/mL) for F, APOE4+:
+$A \beta^{i}$ = 9.52e-08, $A \beta_{m}^{o}$ = 1.98e-07, $A \beta_{o}^{o}$ = 1.48e-09, $A \beta_{p}^{o}$ = 1.59e-14, $GSK 3$ = 5.34e-05, $\tau$ = 6.49e-07, $F_i$ = 4.68e-11, $F_o$ = 5.00e-17, $N$ = 4.50e-01, $A$ = 0.00e+00, $M_{NA}$ = 3.80e-02, $M_{pro}$ = 1.00e-12, $M_{anti}$ = 1.00e-04, $\hat{M}_{pro}$ = 0.00e+00, $\hat{M}_{anti}$ = 0.00e+00, $T_{\beta}$ = 1.89e-14, $I_{10}$ = 1.41e-11, $T_{\alpha}$ = 1.83e-21, $P$ = 1.99e-19
+Initial condition (g/mL) for M, APOE4-:
+$A \beta^{i}$ = 7.45e-08, $A \beta_{m}^{o}$ = 1.60e-07, $A \beta_{o}^{o}$ = 3.57e-10, $A \beta_{p}^{o}$ = 2.31e-16, $GSK 3$ = 1.50e-05, $\tau$ = 6.49e-07, $F_i$ = 4.68e-11, $F_o$ = 5.00e-17, $N$ = 4.20e-01, $A$ = 0.00e+00, $M_{NA}$ = 3.18e-02, $M_{pro}$ = 1.00e-12, $M_{anti}$ = 1.00e-04, $\hat{M}_{pro}$ = 0.00e+00, $\hat{M}_{anti}$ = 0.00e+00, $T_{\beta}$ = 1.89e-14, $I_{10}$ = 1.41e-11, $T_{\alpha}$ = 1.83e-21, $P$ = 1.99e-19
+Initial condition (g/mL) for M, APOE4+:
+$A \beta^{i}$ = 9.52e-08, $A \beta_{m}^{o}$ = 1.98e-07, $A \beta_{o}^{o}$ = 1.48e-09, $A \beta_{p}^{o}$ = 1.59e-14, $GSK 3$ = 1.50e-05, $\tau$ = 6.49e-07, $F_i$ = 4.68e-11, $F_o$ = 5.00e-17, $N$ = 4.20e-01, $A$ = 0.00e+00, $M_{NA}$ = 3.18e-02, $M_{pro}$ = 1.00e-12, $M_{anti}$ = 1.00e-04, $\hat{M}_{pro}$ = 0.00e+00, $\hat{M}_{anti}$ = 0.00e+00, $T_{\beta}$ = 1.89e-14, $I_{10}$ = 1.41e-11, $T_{\alpha}$ = 1.83e-21, $P$ = 1.99e-19

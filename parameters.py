@@ -1,8 +1,10 @@
-# Date : 6 septembre 2022
-# Autor : Éléonore Chamberland
+"""
+Autor : Éléonore Chamberland
+Date : 6 septembre 2022
 
-# This file defines a class for the parameters of the model.
-# Recall : 1 cm^3 = 1 mL
+This file defines a class for the parameters of the model.
+Recall : 1 cm^3 = 1 mL
+"""
 
 import math
 from scipy.constants import Avogadro  # Avogadro number
@@ -20,16 +22,13 @@ class Parameters:
         :param t: Age of the person (in days).
         :return: The degradation rate of extracellular amyloid-beta 42 monomer (/day).
         """
-        # a = ((9.4 / 24) - (3.8 / 24)) / ((80 - 30) * 365)
-        # b = (3.8 / 24) - (a * (30 * 365))
-        # halflife = a * t + b
         halflife = (7 / 547500) * t + (11 / 600)
         return math.log(2) / halflife
 
     def Ins(self, t, S):
         """
         Function for the concentration on insulin in the brain in function of age and the sex. From the data for
-        peripherical insulin of Bryhni et al. (2010), with a molar mass of insulin of 5808 g/mol (Litwack, 2022).
+        peripheral insulin of Bryhni et al. (2010), with a molar mass of insulin of 5808 g/mol (Litwack, 2022).
         We suppose that brain insulin is 10 times smaller than the peripheral one (Gray et al., 2014).
         :param t: Age of the person (in days).
         :param S: Sex of the person (0 for a woman, and 1 for a man).
@@ -46,7 +45,7 @@ class Parameters:
 
         :param Sex: Sex of the person (0 for a woman, and 1 for a man).
         :param APOE_status: APOE4 status of the person, 1 if one has the APOE4 gene and 0 otherwise.
-        :param xi: 0 < xi <= 1. Sera multiplié à TotalMaxActivRateM, donc à kappa_FoM et à kappa_ABooM.
+        :param xi: 0 < xi <= 1. Will be multiplied to `TotalMaxActivRateM`, so to `kappa_FoM` and `kappa_ABooM`.
         """
         self.AP = APOE_status
         """AP equals to 1 if one has the APOE4 gene and 0 otherwise."""
@@ -78,8 +77,7 @@ class Parameters:
         # CONSTANTS FOR THE EQUATION FOR AB^i #
         #######################################
 
-        # self.lambda_ABi = (1 / 2) * ((5631e-9 - 783e-9) / (50 * 365)) * self.rho_cerveau  # approx. = 1.3681e-10
-        self.lambda_ABi = (3.63e-12 * 1e-3 * M_ABm * 86400) / 2   # ~ 1.4157e-06 / 2 ~= 7.0787e-07  # Lindstrom21
+        self.lambda_ABi = (3.63e-12 * 1e-3 * M_ABm * 86400) / 2   # ~= 1.4157e-06 / 2 ~= 7.0787e-07  # Lindstrom21
         """Creation rate of amyloid-beta42 inside neuron from APP (g/mL/day)."""
 
         self.delta_APi = (8373 - 2178) / (5631 - 783) - 1  # approx. 0.2778
@@ -95,7 +93,6 @@ class Parameters:
         #########################################
 
         self.lambda_ABmo = self.lambda_ABi
-        # Voir lambda_ABi pour tests.
         """Creation rate of amyloid-beta monomer outside (without APOE4 allele) (g/mL/day)."""
 
         self.delta_APm = self.delta_APi
@@ -110,8 +107,6 @@ class Parameters:
         self.kappa_ABmoABoo = kappa_ABmoABoo_min
         # self.kappa_ABmoABoo = kappa_ABmoABoo_max
         """Conversion rate of extracellular amyloid-beta monomer to extracellular amyloid-beta oligomer (mL/g/day)."""
-        # In the interval kappa_ABmoABoo_min to kappa_ABmoABoo_max, à tester.
-        #  Conserve min, à confirmer et supprimer ici le cas échéant. Latex ok.
 
         self.delta_APmo = 2.7 - 1
         """This constant quantifies the impact of the APOE4 gene on the conversion rate of extracellular amyloid-beta 
@@ -119,7 +114,7 @@ class Parameters:
 
         # self.d_ABmo = self.d_ABi
         # """Degradation rate of Amyloid Beta42 monomer outside (/day)."""
-        # Devenu une fonction du temps (voir ci-haut).
+        # Function of time (see up here).
 
         #########################################
         # CONSTANTS FOR THE EQUATION FOR AB_o^o #
@@ -168,7 +163,7 @@ class Parameters:
         #    d_G = lambda_InsG / G_0 . Résultat "Figure_22-09-08_solve_ivp_Radau_5y_APOE+_F_10.png" Pas beau :(
         #    Okay avec BDF, donne même chose que "Figure_22-09-08_solve_ivp_BDF_5y_APOE+_F_11.png", où modif faite
         #    sur lambda_InsG.
-        # self.d_G = self.lambda_InsG / (1104e-12 * 47000 * self.rho_cerveau)
+        #   self.d_G = self.lambda_InsG / (1104e-12 * 47000 * self.rho_cerveau)
         """Degradation rate of GSK-3 (/day)."""
 
         if self.S == 0:  # woman
@@ -181,8 +176,7 @@ class Parameters:
         # self.lambda_InsG = 0.18e-6 * 47000 * 1440 * 1.077 * 0.005  # approx 0.065602
         # Test pour que G soit en équilibre à G_0. Sinon grande différence entre G_0 et équilibre.
         #    lambda_InsG = d_G * G_0 . Résultat "Figure_22-09-08_solve_ivp_Radau_1y_APOE+_F_04.png" Pas beau :(
-        #    Okay avec BDF. Voir "Figure_22-09-08_solve_ivp_BDF_5y_APOE+_F_11.png" et suivantes
-        #    À confirmer, déjà ajusté dans Latex.
+        #    Okay avec BDF. Voir "Figure_22-09-08_solve_ivp_BDF_5y_APOE+_F_11.png" et suivantes.
         self.lambda_InsG = self.d_G * self.G_0  # F: ~ 2.1685e-05 ; M: ~ 6.0891e-06
         """Creation rate of GSK-3 induced by the insulin (g/mL/day)"""
 
@@ -194,9 +188,6 @@ class Parameters:
         """Phosphorylation rate of tau in health by other mechanism than GSK-3 (g/ml/day)."""
 
         self.lambda_Gtau = ((20 / 21) - (20 / 57)) * 1e-6 / 0.5 / 1000 / 1000 * 72500  # approx 8.72e-8
-        # self.lambda_Gtau = (((20 / 21) - (20 / 57)) * 1e-6 / 0.5 / 1000 / 1000 * 72500) * 1e-2  # approx 8.72e-8
-        # Pourrait voir le *1e-2 comme différence de GSK-3 entre neurones sains et infecté de 1/1e5 plutôt que 1/1e3.
-        # 22-09-22 : Fait varier pas mal, mais pas les neurones.
         """Creation rate of tau by GSK3 (g/mL/day)"""
 
         # G_0, see GSK-3 section.
@@ -238,8 +229,7 @@ class Parameters:
         ##############################################
 
         self.d_FiN = 1 / (2.51 * 365)  # = 1.0915e-3
-        # self.d_FiN = 1 / (2.51 * 365) * 1e-1
-        # self.d_FiN = 1 / (20 * 365)  # 20 ans temps de survie (Kril et al. 2002)
+        # self.d_FiN = 1 / (20 * 365)  # 20 ans = temps de survie (Kril et al. 2002)
         """Maximal death rate of neurons induced by F_i (/day)."""
 
         # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau))  # approx 3.708e-4
@@ -249,7 +239,7 @@ class Parameters:
         #  il faudrait que tau soit e-2 (à cause du carré et k_tauFi e-1), ce qui est très grand...
         # self.K_Fi = 0.1 * (0.6 * (6e-3 * self.rho_cerveau)) * 1e-5  # ~ 3.708e-9
         # self.K_Fi = 1.708e-10
-        self.K_Fi = 1.25e-10  ## <--
+        self.K_Fi = 1.25e-10  ## <-- Good one!
         # self.K_Fi = 1.2e-10
         """Concentration of intracellular NFTs (F_i) for which the death rate of neuron induced by F_i is 
         half-maximal (g/mL)."""
@@ -284,7 +274,6 @@ class Parameters:
         """Activation rate of astrocytes by TNF-alpha (mL/g/day)."""
 
         self.kappa_ABpoA = (self.kappa_TaA * 2.24e-12) / (2 * self.K_ABpo)  # approx 3.3136
-        # self.kappa_ABpoA = (self.kappa_TaA * 2.24e-12) / (2 * 1e-10)
         """Activation rate of astrocytes by extracellular amyloid-beta42 plaque (mL/g/day)."""
 
         self.d_A = 0.4
@@ -300,9 +289,8 @@ class Parameters:
         # TotalMaxActivRateM = 0.2141 * xi
 
         self.kappa_FoM = TotalMaxActivRateM * 2 / 3  # approx 0.133 (av approx 0.1427)
-        # 28.32 * 2? Trop grand! Latex pour autre, changer si change idée.
-        # self.kappa_FoM = 0.02  # hao
-        # self.kappa_FoM = 0.02 * 2  # hao*2
+        # self.kappa_FoM = 0.02  # Hao16
+        # self.kappa_FoM = 0.02 * 2  # Hao16 * 2
         """Activation rate of microglia by F_o (NFT) (/day)."""
 
         self.K_Fo = 11 * ((1000 * 72500) / Avogadro) * 1000  # approx 1.3243e-12
@@ -313,8 +301,8 @@ class Parameters:
 
         self.kappa_ABooM = TotalMaxActivRateM * 1 / 3  # approx 0.0667 (av approx 0.07137)
         # 28.32 ? Trop grand! Latex pour autre, changer si change idée.
-        # self.kappa_ABooM = 0.0023  # Hao
-        # self.kappa_ABooM = 0.0023 * 2  # Hao*2
+        # self.kappa_ABooM = 0.0023  # Hao16
+        # self.kappa_ABooM = 0.0023 * 2  # Hao16 * 2
         """Activation rate of microglia by extracellular amyloid-beta42 oligomer (/day). """
 
         # self.K_ABooM = 0.060 / 527.4 / 1000  # approx 1.1377e-7
@@ -342,7 +330,7 @@ class Parameters:
         If beta>1, favors proinflammatory polarization; if beta<1, favors anti-inflammatory polarization."""
 
         self.K_TaAct = 2.24e-12
-        # Même genre de pattern avec 2.24e-10, va quand meme au dessus (22-09-23_15).
+        # Même genre de pattern avec 2.24e-10, va quand même au dessus (22-09-23_15).
         """Half-saturation constant of TNF-alpha for the activation of microglia to a proinflammatory 
         polarization (g/mL)."""
 
@@ -382,16 +370,12 @@ class Parameters:
         # self.kappa_PMhat = 0.33  # * 1e-3
         # Revoir valeur, incohérence (voir mémoire)
         self.kappa_PMhat = 1 / 3 * 1e-2  # approx 3.33e-3
-        # self.kappa_PMhat = 1 / 3 / 50  # approx 6.66e-3
-        # Aide à déplacer l'augmentation vers la droite (retarder). Fig 22-09-29_08_.. (vs _06) et suivantes.
-        # Latex ok
-        # self.kappa_PMhat = 1/6  # ~ 0.1667
-        # 1/6 : Pas vrm... 22-09-30_06 (vs _05)
+        # self.kappa_PMhat = 1 / 3 / 50  # approx 6.66e-3  # Aide à déplacer l'augmentation vers la droite (retarder). Fig 22-09-29_08_.. (vs _06) et suivantes.
+        # self.kappa_PMhat = 1/6  # ~ 0.1667  # 1/6 : Pas vrm... 22-09-30_06 (vs _05)
         """Maximal importation rate of macrophage in the brain under MCP-1 signaling (/day)."""
 
         self.K_P = 6.23e-10 * 1e2  # =6.23e-8
         # *1e2 : Adoucis les courbes lors de anti -> pro, donc tout le modèle. Fig 22-09-29_14_... (vs _09)
-        # modif latex ok
         """Concentration of MCP-1 for which the rate of importation of macrophage is half-maximal (g/mL)."""
 
         self.Mhatmax = (830 * m_Mhat) / 2e-4  # = 0.0207085
@@ -405,7 +389,6 @@ class Parameters:
         """Concentration of TGF-beta for which the conversion of hat{M}_pro to hat{M}_anti is half maximal (g/mL)."""
 
         self.kappa_TaMhatanti = 1 / (10 / 24)  # = 2.4
-        # self.kappa_TaMhatanti = 1 / (10 / 24) * 1e-2
         """Maximal conversion rate of anti-inflammatory macrophage to proinflammatory under TNF-alpha 
         signaling (/day)."""
 
@@ -426,16 +409,14 @@ class Parameters:
 
         # kappa_MhatantiTb_min = 10 * (47e-12 / 18 * 24) / (4e6 * m_Mhat)  # approx 3.14e-8 /j
         kappa_MhatantiTb_max = 10 * (47e-12 / 18 * 24) / (2e6 * m_Mhat)  # approx 6.28e-8 /j
-
         self.kappa_MhatantiTb = kappa_MhatantiTb_max
         """Production rate of TGF-beta by hat{M}_pro (/day)."""
-        # In the interval kappa_MhatantiTb_min to kappa_MhatantiTb_max, à tester.
+        # In the interval kappa_MhatantiTb_min to kappa_MhatantiTb_max.
         # 22-10-11_08 : (kappa_MhatantiTb_max + kappa_MhatantiTb_min) / 2 -> Perte trop grande!
-        #   Devrait réajuster K_TaM (et K_TahatM) => Garde _max. Latex ok
+        #   Devrait réajuster K_TaM (et K_TahatM) => Garde _max.
 
         self.kappa_MantiTb = self.kappa_MhatantiTb
         """Production rate of TGF-beta by M_pro (/day)."""
-        # In the interval kappa_MhatantiTb_min to kappa_MhatantiTb_max, à tester.
 
         self.d_Tb = math.log(2) / (3 / 1440)  # approx 332.71
         """Degradation rate of TGF-beta (/day)."""
@@ -446,11 +427,9 @@ class Parameters:
 
         # self.kappa_MhatantiI10 = 47 * (52e-9 / 2) / (4e6 * m_Mhat)  # approx 6.12e-5  # Value from DeWaalMalefyt91
         self.kappa_MhatantiI10 = 660e-12 / (2e5 * m_Mhat)  # approx 6.613e-7 # Value from Mia14 (agreement with Fadok98)
-        # Choisir quelle valeur on conserve. Les deux méthodes sont dans Latex. -> conserve Mia14 , Latex ok
         """Production rate of IL-10 by anti-inflammatory macrophages (hat{M}_anti) (/day)."""
 
         self.kappa_MantiI10 = self.kappa_MhatantiI10
-        # Voir kappa_MhatantiI10.
         """Production rate of IL-10 by anti-inflammatory microglia (M_anti) (/day)."""
 
         self.d_I10 = math.log(2) / (3.556 / 24)  # approx. 4.6782 /j
@@ -463,12 +442,9 @@ class Parameters:
         # self.kappa_MhatproTa = 15.9e-9 / (1e6 * m_Mhat)  # approx 3.186e-6  # Value from Hallsworth94
         # self.kappa_MhatproTa = (1.5e-9 / 18 * 24) / (2e6 * m_Mhat)  # max Fadok98 : approx 2.004e-7
         self.kappa_MhatproTa = (1.5e-9 / 18 * 24) / (4e6 * m_Mhat)  # min Fadok98: approx 1.002e-7
-        # Modif Latex selon ce qu'on conserve (les deux options y sont).
-        #   Choix de ce qu'on conserve selon test modèle. -> Mieux avec min. Latex ok
         """Production rate of TNF-alpha by proinflammatory macrophages (hat{M}_pro) (/day)."""
 
         self.kappa_MproTa = self.kappa_MhatproTa
-        # Voir kappa_MhatproTa.
         """Production rate of TNF-alpha by proinflammatory microglia (M_pro) (/day)."""
 
         self.d_Ta = math.log(2) / (18.2 / 1440)  # approx 54.84
@@ -488,7 +464,7 @@ class Parameters:
         # kappa_AP_max = (1 / 2) * self.kappa_MhatproP  # approx 5.5e-7
         self.kappa_AP = kappa_AP_min
         """Production rate of MCP-1 by astrocytes (/day)."""
-        # In the interval kappa_AP_min to kappa_AP_max, à tester. Prend min, Latex ok
+        # In the interval kappa_AP_min to kappa_AP_max. Take min.
 
         self.d_P = math.log(2) / (3 / 24)  # approx 5.5452
         """Degradation rate of  MCP-1 (/day)."""

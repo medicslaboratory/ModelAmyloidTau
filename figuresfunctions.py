@@ -1,5 +1,7 @@
-# Date : 7 Octobre 2022
-# Author : Éléonore Chamberland
+"""
+Author : Éléonore Chamberland
+Date : 7 Octobre 2022
+"""
 
 import os
 import matplotlib.pyplot as plt
@@ -13,8 +15,36 @@ import datetime
 
 # p = param.Parameters()
 
+# fig_dir = 'Figures'
+fig_dir = 'FiguresPresentationADPD'
+# fig_dir = "."
+dpi = 250
+
+xlabel = "Âge (années)"
+# xlabel = "Age (years)"
+
 
 def run_1_model(Sex, APOE_status, AgeStart, AgeEnd, methodstr, max_step, rtol, atol, InsVar=True, xi=1, return_p=False):
+    """Runs 1 variant of the model.
+
+    :param int Sex: Sex value: 0 for women, 1 for men.
+    :param int APOE_status: APOE4 status: 0 for non bearing APOE4 allele, 1 otherwise.
+    :param float AgeStart: Age to start the model at, in years.
+    :param float AgeEnd: Age at which we end running the model, in years.
+    :param str methodstr: Method of integration of the `scipy.integrate.solve_ivp` method. Usually ``"BDF"``.
+    :param float max_step: Maximal time step of integration.
+    :param float rtol: `rtol` of the `scipy.integrate.solve_ivp` method.
+    :param float atol: `atol` the `scipy.integrate.solve_ivp` method
+    :param InsVar: Default: ``True``. Whether we want the insulin concentration to vary or not.
+    :type InsVar: bool, optional
+    :param float xi: xi value of the model: 0 < xi <= 1. Will be multiplied to `TotalMaxActivRateM`, so to
+        `kappa_FoM` and `kappa_ABooM`.
+    :param return_p: Default: ``False``. Whether to return the `parameters.Parameters` object or not.
+    :type return_p: bool, optional
+    :return: sol, (p).
+        sol: The resolved model. The output of the `scipy.integrate.solve_ivp` method;
+        p: `parameters.Parameters` object, returned if `return_p` is set to ``True``.
+    """
     p = param.Parameters(Sex=Sex, APOE_status=APOE_status, xi=xi)
     y0 = InitialConditions(p, AgeStart)
     sol = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0, method=methodstr,
@@ -26,6 +56,24 @@ def run_1_model(Sex, APOE_status, AgeStart, AgeEnd, methodstr, max_step, rtol, a
 
 
 def run_4_models(AgeStart, AgeEnd, methodstr, max_step, rtol, atol, InsVar=True, xi=1):
+    """Runs the solutions for the four (4) options of the model, for the sex, and APOE4 status.
+
+    :param float AgeStart: Age to start the model at, in years.
+    :param float AgeEnd: Age at which we end running the model, in years.
+    :param str methodstr: Method of integration of the `scipy.integrate.solve_ivp` method. Usually ``"BDF"``.
+    :param float max_step: Maximal time step of integration.
+    :param float rtol: `rtol` of the `scipy.integrate.solve_ivp` method.
+    :param float atol: `atol` the `scipy.integrate.solve_ivp` method
+    :param InsVar: Default: ``True``. Whether we want the insulin concentration to vary or not.
+    :type InsVar: bool, optional
+    :param float xi: xi value of the model: 0 < xi <= 1. Will be multiplied to `TotalMaxActivRateM`, so to
+        `kappa_FoM` and `kappa_ABooM`.
+    :return: sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos.
+        sol_Fneg: Solution for female APOE4 negative;
+        sol_Fpos: Solution for female APOE4 positive;
+        sol_Mneg: Solution for male APOE4 negative;
+        sol_Mpos: Solution for male APOE4 positive.
+    """
     sol_Fneg = run_1_model(0, 0, AgeStart, AgeEnd, methodstr, max_step, rtol, atol, InsVar=InsVar, xi=xi)
 
     sol_Fpos = run_1_model(0, 1, AgeStart, AgeEnd, methodstr, max_step, rtol, atol, InsVar=InsVar, xi=xi)
@@ -34,26 +82,6 @@ def run_4_models(AgeStart, AgeEnd, methodstr, max_step, rtol, atol, InsVar=True,
 
     sol_Mpos = run_1_model(1, 1, AgeStart, AgeEnd, methodstr, max_step, rtol, atol, InsVar=InsVar, xi=xi)
 
-    # p_Fneg = param.Parameters(Sex=0, APOE_status=0)  # F ; APOE4-
-    # y0_Fneg = InitialConditions(p_Fneg, AgeStart)
-    # sol_Fneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fneg, method=methodstr, args=[0, 0, InsVar],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-    #
-    # p_Fpos = param.Parameters(Sex=0, APOE_status=1)  # F ; APOE4+
-    # y0_Fpos = InitialConditions(p_Fpos, AgeStart)
-    # sol_Fpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fpos, method=methodstr, args=[0, 1, InsVar],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-    #
-    # p_Mneg = param.Parameters(Sex=1, APOE_status=0)  # M ; APOE4-
-    # y0_Mneg = InitialConditions(p_Mneg, AgeStart)
-    # sol_Mneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mneg, method=methodstr, args=[1, 0, InsVar],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-    #
-    # p_Mpos = param.Parameters(Sex=1, APOE_status=1)  # M ; APOE+
-    # y0_Mpos = InitialConditions(p_Mpos, AgeStart)
-    # sol_Mpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mpos, method=methodstr, args=[1, 1, InsVar],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-
     return sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos
 
 
@@ -61,29 +89,36 @@ def main_figure(solt, soly, p, y0, AgeStart, AgeEnd, methodstr, maxstepstr, rtol
                 IntraneuronalConcentration=False, SkipFirstHalfYear=False, color="b"):
     """
     Figure principale du modèle présentant les graphiques de chaque variable en fonction du temps.
-    La figure est générée puis enregistrée dans le dossier "Figure".
+    La figure est générée, puis enregistrée dans le dossier `fig_dir`.
 
-    :param color:
     :param solt: Array des temps (en années). (ndarray, shape (n_points,) ; Time points).
+    :type solt: :py:`numpy.ndarray`
     :param soly: Array des arrays des valeurs de chaques paramètres.
                 (ndarray, shape (n, n_points) ; Values of the solution at t).
+    :type soly: :py:`numpy.ndarray`
     :param y0: Array ou liste des conditions initiales.
-    :param AgeStart: int. Âge du début de la simulation (en années).
-    :param AgeEnd: int. Âge de fin de la simulation (en années).
-    :param methodstr: str. Nom de la méthode utilisée pour l'intégration du modèle. Sera ajouté au nom d'enregistrement
+    :type y0: :py:`numpy.ndarray` or list
+    :param int AgeStart: Âge du début de la simulation (en années).
+    :param int AgeEnd: Âge de fin de la simulation (en années).
+    :param str methodstr: Nom de la méthode utilisée pour l'intégration du modèle. Sera ajouté au nom d'enregistrement
                 de la figure.
-    :param maxstepstr: str. Pas de temps maximal permis pour l'intégration du modèle. Sera ajouté au nom
+    :param str maxstepstr: Pas de temps maximal permis pour l'intégration du modèle. Sera ajouté au nom
                 d'enregistrement de la figure.
-    :param rtolstr: str. "rtol" utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
-    :param atolstr: str. "atol" utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
-    :param number: int. Nombre pour identifier la figue. Sera mis dans son nom d'enregistrement. Si ce nombre est déjà
-                utilisé pour la date du jour, il sera incrémenté de 1.
-    :param CommentModif: str, optionnel. Commentaire pour le titre de la figure résumant les modifications, s'il y a
-                lieu. Sera ajouté à la fin du nom d'enregistrement de la figure.
-    :param IntraneuronalConcentration: bool, optionnel. Si l'on affiche les graphiques des concentrations
-                intraneuronales pour ABi, GSK3, tau et F_i sur leur graphique respectif. Valeur par défaut est "False".
-    :param SkipFirstHalfYear: bool, optionnel. Si l'on ignore la première demie année pour l'affichage les valeurs.
-                Valeur par défaut est "False".
+    :param str rtolstr: ``rtol`` utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
+    :param str atolstr: ``atol`` utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
+    :param int number: Nombre pour identifier la figue. Sera mis dans son nom d'enregistrement. Si ce nombre est déjà
+                utilisé pour la date du jour, il sera incrémenté de 1 jusqu'à l'obtention d'un nom qui n'est pas
+                déjà existant.
+    :param CommentModif: Commentaire pour le titre de la figure résumant les modifications, s'il y a
+                lieu. Sera ajouté à la fin du nom d'enregistrement de la figure. Default: ``""``.
+    :param CommentModif: str, optional
+    :param IntraneuronalConcentration: Si l'on affiche les graphiques des concentrations intraneuronales pour ABi,
+        GSK3, tau et F_i sur leur graphique respectif. Default: ``False``.
+    :type IntraneuronalConcentration: bool, optional
+    :param SkipFirstHalfYear: Si l'on ignore la première demie année pour l'affichage les valeurs. Default: ``False``.
+    :type SkipFirstHalfYear: bool, optional
+    :param color: Color to plot the graphs lines.
+    :type color: str, optional
     :return: FigName : Nom de la figure utilisé pour l'enregistrement.
     """
     fig, axs = plt.subplots(nrows=4, ncols=5, sharex="all")  # If no text under the figure, add: layout="constrained"
@@ -106,8 +141,7 @@ def main_figure(solt, soly, p, y0, AgeStart, AgeEnd, methodstr, maxstepstr, rtol
 
             ax.grid()
             if i >= 14:
-                # ax.set_xlabel('Age (years)')
-                ax.set_xlabel('Âge (années)')
+                ax.set_xlabel(xlabel)
             ax.set_ylabel(labelname[i])
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
@@ -171,8 +205,7 @@ def main_figure(solt, soly, p, y0, AgeStart, AgeEnd, methodstr, maxstepstr, rtol
     # # # dNdtFi = - p.d_FiN * (1 / (1 + np.exp(- p.n * (soly[6, :] - p.K_Fi)))) * soly[8, :]
     # # # ax.plot(solt, dNdtFi)  # , '.-', ms=2
     # ax.grid()
-    # # # # ax.set_xlabel('Age (years)')
-    # # # ax.set_xlabel('Âge (années)')
+    # # # ax.set_xlabel(xlabel)
     # # # ax.set_ylabel("dABpo/dt")
     # # # ax.set_ylabel("dN/dt du à F_i")
     # ax2 = axs[3, 4].twinx()
@@ -232,7 +265,7 @@ def main_figure(solt, soly, p, y0, AgeStart, AgeEnd, methodstr, maxstepstr, rtol
     if CommentModif != "":
         CommentModif = "_" + CommentModif
 
-    my_path = os.path.abspath('Figures')
+    my_path = os.path.abspath(fig_dir)
     FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + methodstr + "_APOE" + APOE + "_" + sex + "_" + \
               str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + \
               "_atol" + atolstr + CommentModif + ".png"
@@ -242,33 +275,35 @@ def main_figure(solt, soly, p, y0, AgeStart, AgeEnd, methodstr, maxstepstr, rtol
                   str(AgeEnd - AgeStart).replace(".", "") + "y_maxstep" + maxstepstr + "_rtol" + rtolstr + \
                   "_atol" + atolstr + CommentModif + ".png"
 
-    plt.savefig(os.path.join(my_path, FigName), dpi=180)
+    plt.savefig(os.path.join(my_path, FigName), dpi=dpi)
 
     return FigName
 
 
 def figure_intracellular_concentrations(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol, number, CommentModif=""):
-    sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos = sols
+    """Trace et sauvegarde le tracé des concentrations intracellulaires, i.e. de {A\beta^{i}}/N, GSK3/N, \tau/N, {F_i}/N.
 
-    # p_Fneg = param.Parameters(Sex=0, APOE_status=0)  # F ; APOE4-
-    # y0_Fneg = InitialConditions(p_Fneg, AgeStart)
-    # sol_Fneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fneg, method=methodstr, args=[0, 0],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-    #
-    # p_Fpos = param.Parameters(Sex=0, APOE_status=1)  # F ; APOE4+
-    # y0_Fpos = InitialConditions(p_Fpos, AgeStart)
-    # sol_Fpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fpos, method=methodstr, args=[0, 1],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-    #
-    # p_Mneg = param.Parameters(Sex=1, APOE_status=0)  # M ; APOE4-
-    # y0_Mneg = InitialConditions(p_Mneg, AgeStart)
-    # sol_Mneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mneg, method=methodstr, args=[1, 0],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-    #
-    # p_Mpos = param.Parameters(Sex=1, APOE_status=1)  # M ; APOE4+
-    # y0_Mpos = InitialConditions(p_Mpos, AgeStart)
-    # sol_Mpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mpos, method=methodstr, args=[1, 1],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
+    Voir aussi `figure_intracellular_concentrations_SexDiff`.
+
+    :param tuple sols: Solutions des 4 sous-modèles. Résultats de la fonction `run_4_models`: (sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos).
+    :param int AgeStart: Âge du début de la simulation (en années).
+    :param int AgeEnd: Âge de fin de la simulation (en années).
+    :param str methodstr: Nom de la méthode utilisée pour l'intégration du modèle. Sera ajouté au nom d'enregistrement
+                de la figure.
+    :param str max_step: Pas de temps maximal permis pour l'intégration du modèle. Sera ajouté au nom
+                d'enregistrement de la figure.
+    :param str rtol: ``rtol`` utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
+    :param str atol: ``atol`` utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
+    :param int number: Nombre pour identifier la figue. Sera mis dans son nom d'enregistrement. Si ce nombre est déjà
+                utilisé pour la date du jour, il sera incrémenté de 1 jusqu'à l'obtention d'un nom qui n'est pas
+                déjà existant.
+    :param CommentModif: Commentaire pour le titre de la figure résumant les modifications, s'il y a
+                lieu. Sera ajouté à la fin du nom d'enregistrement de la figure. Default: ``""``.
+    :param CommentModif: str, optional
+    :return: None
+    """
+
+    sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos = sols
 
     fig, axs = plt.subplots(nrows=2, ncols=2, sharex="all", figsize=(8, 7), layout="tight")
     axs = axs.flat
@@ -293,7 +328,7 @@ def figure_intracellular_concentrations(sols, AgeStart, AgeEnd, methodstr, max_s
         ax.grid()
         ax.set_ylabel(variablenames[i])
         if i >= 2:
-            ax.set_xlabel('Âge (années)')
+            ax.set_xlabel(xlabel)
         formatter = ticker.ScalarFormatter(useMathText=True)
         formatter.set_scientific(True)
         formatter.set_powerlimits((-1, 1))
@@ -310,7 +345,7 @@ def figure_intracellular_concentrations(sols, AgeStart, AgeEnd, methodstr, max_s
     date = today.strftime("%y-%m-%d")
     if CommentModif != "":
         CommentModif = "_" + CommentModif
-    my_path = os.path.abspath('Figures')
+    my_path = os.path.abspath(fig_dir)
     FigName = "Figure_" + date + "_" + "{:0>2d}".format(number) + "_Intracellular_" + methodstr + "_" + \
               str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + "_mstep=" + max_step + "_rtol" + \
               rtol + "_atol" + atol + ".png"
@@ -319,34 +354,36 @@ def figure_intracellular_concentrations(sols, AgeStart, AgeEnd, methodstr, max_s
         FigName = "Figure_" + date + "_" + "{:0>2d}".format(number) + "_Intracellular_" + methodstr + "_" + \
                   str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + "_mstep=" + max_step + "_rtol" + \
                   rtol + "_atol" + atol + ".png"
-    plt.savefig(os.path.join(my_path, FigName), dpi=180)
+    plt.savefig(os.path.join(my_path, FigName), dpi=dpi)
 
 
 def figure_intracellular_concentrations_SexDiff(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol, number, CommentModif=""):
+    """Trace et sauvegarde le tracé des concentrations intracellulaires, i.e. de {A\beta^{i}}/N, GSK3/N, \tau/N, {F_i}/N.
+    Traces les courbes pour les différents sexes dans des figures distictes.
+
+    Voir aussi `figure_intracellular_concentrations`.
+
+    :param tuple sols: Solutions des 4 sous-modèles. Résultats de la fonction `run_4_models`: (sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos).
+    :param int AgeStart: Âge du début de la simulation (en années).
+    :param int AgeEnd: Âge de fin de la simulation (en années).
+    :param str methodstr: Nom de la méthode utilisée pour l'intégration du modèle. Sera ajouté au nom d'enregistrement
+                de la figure.
+    :param str max_step: Pas de temps maximal permis pour l'intégration du modèle. Sera ajouté au nom
+                d'enregistrement de la figure.
+    :param str rtol: ``rtol`` utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
+    :param str atol: ``atol`` utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
+    :param int number: Nombre pour identifier la figue. Sera mis dans son nom d'enregistrement. Si ce nombre est déjà
+                utilisé pour la date du jour, il sera incrémenté de 1 jusqu'à l'obtention d'un nom qui n'est pas
+                déjà existant.
+    :param CommentModif: Commentaire pour le titre de la figure résumant les modifications, s'il y a
+                lieu. Sera ajouté à la fin du nom d'enregistrement de la figure. Default: ``""``.
+    :param CommentModif: str, optional
+    :return: None
+    """
+
     sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos = sols
 
-    # p_Fneg = param.Parameters(Sex=0, APOE_status=0)  # F ; APOE4-
-    # y0_Fneg = InitialConditions(p_Fneg, AgeStart)
-    # sol_Fneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fneg, method=methodstr, args=[0, 0],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-    #
-    # p_Fpos = param.Parameters(Sex=0, APOE_status=1)  # F ; APOE4+
-    # y0_Fpos = InitialConditions(p_Fpos, AgeStart)
-    # sol_Fpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fpos, method=methodstr, args=[0, 1],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-    #
-    # p_Mneg = param.Parameters(Sex=1, APOE_status=0)  # M ; APOE4-
-    # y0_Mneg = InitialConditions(p_Mneg, AgeStart)
-    # sol_Mneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mneg, method=methodstr, args=[1, 0],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-    #
-    # p_Mpos = param.Parameters(Sex=1, APOE_status=1)  # M ; APOE4+
-    # y0_Mpos = InitialConditions(p_Mpos, AgeStart)
-    # sol_Mpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mpos, method=methodstr, args=[1, 1],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-
     fig, axs = plt.subplots(nrows=4, ncols=2, sharex="all", figsize=(8, 9), layout="tight")
-    # axs = axs.flat
 
     variablenames = [r"$A \beta^{i} / N$", r"$GSK3/N$", r"$\tau/N$", r"$F_i/N$"]
     colors = ["purple", "hotpink", "darkblue", "royalblue"]
@@ -387,13 +424,19 @@ def figure_intracellular_concentrations_SexDiff(sols, AgeStart, AgeEnd, methodst
     for ax in axs.flat:
         ax.grid()
         if i >= 6:
-            ax.set_xlabel('Âge (années)')
+            ax.set_xlabel(xlabel)
         formatter = ticker.ScalarFormatter(useMathText=True)
         formatter.set_scientific(True)
         formatter.set_powerlimits((-1, 1))
         # formatter.set_powerlimits((-1, 1)): For a number representable as a * 10^{exp} with 1<abs(a)<=10, scientific
         # notation will be used if exp <= -1 or exp >= 1.
         ax.yaxis.set_major_formatter(formatter)
+        if i == 2:
+            ax.set_ylim(1.186e-4, 1.189e-4)
+        if i == 3:
+            ax.set_ylim(3.571e-5, 3.575e-5)
+        if i in [2,3]:
+            ax.ticklabel_format(useOffset=False)
         i += 1
     # handles, labels = axs[3].get_legend_handles_labels()
     # fig.legend(handles, labels, loc='lower left', bbox_to_anchor=(0.81, 0.06))  # (0.82, 0.06)
@@ -405,7 +448,7 @@ def figure_intracellular_concentrations_SexDiff(sols, AgeStart, AgeEnd, methodst
     date = today.strftime("%y-%m-%d")
     if CommentModif != "":
         CommentModif = "_" + CommentModif
-    my_path = os.path.abspath('Figures')
+    my_path = os.path.abspath(fig_dir)
     FigName = "Figure_" + date + "_" + "{:0>2d}".format(number) + "_IntracellularSex_" + methodstr + "_" + \
               str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + "_mstep=" + max_step + "_rtol" + \
               rtol + "_atol" + atol + ".png"
@@ -414,15 +457,17 @@ def figure_intracellular_concentrations_SexDiff(sols, AgeStart, AgeEnd, methodst
         FigName = "Figure_" + date + "_" + "{:0>2d}".format(number) + "_IntracellularSex_" + methodstr + "_" + \
                   str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + "_mstep=" + max_step + "_rtol" + \
                   rtol + "_atol" + atol + ".png"
-    plt.savefig(os.path.join(my_path, FigName), dpi=180)
+    plt.savefig(os.path.join(my_path, FigName), dpi=dpi)
 
 
-def main_figure_4_models(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol, number, CommentModif="",
+def main_figure_4_models(sols, AgeStart, AgeEnd, methodstr, number, CommentModif="",
                          SkipFirstHalfYear=False, orientation="portrait"):
     """
     Figure principale du modèle présentant les graphiques de chaque variable en fonction du temps, pour les quatre
-    possibilités: APOE4 +/- et sexe (F/M)
-    La figure est générée puis enregistrée dans le dossier "Figure".
+    possibilités : APOE4 +/- et sexe (F/M)
+    La figure est générée puis enregistrée dans le dossier `fig_dir` (défini dans le haut de ce fichier).
+
+    Imprime aussi les pourcentages perte neuronale et les conditions initiales de chaque sous-modèle.
 
     :param sols: tuple. Solution de l'intégration du modèle pour les quatres possibilités, dans l'ordre suivant :
                 sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos
@@ -430,39 +475,19 @@ def main_figure_4_models(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol
     :param AgeEnd: int. Âge de fin de la simulation (en années).
     :param methodstr: str. Nom de la méthode utilisée pour l'intégration du modèle. Sera ajouté au nom d'enregistrement
                 de la figure.
-    :param max_step: str. Pas de temps maximal permis pour l'intégration du modèle. Sera ajouté au nom
-                d'enregistrement de la figure.
-    :param rtol: str. "rtol" utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
-    :param atol: str. "atol" utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
-    :param number: int. Nombre pour identifier la figue. Sera mis dans son nom d'enregistrement. Si ce nombre est déjà
-                utilisé pour la date du jour, il sera incrémenté de 1.
-    :param CommentModif: str, optionnel. Commentaire pour le titre de la figure résumant les modifications, s'il y a
-                lieu. Sera ajouté à la fin du nom d'enregistrement de la figure.
-    :param SkipFirstHalfYear: bool, optionnel. Si l'on ignore la première demie année pour l'affichage les valeurs.
-                Valeur par défaut est "False".
+    :param int number: Nombre pour identifier la figue. Sera mis dans son nom d'enregistrement. Si ce nombre est déjà
+                utilisé pour la date du jour, il sera incrémenté de 1 jusqu'à l'obtention d'un nom qui n'est pas
+                déjà existant.
+    :param CommentModif: Commentaire pour le titre de la figure résumant les modifications, s'il y a
+                lieu. Sera ajouté à la fin du nom d'enregistrement de la figure. Default: ``""``.
+    :param CommentModif: str, optional
+    :param SkipFirstHalfYear: Si l'on ignore la première demie année pour l'affichage les valeurs. Default: ``False``.
+    :type SkipFirstHalfYear: bool, optional
+    :param orientation: Orientation de la figure: "portrait" (default) ou "paysage".
+    :type orientation: str, optional
     :return: FigName : Nom de la figure utilisé pour l'enregistrement.
     """
     sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos = sols
-
-    p_Fneg = param.Parameters(Sex=0, APOE_status=0)  # F ; APOE4-
-    y0_Fneg = InitialConditions(p_Fneg, AgeStart)
-    # sol_Fneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fneg, method=methodstr, args=[0, 0],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-    #
-    p_Fpos = param.Parameters(Sex=0, APOE_status=1)  # F ; APOE4+
-    y0_Fpos = InitialConditions(p_Fpos, AgeStart)
-    # sol_Fpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Fpos, method=methodstr, args=[0, 1],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-    #
-    p_Mneg = param.Parameters(Sex=1, APOE_status=0)  # M ; APOE4-
-    y0_Mneg = InitialConditions(p_Mneg, AgeStart)
-    # sol_Mneg = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mneg, method=methodstr, args=[1, 0],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
-    #
-    p_Mpos = param.Parameters(Sex=1, APOE_status=1)  # M ; APOE4+
-    y0_Mpos = InitialConditions(p_Mpos, AgeStart)
-    # sol_Mpos = solve_ivp(eqns.ODEsystem, [365 * AgeStart, 365 * AgeEnd], y0_Mpos, method=methodstr, args=[1, 1],
-    #                      max_step=max_step, rtol=rtol, atol=atol)
 
     if orientation == "portrait":
         fig, axs = plt.subplots(nrows=5, ncols=4, sharex="all", figsize=(9, 10), layout="tight")  # "constrained"
@@ -470,7 +495,7 @@ def main_figure_4_models(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol
         fig, axs = plt.subplots(nrows=4, ncols=5, sharex="all", layout="tight")
         fig.set_size_inches(35 / 2.54, 20 / 2.54, forward=True)
     else:
-        print("Paramètre <orientation> non valide.")
+        print("Paramètre `orientation` non valide.")
         return
 
     # Making a list for Label names in the plot
@@ -489,13 +514,13 @@ def main_figure_4_models(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol
         for ax in axs.flat:
             if i < 19:
                 if i < 18:
-                    ax.plot(solt, soly[i, :], color=colors[s])  # , '.-', ms=2
+                    ax.plot(solt, soly[i, :], color=colors[s])  # , '.-', ms=2, , alpha=0.8
 
                     if SkipFirstHalfYear:  # """Plot sans la première demie année."""
                         ax.plot(solt[k:], soly[i, k:], color=colors[s])
 
                 else:  # i == 18
-                    ax.plot(solt, soly[i, :], color=colors[s], label=labels[s])  # , '.-', ms=2
+                    ax.plot(solt, soly[i, :], color=colors[s], label=labels[s])  # , '.-', ms=2, , alpha=0.8
 
                     if SkipFirstHalfYear:  # """Plot sans la première demie année."""
                         ax.plot(solt[k:], soly[i, k:], color=colors[s], label=labels[s])
@@ -507,8 +532,7 @@ def main_figure_4_models(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol
                     else:  # orientation == "paysage"
                         indice = 14
                     if i >= indice:
-                        # ax.set_xlabel('Age (years)')
-                        ax.set_xlabel('Âge (années)')
+                        ax.set_xlabel(xlabel)
                     ax.set_ylabel(labelname[i])
                     formatter = ticker.ScalarFormatter(useMathText=True)
                     formatter.set_scientific(True)
@@ -540,7 +564,7 @@ def main_figure_4_models(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol
     if CommentModif != "":
         CommentModif = "_" + CommentModif
 
-    my_path = os.path.abspath('Figures')
+    my_path = os.path.abspath(fig_dir)
     FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + methodstr + "_AllInOne_" + \
               str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + ".png"
     while os.path.exists(os.path.join(my_path, FigName)):
@@ -548,7 +572,7 @@ def main_figure_4_models(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol
         FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + methodstr + "_AllInOne_" + \
                   str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + ".png"
 
-    plt.savefig(os.path.join(my_path, FigName), dpi=180)
+    plt.savefig(os.path.join(my_path, FigName), dpi=dpi)
 
     s = 0
     for sol in [sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos]:
@@ -560,8 +584,8 @@ def main_figure_4_models(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol
         s = s + 1
 
     s = 0
-
-    for y0 in [y0_Fneg, y0_Fpos, y0_Mneg, y0_Mpos]:
+    for sol in [sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos]:
+        y0 = sol.y[:, 0]
         icNameValue = [str(labelname[i]) + " = " + "{:.5e}".format(y0[i]) for i in np.arange(19)]
         print(labels[s])
         initcond = "Initial conditions used (in g/mL): " + ", ".join(icNameValue[:])
@@ -573,7 +597,25 @@ def main_figure_4_models(sols, AgeStart, AgeEnd, methodstr, max_step, rtol, atol
 
 def fig_one_variable_all_models(variable, sols, AgeStart, AgeEnd, methodstr, number, CommentModif="",
                                 SkipFirstHalfYear=False):
+    """Trace et sauvegarde le graphique d'une variable en fonction du temps pour les 4 sous-modèles (APOE+/-, F/M).
 
+    :param int variable: Numéro correspondant de la varible entre 0 et 18 (voir le fichier equations.py au besoin).
+    :param tuple sols: Solution de l'intégration du modèle pour les quatres possibilités, dans l'ordre suivant :
+                sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos. Résultat de la fonction `run_4_models`.
+    :param AgeStart: int. Âge du début de la simulation (en années).
+    :param AgeEnd: int. Âge de fin de la simulation (en années).
+    :param methodstr: str. Nom de la méthode utilisée pour l'intégration du modèle. Sera ajouté au nom d'enregistrement
+                de la figure.
+    :param int number: Nombre pour identifier la figue. Sera mis dans son nom d'enregistrement. Si ce nombre est déjà
+                utilisé pour la date du jour, il sera incrémenté de 1 jusqu'à l'obtention d'un nom qui n'est pas
+                déjà existant.
+    :param CommentModif: Commentaire pour le titre de la figure résumant les modifications, s'il y a
+                lieu. Sera ajouté à la fin du nom d'enregistrement de la figure. Default: ``""``.
+    :param CommentModif: str, optional
+    :param SkipFirstHalfYear: Si l'on ignore la première demie année pour l'affichage les valeurs. Default: ``False``.
+    :type SkipFirstHalfYear: bool, optional
+    :return: FigName : Nom de la figure utilisé pour l'enregistrement.
+    """
     sol_Fneg, sol_Fpos, sol_Mneg, sol_Mpos = sols
 
     # Making a list for Label names in the plot
@@ -596,8 +638,8 @@ def fig_one_variable_all_models(variable, sols, AgeStart, AgeEnd, methodstr, num
             ax1.plot(sol_Fpos.t / 365, sol_Fpos.y[variable, :], color=colors[1], label=labels[1])
             ax1.plot(sol_Mpos.t / 365, sol_Mpos.y[variable, :], color=colors[3], label=labels[3])
 
-        # ax.set_xlabel('Age (years)')
-        # ax1.set_xlabel('Âge (années)')
+        # ax.set_xlabel(xlabel)
+        # ax1.set_xlabel(xlabel)
         ax1.legend()
         # ax1.set_ylabel(labelname[variable] + ", APOE4+")
         ax1.set_ylabel(labelname[variable])
@@ -620,8 +662,7 @@ def fig_one_variable_all_models(variable, sols, AgeStart, AgeEnd, methodstr, num
 
         # ax2.set_ylabel(labelname[variable] + ", APOE4-")
         ax2.set_ylabel(labelname[variable])
-        ax2.set_xlabel("Âge (années)")
-        # ax2.set_xlabel("Age (years)")
+        ax2.set_xlabel(xlabel)
         ax2.legend()
         ax2.grid()
         formatter = ticker.ScalarFormatter(useMathText=True)
@@ -646,8 +687,7 @@ def fig_one_variable_all_models(variable, sols, AgeStart, AgeEnd, methodstr, num
                 ax.plot(solt[k:], soly[variable, k:], color=colors[s], label=labels[s])
 
             ax.set_ylabel(labelname[variable])
-            # ax.set_xlabel('Age (years)')
-            ax.set_xlabel('Âge (années)')
+            ax.set_xlabel(xlabel)
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
             formatter.set_powerlimits((-1, 1))
@@ -675,7 +715,7 @@ def fig_one_variable_all_models(variable, sols, AgeStart, AgeEnd, methodstr, num
     if CommentModif != "":
         CommentModif = "_" + CommentModif
 
-    my_path = os.path.abspath('Figures')
+    my_path = os.path.abspath(fig_dir)
     FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + methodstr + "_" + VariablesName[variable] + "_" + \
               str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + ".png"
     while os.path.exists(os.path.join(my_path, FigName)):
@@ -683,7 +723,7 @@ def fig_one_variable_all_models(variable, sols, AgeStart, AgeEnd, methodstr, num
         FigName = "Figure_" + date + "_" + f"{number:02}" + "_" + methodstr + "_" + VariablesName[variable] + "_" + \
                   str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + ".png"
 
-    plt.savefig(os.path.join(my_path, FigName), dpi=180)
+    plt.savefig(os.path.join(my_path, FigName), dpi=dpi)
 
     return FigName
 
@@ -691,30 +731,39 @@ def fig_one_variable_all_models(variable, sols, AgeStart, AgeEnd, methodstr, num
 def main_figure_comparison(solt1, soly1, solt2, soly2, labels, AgeStart, AgeEnd, methodstr, number, CommentModif="",
                            SkipFirstHalfYear=False, color1="k", color2="b", orientation="portrait"):
     """
-    Figure principale du modèle présentant les graphiques de chaque variable en fonction du temps.
-    La figure est générée puis enregistrée dans le dossier "Figure".
+    Figure principale du modèle présentant les graphiques de chaque variable en fonction du temps, pour deux variantes
+    du modèle.
+    La figure est générée puis enregistrée dans le dossier `fig_dir`.
+
+    Voir aussi `main_figure_comparison_many`.
 
     :param solt1: Array des temps (en jours) de la première série. (ndarray, shape (n_points,) ; Time points).
+    :type solt1: :py:`numpy.ndarray`
     :param soly1: Array des arrays des valeurs de chaque variable pour la première série.
                 (ndarray, shape (n, n_points) ; Values of the solution at t).
+    :type soly1: :py:`numpy.ndarray`
     :param solt2: Array des temps (en années) de la deuxième série. (ndarray, shape (n_points,) ; Time points).
+    :type solt2: :py:`numpy.ndarray`
     :param soly2: Array des arrays des valeurs de chaque variable pour la deuxième série.
                 (ndarray, shape (n, n_points) ; Values of the solution at t).
-    :param labels: Liste des labels à associer [label de la première série, label de la deuxième série].
-    :param AgeStart: int. Âge du début de la simulation (en années).
-    :param AgeEnd: int. Âge de fin de la simulation (en années).
-    :param methodstr: str. Nom de la méthode utilisée pour l'intégration du modèle. Sera ajouté au nom d'enregistrement
+    :type soly2: :py:`numpy.ndarray`
+    :param list[str] labels: Liste des labels à associer [label de la première série, label de la deuxième série].
+    :param int AgeStart: int. Âge du début de la simulation (en années).
+    :param int AgeEnd: int. Âge de fin de la simulation (en années).
+    :param str methodstr: Nom de la méthode utilisée pour l'intégration du modèle. Sera ajouté au nom d'enregistrement
                 de la figure.
-    :param maxstepstr: str. Pas de temps maximal permis pour l'intégration du modèle. Sera ajouté au nom
-                d'enregistrement de la figure.
-    :param rtolstr: str. "rtol" utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
-    :param atolstr: str. "atol" utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
-    :param number: int. Nombre pour identifier la figue. Sera mis dans son nom d'enregistrement. Si ce nombre est déjà
-                utilisé pour la date du jour, il sera incrémenté de 1.
-    :param CommentModif: str, optionnel. Commentaire pour le titre de la figure résumant les modifications, s'il y a
-                lieu. Sera ajouté à la fin du nom d'enregistrement de la figure.
-    :param SkipFirstHalfYear: bool, optionnel. Si l'on ignore la première demie année pour l'affichage les valeurs.
-                Valeur par défaut est "False".
+    :param int number: int. Nombre pour identifier la figue. Sera mis dans son nom d'enregistrement. Si ce nombre est déjà
+                utilisé pour la date du jour, il sera incrémenté de 1 jusqu'à l'obtention d'un nom qui n'est pas
+                déjà existant.
+    :param CommentModif: Commentaire pour le titre de la figure résumant les modifications, s'il y a
+                lieu. Sera ajouté à la fin du nom d'enregistrement de la figure. Default: ``""``.
+    :param CommentModif: str, optional
+    :param SkipFirstHalfYear: Si l'on ignore la première demie année pour l'affichage les valeurs. Default: ``False``.
+    :type SkipFirstHalfYear: bool, optional
+    :param str, optional color1: Couleur de tracé de la première variante du modèle. Défault: ``"k"`` (noir).
+    :param str, optional color2: Couleur de tracé de la deuxième variante du modèle. Défault: ``"b"`` (bleu).
+    :param orientation: Orientation de la figure: "portrait" (default) ou "paysage".
+    :type orientation: str, optional
     :return: FigName : Nom de la figure utilisé pour l'enregistrement.
     """
     solt1 = solt1 / 365
@@ -753,8 +802,7 @@ def main_figure_comparison(solt1, soly1, solt2, soly2, labels, AgeStart, AgeEnd,
             else:  # orientation == "paysage"
                 indice = 14
             if i >= indice:
-                # ax.set_xlabel('Age (years)')
-                ax.set_xlabel('Âge (années)')
+                ax.set_xlabel(xlabel)
             ax.set_ylabel(labelname[i])
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
@@ -769,7 +817,8 @@ def main_figure_comparison(solt1, soly1, solt2, soly2, labels, AgeStart, AgeEnd,
 
     if orientation == "portrait":
         # fig.legend(handles, labels, loc='lower left', bbox_to_anchor=(0.80, 0.07))
-        fig.legend(handles, labels, loc='best', bbox_to_anchor=(0.75, 0., 0.5, 0.25))
+        # fig.legend(handles, labels, loc='best', bbox_to_anchor=(0.75, 0., 0.5, 0.25))
+        fig.legend(handles, labels, loc='lower left', bbox_to_anchor=(0.81, 0.06))
         axs.flat[15].tick_params('x', labelbottom=True)
     else:  # orientation == "paysage"
         fig.legend(handles, labels, loc='lower left', bbox_to_anchor=(0.85, 0.09))
@@ -782,7 +831,7 @@ def main_figure_comparison(solt1, soly1, solt2, soly2, labels, AgeStart, AgeEnd,
     if CommentModif != "":
         CommentModif = "_" + CommentModif
 
-    my_path = os.path.abspath('Figures')
+    my_path = os.path.abspath(fig_dir)
     FigName = "Figure_" + date + "_" + f"{number:02}" + "_Comparaison_" + methodstr + "_" + \
               str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + ".png"
     while os.path.exists(os.path.join(my_path, FigName)):
@@ -790,7 +839,7 @@ def main_figure_comparison(solt1, soly1, solt2, soly2, labels, AgeStart, AgeEnd,
         FigName = "Figure_" + date + "_" + f"{number:02}" + "_Comparaison_" + methodstr + "_" + \
                   str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + ".png"
 
-    plt.savefig(os.path.join(my_path, FigName), dpi=180)
+    plt.savefig(os.path.join(my_path, FigName), dpi=dpi)
 
     return FigName
 
@@ -798,30 +847,36 @@ def main_figure_comparison(solt1, soly1, solt2, soly2, labels, AgeStart, AgeEnd,
 def main_figure_comparison_many(solst, solsy, labels, colors, AgeStart, AgeEnd, methodstr, number, CommentModif="",
                                 SkipFirstHalfYear=False, orientation="portrait", alphas=(1, 0.8)):
     """
-    Figure principale du modèle présentant les graphiques de chaque variable en fonction du temps.
-    La figure est générée puis enregistrée dans le dossier "Figure".
+    Figure principale du modèle présentant les graphiques de chaque variable en fonction du temps, pour plusieurs
+    variantes du modèle.
+    La figure est générée puis enregistrée dans le dossier `fig_dir`.
 
-    :param solt1: Array des temps (en jours) de la première série. (ndarray, shape (n_points,) ; Time points).
-    :param soly1: Array des arrays des valeurs de chaque variable pour la première série.
+    :param solst: Liste des array des temps (en jours). [(ndarray, shape (n_points,) ; Time points)].
+    :type solst: list[:py:`numpy.ndarray`]
+    :param solsy: Liste des array des arrays des valeurs de chaque variable.
                 (ndarray, shape (n, n_points) ; Values of the solution at t).
-    :param solt2: Array des temps (en années) de la deuxième série. (ndarray, shape (n_points,) ; Time points).
-    :param soly2: Array des arrays des valeurs de chaque variable pour la deuxième série.
-                (ndarray, shape (n, n_points) ; Values of the solution at t).
-    :param labels: Liste des labels à associer [label de la première série, label de la deuxième série].
-    :param AgeStart: int. Âge du début de la simulation (en années).
-    :param AgeEnd: int. Âge de fin de la simulation (en années).
-    :param methodstr: str. Nom de la méthode utilisée pour l'intégration du modèle. Sera ajouté au nom d'enregistrement
+    :type solsy: list[:py:`numpy.ndarray`]
+    :param list[str] labels: Liste des labels à associer à chaque variante du modèle.
+    :param list[str] colors: Liste des couleurs à associer à chaque variante du modèle.
+    :param int AgeStart: Âge du début de la simulation (en années).
+    :param int AgeEnd: Âge de fin de la simulation (en années).
+    :param str methodstr: Nom de la méthode utilisée pour l'intégration du modèle. Sera ajouté au nom d'enregistrement
                 de la figure.
-    :param maxstepstr: str. Pas de temps maximal permis pour l'intégration du modèle. Sera ajouté au nom
-                d'enregistrement de la figure.
-    :param rtolstr: str. "rtol" utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
-    :param atolstr: str. "atol" utilisé pour l'intégration du modèle. Sera ajouté au nom d'enregistrement de la figure.
-    :param number: int. Nombre pour identifier la figue. Sera mis dans son nom d'enregistrement. Si ce nombre est déjà
-                utilisé pour la date du jour, il sera incrémenté de 1.
-    :param CommentModif: str, optionnel. Commentaire pour le titre de la figure résumant les modifications, s'il y a
-                lieu. Sera ajouté à la fin du nom d'enregistrement de la figure.
-    :param SkipFirstHalfYear: bool, optionnel. Si l'on ignore la première demie année pour l'affichage les valeurs.
-                Valeur par défaut est "False".
+    :param int number: Nombre pour identifier la figue. Sera mis dans son nom d'enregistrement. Si ce nombre est déjà
+                utilisé pour la date du jour, il sera incrémenté de 1 jusqu'à l'obtention d'un nom qui n'est pas
+                déjà existant.
+    :param CommentModif: Commentaire pour le titre de la figure résumant les modifications, s'il y a
+                lieu. Sera ajouté à la fin du nom d'enregistrement de la figure. Default: ``""``.
+    :param CommentModif: str, optional
+    :param SkipFirstHalfYear: Si l'on ignore la première demie année pour l'affichage les valeurs. Default: ``False``.
+    :type SkipFirstHalfYear: bool, optional
+    :param orientation: Orientation de la figure: "portrait" (default) ou "paysage".
+    :type orientation: str, optional
+    :param alphas: Tuple ou liste des alphas à utiliser pour les tracés, valeurs qui définissent la transparence du
+        tracé. Chaque valeur doit être entre 0 et 1: 0 -> transparent, 1 -> opaque. Doit avoir une valeur par variante
+        du modèle.
+        Default: ``(1, 0.8)``.
+    :type alphas: tuple(float) or list(float), optional
     :return: FigName : Nom de la figure utilisé pour l'enregistrement.
     """
     if len(solst) != len(solsy):
@@ -875,8 +930,7 @@ def main_figure_comparison_many(solst, solsy, labels, colors, AgeStart, AgeEnd, 
             else:  # orientation == "paysage"
                 indice = 14
             if i >= indice:
-                # ax.set_xlabel('Age (years)')
-                ax.set_xlabel('Âge (années)')
+                ax.set_xlabel(xlabel)
             ax.set_ylabel(labelname[i])
             formatter = ticker.ScalarFormatter(useMathText=True)
             formatter.set_scientific(True)
@@ -905,7 +959,7 @@ def main_figure_comparison_many(solst, solsy, labels, colors, AgeStart, AgeEnd, 
     if CommentModif != "":
         CommentModif = "_" + CommentModif
 
-    my_path = os.path.abspath('Figures')
+    my_path = os.path.abspath(fig_dir)
     FigName = "Figure_" + date + "_" + f"{number:02}" + "_Comparaison_" + methodstr + "_" + \
               str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + ".png"
     while os.path.exists(os.path.join(my_path, FigName)):
@@ -913,6 +967,6 @@ def main_figure_comparison_many(solst, solsy, labels, colors, AgeStart, AgeEnd, 
         FigName = "Figure_" + date + "_" + f"{number:02}" + "_Comparaison_" + methodstr + "_" + \
                   str(AgeEnd - AgeStart).replace(".", "") + "y" + CommentModif + ".png"
 
-    plt.savefig(os.path.join(my_path, FigName), dpi=180)
+    plt.savefig(os.path.join(my_path, FigName), dpi=dpi)
 
     return FigName

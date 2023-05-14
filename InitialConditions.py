@@ -50,15 +50,13 @@ def InitialConditions(p, AgeStart=30):
     # C = - p.kappa_ABmoABoo * (1 + p.AP * p.delta_APmo) * (y0[1] ** 2)
     # eqABoo = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
     # y0[3] = 5e-28
-    # # Prend équilibre, donc après microglies et macropphages !
+    # # Prend équilibre, donc après microglies et macrophages !
 
     """G (GSK3)"""
     # y0[4] = p.lambda_InsG / p.d_G  # ~= 0.16168
     y0[4] = p.G_0   # F: ~ 5.3445e-05 ; M: ~ 1.5007e-5
 
     """tau (tau proteins)"""
-    # y0[5] = (p.lambda_tau + p.lambda_Gtau)/p.d_tau
-    # y0[5] = 6e-7
     # (p.lambda_tau + p.lambda_Gtau * (y0[4] / p.G_0))/p.d_tau => avant fig _39
     # = 2.57e-5    # Hao: Concentration of tau proteins is, in health, 137 pg/ml and, in AD, 490 pg/ml
     A = p.kappa_tauFi
@@ -66,17 +64,13 @@ def InitialConditions(p, AgeStart=30):
     C = -(p.lambda_tau + p.lambda_Gtau)
     y0[5] = (-B + math.sqrt((B**2) - (4 * A * C))) / (2 * A)
     # Prendre "-" donne nég. Donc, prend "+" et donne ~ 6.4947e-07.
-    # Si prend lambda_Gtau * 1e-2 => ~6.6886e-09
-    # y0[5] = 1e-10
 
     """F_i (NFT inside the neurons)"""
     y0[6] = p.kappa_tauFi * (y0[5] ** 2) / p.d_Fi  # ~ 4.6751e-11
-    # y0[6] = 0
 
     """F_o (NFT outside the neurons)"""
     # y0[7] = 0
     # y0[7] = 0.5 * ((1000 * 72500) / Avogadro) * 1000  # = 6.019454118505194e-14
-    # y0[7] = 1e-16
     y0[7] = 5e-17
     # Même méthode que pour K_Fo, même source, avait trouvé 0 ou 1 NFT chez contrôles (approx à 0.5)
 
@@ -94,16 +88,10 @@ def InitialConditions(p, AgeStart=30):
     # M_NA : Après M_pro et M_anti.
 
     """M_pro (Proinflammatory microglia)"""
-    # y0[11] = 1e-12  # y0[10] * (p.beta / (p.beta + 1))
     y0[11] = 1e-12
 
     """M_anti (Anti-inflammatory microglia)"""
-    # y0[12] = 1e-12
-    # y0[12] = 1e-5
     y0[12] = 1e-4
-    # y0[12] = 5e-4
-    # y0[10] * (1 / (p.beta + 1))
-    # y0[12] = y0[11] * (p.kappa_MhatproTa / p.d_Ta) / (p.kappa_MantiI10 / p.d_I10)  # pour qu'au départ I_10 et T_a soient égaux.
     # Changement 1e-12 pour 1e-5 (fig 22-09-09_..._03 vs _01) pas vrm amélioration
 
     """M_NA (Resting microglia)"""
@@ -115,20 +103,13 @@ def InitialConditions(p, AgeStart=30):
     # y0[10] = (1 - 0.67/100) * M_0 - (y0[11] + y0[12])
 
     """hat{M}_pro (Proinflammatory macrophages)"""
-    # y0[13] = p.Mprohateq/1.5  # 0
-    # y0[13] = 1e-12
-    # y0[13] = p.Mhatmax/2
+    # Keep the value = 0. (y0[13])
 
     """hat{M}_anti (Anti-inflammatory macrophages)"""
+    # Keep the value = 0. (y0[14])
+
     # y0[14] = 1e-9  # ou (p.kappa_TB * y0[15])/p.d_Mantihat, si y0[15] defini avant # Hao: 0
-    # y0[14] = 1e-12
-    # y0[14] = p.Mhatmax/3
-    # y0[14] = y0[14] * (p.kappa_MhatproTa / p.d_Ta) / (p.kappa_MantiI10 / p.d_I10)  # pour qu'au départ I_10 et T_a soient égaux.
-
     # Changement 1e-12 pour 1e-5 (fig 22-09-09_..._03 vs _01) pas vrm amélioration
-
-    # y0[13] = 0.67/100 * M_0 * 0.5
-    # y0[14] = 0.67/100 * M_0 * 0.5
 
     """AB_p^o (Amyloid-beta plaque extracell.) - Équilibre!"""
     Psi = p.kappa_ABooABpo * (y0[2] ** 2)   # AP=1 : 1.985969404177517e-24 ; AP=0 : 1.0219851779307061e-25
